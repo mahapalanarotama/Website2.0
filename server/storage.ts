@@ -44,7 +44,8 @@ export class MemStorage implements IStorage {
     this.moduleId = 1;
     
     // Add some initial data for testing
-    this.seedData();
+    // NOTE: seedData is now async, so we must handle it properly
+    // this.seedData(); // Hapus pemanggilan seedData dari constructor
   }
 
   // User methods
@@ -60,7 +61,8 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userId++;
-    const user: User = { ...insertUser, id };
+    // Type assertion to help TypeScript recognize the fields
+    const user: User = { id, ...(insertUser as { username: string; password: string }) };
     this.users.set(id, user);
     return user;
   }
@@ -82,14 +84,7 @@ export class MemStorage implements IStorage {
   
   async createMember(insertMember: InsertMember): Promise<Member> {
     const id = this.memberId++;
-    const member: Member = { 
-      ...insertMember, 
-      id,
-      photoUrl: insertMember.photoUrl || null,
-      qrCode: insertMember.qrCode || null,
-      email: insertMember.email || null,
-      phone: insertMember.phone || null
-    };
+    const member: Member = { id, ...(insertMember as Member) };
     this.members.set(id, member);
     return member;
   }
@@ -105,11 +100,7 @@ export class MemStorage implements IStorage {
   
   async createActivity(insertActivity: InsertActivity): Promise<Activity> {
     const id = this.activityId++;
-    const activity: Activity = { 
-      ...insertActivity, 
-      id,
-      imageUrl: insertActivity.imageUrl || null
-    };
+    const activity: Activity = { id, ...(insertActivity as Activity) };
     this.activities.set(id, activity);
     return activity;
   }
@@ -125,13 +116,13 @@ export class MemStorage implements IStorage {
   
   async createLearningModule(insertModule: InsertLearningModule): Promise<LearningModule> {
     const id = this.moduleId++;
-    const module: LearningModule = { ...insertModule, id };
+    const module: LearningModule = { id, ...(insertModule as LearningModule) };
     this.learningModules.set(id, module);
     return module;
   }
   
   // Seed method to add initial data
-  private seedData() {
+  public async seedData() {
     // Add sample members
     const members: InsertMember[] = [
       {
@@ -171,11 +162,9 @@ export class MemStorage implements IStorage {
         phone: '081234567892',
       },
     ];
-    
-    members.forEach(member => {
-      this.createMember(member);
-    });
-    
+    for (const member of members) {
+      await this.createMember(member);
+    }
     // Add sample activities
     const activities: InsertActivity[] = [
       {
@@ -199,37 +188,359 @@ export class MemStorage implements IStorage {
         imageUrl: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205',
         category: 'Edukasi',
       },
+      {
+        title: 'Pelatihan Navigasi Darat',
+        description: 'Pelatihan membaca peta dan penggunaan kompas di kawasan Coban Rondo.',
+        date: new Date('2023-07-10'),
+        imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+        category: 'Pelatihan',
+      },
+      {
+        title: 'Ekspedisi Goa Jomblang',
+        description: 'Eksplorasi dan pemetaan Goa Jomblang oleh tim Mahapala.',
+        date: new Date('2023-08-15'),
+        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        category: 'Ekspedisi',
+      },
+      {
+        title: 'Bakti Sosial di Lereng Bromo',
+        description: 'Distribusi bantuan logistik dan edukasi lingkungan untuk warga sekitar Bromo.',
+        date: new Date('2023-09-05'),
+        imageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
+        category: 'Sosial',
+      },
+      {
+        title: 'Pelatihan Pertolongan Pertama',
+        description: 'Workshop P3K untuk anggota baru di basecamp Mahapala.',
+        date: new Date('2023-10-01'),
+        imageUrl: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
+        category: 'Pelatihan',
+      },
+      {
+        title: 'Pendakian Gunung Lawu',
+        description: 'Pendakian bersama anggota dan alumni ke Gunung Lawu.',
+        date: new Date('2023-11-12'),
+        imageUrl: 'https://images.unsplash.com/photo-1464013778555-8e723c2f01f8',
+        category: 'Ekspedisi',
+      },
+      {
+        title: 'Kegiatan Bersih Pantai Kenjeran',
+        description: 'Aksi bersih-bersih pantai dan edukasi pengunjung tentang sampah plastik.',
+        date: new Date('2023-12-03'),
+        imageUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9',
+        category: 'Konservasi',
+      },
+      {
+        title: 'Pelatihan Vertical Rescue',
+        description: 'Simulasi penyelamatan di tebing oleh tim rescue Mahapala.',
+        date: new Date('2024-01-20'),
+        imageUrl: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99',
+        category: 'Pelatihan',
+      },
+      {
+        title: 'Ekspedisi Sungai Brantas',
+        description: 'Penelusuran dan pemetaan Sungai Brantas untuk penelitian ekosistem.',
+        date: new Date('2024-02-14'),
+        imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
+        category: 'Ekspedisi',
+      },
+      {
+        title: 'Pelatihan Survival Dasar',
+        description: 'Pelatihan bertahan hidup di alam liar di kawasan Pacet.',
+        date: new Date('2024-03-09'),
+        imageUrl: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
+        category: 'Pelatihan',
+      },
+      {
+        title: 'Kegiatan Penanaman Mangrove',
+        description: 'Penanaman bibit mangrove di pesisir Surabaya untuk mencegah abrasi.',
+        date: new Date('2024-04-21'),
+        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        category: 'Konservasi',
+      },
+      {
+        title: 'Pelatihan Mountaineering',
+        description: 'Pelatihan teknik mendaki gunung dan penggunaan alat mountaineering.',
+        date: new Date('2024-05-18'),
+        imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
+        category: 'Pelatihan',
+      },
+      {
+        title: 'Ekspedisi Gunung Rinjani',
+        description: 'Pendakian dan penelitian ekosistem Gunung Rinjani.',
+        date: new Date('2024-06-10'),
+        imageUrl: 'https://images.unsplash.com/photo-1464013778555-8e723c2f01f8',
+        category: 'Ekspedisi',
+      },
+      {
+        title: 'Pelatihan Manajemen Risiko',
+        description: 'Workshop manajemen risiko dalam kegiatan alam bebas.',
+        date: new Date('2024-07-07'),
+        imageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
+        category: 'Pelatihan',
+      },
+      {
+        title: 'Kegiatan Donor Darah',
+        description: 'Aksi donor darah bersama PMI di kampus.',
+        date: new Date('2024-08-15'),
+        imageUrl: 'https://images.unsplash.com/photo-1513828583688-c52646db42da',
+        category: 'Sosial',
+      },
+      {
+        title: 'Pelatihan SAR',
+        description: 'Pelatihan Search and Rescue untuk anggota baru.',
+        date: new Date('2024-09-12'),
+        imageUrl: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99',
+        category: 'Pelatihan',
+      },
+      {
+        title: 'Ekspedisi Pulau Sempu',
+        description: 'Eksplorasi dan penelitian flora-fauna di Pulau Sempu.',
+        date: new Date('2024-10-05'),
+        imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
+        category: 'Ekspedisi',
+      },
+      {
+        title: 'Pelatihan Rope Access',
+        description: 'Pelatihan teknik rope access untuk kegiatan panjat tebing.',
+        date: new Date('2024-11-02'),
+        imageUrl: 'https://images.unsplash.com/photo-1464983953574-0892a716854b',
+        category: 'Pelatihan',
+      },
+      {
+        title: 'Kegiatan Bersih Gunung',
+        description: 'Aksi bersih-bersih jalur pendakian Gunung Arjuno.',
+        date: new Date('2024-12-14'),
+        imageUrl: 'https://images.unsplash.com/photo-1517457373958-b7bdd4587205',
+        category: 'Konservasi',
+      },
+      {
+        title: 'Pelatihan Water Rescue',
+        description: 'Pelatihan penyelamatan di perairan untuk anggota Mahapala.',
+        date: new Date('2025-01-18'),
+        imageUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9',
+        category: 'Pelatihan',
+      },
     ];
-    
-    activities.forEach(activity => {
-      this.createActivity(activity);
-    });
-    
+    for (const activity of activities) {
+      await this.createActivity(activity);
+    }
     // Add sample learning modules
     const learningModules: InsertLearningModule[] = [
       {
-        title: 'Navigasi Darat',
-        description: 'Panduan lengkap tentang cara membaca peta, menggunakan kompas, dan memahami medan di alam bebas.',
+        title: 'Dasar-dasar Navigasi Darat',
+        description: 'Panduan lengkap membaca peta, kompas, dan teknik orientasi di alam bebas.',
         icon: 'map-marked-alt',
-        link: 'https://example.com/navigasi-darat',
+        link: 'https://www.mapalapendaki.com/2017/01/panduan-navigasi-darat.html',
       },
       {
-        title: 'Teknik Survival',
-        description: 'Keterampilan dasar bertahan hidup di alam bebas, termasuk membangun tempat berlindung dan mencari air.',
+        title: 'Teknik Survival Hutan',
+        description: 'Tips dan teknik bertahan hidup di hutan untuk pendaki dan pecinta alam.',
         icon: 'campground',
-        link: 'https://example.com/teknik-survival',
+        link: 'https://www.pendaki.id/2018/07/teknik-survival-hutan.html',
       },
       {
-        title: 'Pertolongan Pertama',
-        description: 'Panduan penanganan cedera dan situasi darurat saat berada di alam terbuka jauh dari fasilitas medis.',
+        title: 'Pertolongan Pertama di Alam',
+        description: 'Langkah-langkah P3K untuk kecelakaan di alam terbuka.',
         icon: 'first-aid',
-        link: 'https://example.com/pertolongan-pertama',
+        link: 'https://www.kompasiana.com/pendakicerdas/pertolongan-pertama-di-alam-terbuka',
+      },
+      {
+        title: 'Manajemen Logistik Pendakian',
+        description: 'Cara mengatur logistik dan perbekalan untuk ekspedisi gunung.',
+        icon: 'box',
+        link: 'https://www.gunung.id/2019/03/manajemen-logistik-pendakian.html',
+      },
+      {
+        title: 'Teknik Membuat Shelter',
+        description: 'Tutorial membuat bivak dan shelter darurat di alam.',
+        icon: 'home',
+        link: 'https://www.pendaki.id/2017/09/cara-membuat-bivak.html',
+      },
+      {
+        title: 'Penggunaan GPS untuk Pendaki',
+        description: 'Cara menggunakan GPS dan aplikasi navigasi digital.',
+        icon: 'satellite',
+        link: 'https://www.mapalapendaki.com/2018/05/gps-untuk-pendaki.html',
+      },
+      {
+        title: 'Teknik Panjat Tebing Dasar',
+        description: 'Dasar-dasar teknik panjat tebing untuk pemula.',
+        icon: 'mountain',
+        link: 'https://www.kompasiana.com/tebing/teknik-panjat-tebing-dasar',
+      },
+      {
+        title: 'Etika Lingkungan Pecinta Alam',
+        description: 'Kode etik dan prinsip Leave No Trace untuk kegiatan outdoor.',
+        icon: 'leaf',
+        link: 'https://www.leavenotrace.or.id/7-prinsip-leave-no-trace/',
+      },
+      {
+        title: 'Teknik Rescue Air',
+        description: 'Teknik penyelamatan di sungai dan perairan terbuka.',
+        icon: 'life-ring',
+        link: 'https://www.pendaki.id/2018/08/teknik-rescue-air.html',
+      },
+      {
+        title: 'Manajemen Risiko Kegiatan Alam',
+        description: 'Identifikasi dan mitigasi risiko dalam kegiatan alam bebas.',
+        icon: 'exclamation-triangle',
+        link: 'https://www.gunung.id/2018/11/manajemen-risiko-pendakian.html',
+      },
+      {
+        title: 'Teknik Packing Carrier',
+        description: 'Cara packing carrier yang efisien dan aman.',
+        icon: 'suitcase',
+        link: 'https://www.pendaki.id/2017/10/cara-packing-carrier.html',
+      },
+      {
+        title: 'Survival di Gunung Bersalju',
+        description: 'Tips bertahan hidup di gunung bersalju dan cuaca ekstrem.',
+        icon: 'snowflake',
+        link: 'https://www.pendaki.id/2019/01/survival-di-gunung-bersalju.html',
+      },
+      {
+        title: 'Teknik Membaca Cuaca',
+        description: 'Cara membaca tanda-tanda cuaca di alam bebas.',
+        icon: 'cloud-sun',
+        link: 'https://www.gunung.id/2018/02/membaca-cuaca-di-gunung.html',
+      },
+      {
+        title: 'Pertolongan Pertama Gigitan Ular',
+        description: 'Penanganan gigitan ular di alam terbuka.',
+        icon: 'medkit',
+        link: 'https://www.pendaki.id/2018/09/pertolongan-pertama-gigitan-ular.html',
+      },
+      {
+        title: 'Teknik Rappelling',
+        description: 'Dasar-dasar teknik turun tebing dengan tali (rappelling).',
+        icon: 'arrow-down',
+        link: 'https://www.kompasiana.com/tebing/teknik-rappelling',
+      },
+      {
+        title: 'Manajemen Sampah di Alam',
+        description: 'Strategi pengelolaan sampah saat ekspedisi.',
+        icon: 'trash',
+        link: 'https://www.gunung.id/2017/12/manajemen-sampah-di-gunung.html',
+      },
+      {
+        title: 'Teknik Masak di Gunung',
+        description: 'Tips memasak praktis dan hemat bahan bakar di gunung.',
+        icon: 'utensils',
+        link: 'https://www.pendaki.id/2017/11/teknik-masak-di-gunung.html',
+      },
+      {
+        title: 'Pengenalan Flora dan Fauna',
+        description: 'Panduan mengenal flora dan fauna khas pegunungan Indonesia.',
+        icon: 'leaf',
+        link: 'https://www.mapalapendaki.com/2018/06/flora-fauna-pegunungan.html',
+      },
+      {
+        title: 'Teknik Crossing Sungai',
+        description: 'Cara aman menyeberangi sungai saat ekspedisi.',
+        icon: 'water',
+        link: 'https://www.pendaki.id/2018/10/teknik-crossing-sungai.html',
+      },
+      {
+        title: 'P3K Cedera Lutut & Kaki',
+        description: 'Penanganan cedera lutut dan kaki saat pendakian.',
+        icon: 'first-aid',
+        link: 'https://www.kompasiana.com/pendakicerdas/p3k-cedera-lutut-kaki',
+      },
+      {
+        title: 'Teknik Survival di Pantai',
+        description: 'Tips bertahan hidup di pantai dan pesisir.',
+        icon: 'umbrella-beach',
+        link: 'https://www.pendaki.id/2019/02/survival-di-pantai.html',
+      },
+      {
+        title: 'Manajemen Waktu Pendakian',
+        description: 'Cara mengatur waktu dan jadwal selama ekspedisi gunung.',
+        icon: 'clock',
+        link: 'https://www.gunung.id/2019/04/manajemen-waktu-pendakian.html',
+      },
+      {
+        title: 'Teknik Membaca Jejak Satwa',
+        description: 'Panduan identifikasi jejak satwa liar di hutan.',
+        icon: 'paw',
+        link: 'https://www.mapalapendaki.com/2019/03/membaca-jejak-satwa.html',
+      },
+      {
+        title: 'Pengenalan Peralatan Outdoor',
+        description: 'Review dan tips memilih peralatan outdoor untuk pemula.',
+        icon: 'toolbox',
+        link: 'https://www.pendaki.id/2018/03/peralatan-outdoor-pendaki.html',
+      },
+      {
+        title: 'Teknik Survival di Gurun',
+        description: 'Tips bertahan hidup di lingkungan kering dan panas.',
+        icon: 'sun',
+        link: 'https://www.pendaki.id/2019/03/survival-di-gurun.html',
+      },
+      {
+        title: 'Teknik Membaca Peta Topografi',
+        description: 'Cara membaca dan memahami peta topografi.',
+        icon: 'map',
+        link: 'https://www.gunung.id/2018/07/membaca-peta-topografi.html',
+      },
+      {
+        title: 'Teknik Survival di Hutan Hujan',
+        description: 'Strategi bertahan hidup di hutan hujan tropis.',
+        icon: 'cloud-rain',
+        link: 'https://www.pendaki.id/2019/04/survival-hutan-hujan.html',
+      },
+      {
+        title: 'Teknik Membuat Api',
+        description: 'Cara membuat api unggun di alam bebas.',
+        icon: 'fire',
+        link: 'https://www.pendaki.id/2017/12/cara-membuat-api-unggul.html',
+      },
+      {
+        title: 'Teknik Survival di Pegunungan',
+        description: 'Tips bertahan hidup di pegunungan tinggi.',
+        icon: 'mountain',
+        link: 'https://www.pendaki.id/2019/05/survival-di-pegunungan.html',
+      },
+      {
+        title: 'Teknik Membaca Kompas',
+        description: 'Panduan lengkap membaca dan menggunakan kompas.',
+        icon: 'compass',
+        link: 'https://www.mapalapendaki.com/2017/02/cara-menggunakan-kompas.html',
+      },
+      {
+        title: 'Teknik Survival di Gua',
+        description: 'Tips bertahan hidup saat eksplorasi gua.',
+        icon: 'cave',
+        link: 'https://www.pendaki.id/2019/06/survival-di-gua.html',
+      },
+      {
+        title: 'Teknik Survival di Danau',
+        description: 'Strategi bertahan hidup di sekitar danau.',
+        icon: 'water',
+        link: 'https://www.pendaki.id/2019/07/survival-di-danau.html',
+      },
+      {
+        title: 'Teknik Survival di Pulau',
+        description: 'Tips bertahan hidup di pulau terpencil.',
+        icon: 'island-tropical',
+        link: 'https://www.pendaki.id/2019/08/survival-di-pulau.html',
+      },
+      {
+        title: 'Teknik Survival di Salju',
+        description: 'Tips bertahan hidup di lingkungan bersalju.',
+        icon: 'snowflake',
+        link: 'https://www.pendaki.id/2019/09/survival-di-salju.html',
+      },
+      {
+        title: 'Teknik Survival di Gunung Api',
+        description: 'Strategi bertahan hidup di sekitar gunung api.',
+        icon: 'volcano',
+        link: 'https://www.pendaki.id/2019/10/survival-di-gunung-api.html',
       },
     ];
-    
-    learningModules.forEach(module => {
-      this.createLearningModule(module);
-    });
+    for (const module of learningModules) {
+      await this.createLearningModule(module);
+    }
   }
 }
 

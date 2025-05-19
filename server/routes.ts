@@ -48,7 +48,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Activities routes
   app.get("/api/activities", async (req, res) => {
     try {
-      const activities = await storage.getAllActivities();
+      let activities = await storage.getAllActivities();
+      // Sort by date descending (terbaru di depan)
+      activities = activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // Limit jika ada query limit
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      if (limit) activities = activities.slice(0, limit);
       res.json(activities);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch activities" });
@@ -86,7 +91,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Learning modules routes
   app.get("/api/learning-modules", async (req, res) => {
     try {
-      const modules = await storage.getAllLearningModules();
+      let modules = await storage.getAllLearningModules();
+      // Sort by id descending (terbaru di depan, karena learning module tidak punya date)
+      modules = modules.sort((a, b) => b.id - a.id);
+      // Limit jika ada query limit
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      if (limit) modules = modules.slice(0, limit);
       res.json(modules);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch learning modules" });

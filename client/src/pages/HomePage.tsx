@@ -14,8 +14,8 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 
 export default function HomePage() {
-  const { data: activities, isLoading: activitiesLoading } = useActivities(3);
-  const { data: learningModules, isLoading: modulesLoading } = useLearningModules(3);
+  const { data: activities, isLoading: activitiesLoading } = useActivities(3); // hanya 3 terbaru
+  const { data: learningModules, isLoading: modulesLoading } = useLearningModules(3); // hanya 3 terbaru
 
   return (
     <>
@@ -272,7 +272,7 @@ export default function HomePage() {
           </div>
           
           <div className="text-center mt-10">
-            <Link href="/kegiatan">
+            <Link href="/galeri">
               <Button>
                 Lihat Galeri Lengkap
               </Button>
@@ -289,9 +289,11 @@ export default function HomePage() {
             Mari bergabung dalam misi kami untuk melestarikan alam dan mengeksplorasi keindahan Indonesia. Kami membuka pendaftaran anggota baru setiap awal tahun akademik.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button variant="secondary" className="bg-white text-primary hover:bg-gray-100">
-              Informasi Pendaftaran
-            </Button>
+            <Link href="/pendaftaran">
+              <Button variant="secondary" className="bg-white text-primary hover:bg-gray-100">
+                Informasi Pendaftaran
+              </Button>
+            </Link>
             <Button variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10">
               Hubungi Kami
             </Button>

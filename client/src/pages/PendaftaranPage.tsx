@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { AlertCircle, CheckCircle, ArrowRight, Download, Calendar, Users, FileText, Mail } from "lucide-react";
 
 export default function PendaftaranPage() {
   const [activeTab, setActiveTab] = useState<"general" | "requirements" | "timeline" | "faq">("general");
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
   
   const container = {
     hidden: { opacity: 0 },
@@ -35,113 +39,7 @@ export default function PendaftaranPage() {
               Bergabunglah dengan Mahapala Narotama dan jadilah bagian dari komunitas yang peduli terhadap pelestarian lingkungan dan eksplorasi alam.
             </p>
           </div>
-          
-          {/* Timeline Section */}
-          <motion.div 
-            className="max-w-4xl mx-auto mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-8 rounded-xl shadow-md">
-              <div className="flex flex-col md:flex-row justify-between mb-10 space-y-4 md:space-y-0">
-                <div className="flex-1">
-                  <h2 className="text-2xl font-heading font-bold text-gray-800 mb-2">Periode Pendaftaran 2025</h2>
-                  <p className="text-gray-600">Pendaftaran anggota baru Mahapala tahun 2025</p>
-                </div>
-                <div>
-                  <Button className="gap-2 bg-primary hover:bg-primary/90">
-                    <Download size={16} />
-                    Unduh Formulir
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="mb-8">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="bg-primary text-white p-3 rounded-full">
-                    <Calendar size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Jadwal Pendaftaran</h3>
-                    <p className="text-gray-600">15 Agustus - 30 September 2025</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="bg-primary text-white p-3 rounded-full">
-                    <Users size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Kuota Anggota</h3>
-                    <p className="text-gray-600">Maksimal 50 mahasiswa baru</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-4">
-                  <div className="bg-primary text-white p-3 rounded-full">
-                    <FileText size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg">Persyaratan Utama</h3>
-                    <p className="text-gray-600">Mahasiswa aktif Universitas Narotama</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="border-t border-gray-200 pt-6">
-                <h3 className="font-medium text-lg mb-4">Timeline Pendaftaran & Seleksi</h3>
-                <div className="relative ml-6 pl-8 border-l-2 border-primary/30 space-y-10">
-                  {/* Timeline items */}
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">15 - 30 Agustus 2025</span>
-                      <h4 className="font-medium text-gray-800">Pendaftaran Online</h4>
-                      <p className="text-gray-600 text-sm">Pengisian formulir pendaftaran dan pengumpulan berkas persyaratan</p>
-                    </div>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">5 - 10 September 2025</span>
-                      <h4 className="font-medium text-gray-800">Tes Tertulis & Wawancara</h4>
-                      <p className="text-gray-600 text-sm">Tes pengetahuan umum dan wawancara motivasi</p>
-                    </div>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">15 - 20 September 2025</span>
-                      <h4 className="font-medium text-gray-800">Diklat Dasar</h4>
-                      <p className="text-gray-600 text-sm">Pelatihan dasar kepencintaalaman dan team building</p>
-                    </div>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">25 September 2025</span>
-                      <h4 className="font-medium text-gray-800">Pengumuman Hasil Seleksi</h4>
-                      <p className="text-gray-600 text-sm">Pengumuman calon anggota yang lolos seleksi</p>
-                    </div>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">30 September 2025</span>
-                      <h4 className="font-medium text-gray-800">Pelantikan Anggota Baru</h4>
-                      <p className="text-gray-600 text-sm">Upacara pelantikan dan penerimaan anggota baru</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-          
+
           {/* Tab Navigation */}
           <div className="mb-8 flex overflow-x-auto scrollbar-hide">
             <div className="max-w-4xl mx-auto flex space-x-1 p-1 bg-gray-100 rounded-lg">
@@ -175,7 +73,7 @@ export default function PendaftaranPage() {
               </Button>
             </div>
           </div>
-          
+
           {/* Tab Content */}
           <div className="max-w-4xl mx-auto">
             {activeTab === "general" && (
@@ -320,53 +218,52 @@ export default function PendaftaranPage() {
                 transition={{ duration: 0.3 }}
                 className="bg-white p-6 rounded-lg shadow-md"
               >
-                <h3 className="font-heading text-xl font-semibold mb-4">Tahapan Seleksi</h3>
-                
-                <div className="space-y-8">
-                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['1']">
-                    <h4 className="font-medium text-lg">Pendaftaran Online dan Pengumpulan Berkas</h4>
-                    <p className="text-gray-700 mt-1 mb-2">Pengisian formulir online dan pengumpulan berkas persyaratan</p>
-                    <div className="text-sm text-gray-500">15 - 30 Agustus 2025</div>
+                <h3 className="font-heading text-xl font-semibold mb-4">Timeline Pendaftaran & Seleksi</h3>
+                <div className="relative ml-6 pl-8 border-l-2 border-primary/30 space-y-10">
+                  {/* Timeline items */}
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">15 - 30 Agustus 2025</span>
+                      <h4 className="font-medium text-gray-800">Pendaftaran Online</h4>
+                      <p className="text-gray-600 text-sm">Pengisian formulir pendaftaran dan pengumpulan berkas persyaratan</p>
+                    </div>
                   </div>
                   
-                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['2']">
-                    <h4 className="font-medium text-lg">Tes Tertulis</h4>
-                    <p className="text-gray-700 mt-1 mb-2">Tes pengetahuan umum, lingkungan, dan kegiatan outdoor</p>
-                    <ul className="list-disc pl-5 text-gray-700 text-sm mb-2">
-                      <li>Pengetahuan umum tentang lingkungan dan kepencintaalaman</li>
-                      <li>Pengetahuan dasar tentang navigasi dan survival</li>
-                      <li>Tes psikologi dasar</li>
-                    </ul>
-                    <div className="text-sm text-gray-500">5 September 2025</div>
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">5 - 10 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Tes Tertulis & Wawancara</h4>
+                      <p className="text-gray-600 text-sm">Tes pengetahuan umum dan wawancara motivasi</p>
+                    </div>
                   </div>
                   
-                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['3']">
-                    <h4 className="font-medium text-lg">Wawancara</h4>
-                    <p className="text-gray-700 mt-1 mb-2">Wawancara untuk menggali motivasi dan komitmen</p>
-                    <ul className="list-disc pl-5 text-gray-700 text-sm mb-2">
-                      <li>Motivasi bergabung dengan Mahapala</li>
-                      <li>Pengalaman kegiatan outdoor</li>
-                      <li>Komitmen dan kontribusi yang dapat diberikan</li>
-                    </ul>
-                    <div className="text-sm text-gray-500">10 September 2025</div>
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">15 - 20 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Diklat Dasar</h4>
+                      <p className="text-gray-600 text-sm">Pelatihan dasar kepencintaalaman dan team building</p>
+                    </div>
                   </div>
                   
-                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['4']">
-                    <h4 className="font-medium text-lg">Diklat Dasar</h4>
-                    <p className="text-gray-700 mt-1 mb-2">Pelatihan dasar kepencintaalaman dan team building</p>
-                    <ul className="list-disc pl-5 text-gray-700 text-sm mb-2">
-                      <li>Materi dasar kepencintaalaman</li>
-                      <li>Praktik navigasi dan survival dasar</li>
-                      <li>Simulasi penanggulangan bencana</li>
-                      <li>Team building dan problem solving</li>
-                    </ul>
-                    <div className="text-sm text-gray-500">15 - 20 September 2025</div>
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">25 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Pengumuman Hasil Seleksi</h4>
+                      <p className="text-gray-600 text-sm">Pengumuman calon anggota yang lolos seleksi</p>
+                    </div>
                   </div>
                   
-                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['5']">
-                    <h4 className="font-medium text-lg">Pengumuman dan Pelantikan</h4>
-                    <p className="text-gray-700 mt-1 mb-2">Pengumuman hasil seleksi dan pelantikan anggota baru</p>
-                    <div className="text-sm text-gray-500">25 - 30 September 2025</div>
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">30 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Pelantikan Anggota Baru</h4>
+                      <p className="text-gray-600 text-sm">Upacara pelantikan dan penerimaan anggota baru</p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -440,6 +337,61 @@ export default function PendaftaranPage() {
               </motion.div>
             )}
           </div>
+          
+          {/* Timeline Section */}
+          <motion.div 
+            className="max-w-4xl mx-auto mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-8 rounded-xl shadow-md">
+              <div className="flex flex-col md:flex-row justify-between mb-10 space-y-4 md:space-y-0">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-heading font-bold text-gray-800 mb-2">Periode Pendaftaran 2025</h2>
+                  <p className="text-gray-600">Pendaftaran anggota baru Mahapala tahun 2025</p>
+                </div>
+                <div>
+                  <Button className="gap-2 bg-primary hover:bg-primary/90">
+                    <Download size={16} />
+                    Unduh Formulir
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="mb-8">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="bg-primary text-white p-3 rounded-full">
+                    <Calendar size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Jadwal Pendaftaran</h3>
+                    <p className="text-gray-600">15 Agustus - 30 September 2025</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="bg-primary text-white p-3 rounded-full">
+                    <Users size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Kuota Anggota</h3>
+                    <p className="text-gray-600">Maksimal 50 mahasiswa baru</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="bg-primary text-white p-3 rounded-full">
+                    <FileText size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Persyaratan Utama</h3>
+                    <p className="text-gray-600">Mahasiswa aktif Universitas Narotama</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
           
           {/* Contact Cards */}
           <div className="mt-16">
