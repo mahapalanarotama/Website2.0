@@ -14,12 +14,16 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Instagram, Mail, Phone } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function HomePage() {
   const { data: activities, isLoading: activitiesLoading } = useActivities(3); // hanya 3 terbaru
   const { data: learningModules, isLoading: modulesLoading } = useLearningModules(3); // hanya 3 terbaru
   const [showContact, setShowContact] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   return (
     <>
