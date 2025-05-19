@@ -15,6 +15,8 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        penuh: "border-transparent bg-green-700 text-white", // Anggota Penuh
+        muda: "border-transparent bg-green-200 text-green-900", // Anggota Muda
       },
     },
     defaultVariants: {

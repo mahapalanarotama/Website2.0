@@ -7,15 +7,15 @@ import { collection, getDocs, query, where, limit, DocumentData, QueryDocumentSn
 const convertToMember = (doc: QueryDocumentSnapshot<DocumentData>): Member => {
   const data = doc.data();
   return {
-    id: parseInt(doc.id, 10) || Math.floor(Math.random() * 1000), // Fallback to random ID if parse fails
-    fullName: data.fullName || "",
-    fieldName: data.fieldName || "",
-    batchName: data.batchName || "",
-    batchYear: data.batchYear || 0,
-    registrationNumber: data.registrationNumber || "",
-    membershipStatus: data.membershipStatus || "Tidak Aktif",
-    photoUrl: data.photoUrl || "",
-    qrCode: data.qrCode || "",
+    id: !isNaN(Number(doc.id)) ? Number(doc.id) : Math.floor(Math.random() * 1000000), // Use doc.id as number if possible, else fallback to random
+    fullName: data.namalengkap || "",
+    fieldName: data.namalapangan || "",
+    batchName: data.namaangkatan || "",
+    batchYear: data.tahun || 0,
+    registrationNumber: data.nomorregistrasi || "",
+    membershipStatus: data.keanggotaan || "Tidak Aktif",
+    photoUrl: data.foto || "",
+    qrCode: data.url || "",
     email: data.email || "",
     phone: data.phone || "",
   };
@@ -24,7 +24,8 @@ const convertToMember = (doc: QueryDocumentSnapshot<DocumentData>): Member => {
 // Function to fetch all members
 export const fetchMembers = async (): Promise<Member[]> => {
   try {
-    const membersRef = collection(db, "members");
+    // Change collection name from "members" to "anggota"
+    const membersRef = collection(db, "anggota");
     const snapshot = await getDocs(membersRef);
     
     if (snapshot.empty) {
@@ -42,7 +43,8 @@ export const fetchMembers = async (): Promise<Member[]> => {
 // Function to fetch members with limit
 export const fetchLimitedMembers = async (count: number): Promise<Member[]> => {
   try {
-    const membersRef = collection(db, "members");
+    // Change collection name from "members" to "anggota"
+    const membersRef = collection(db, "anggota");
     const q = query(membersRef, limit(count));
     const snapshot = await getDocs(q);
     
@@ -56,7 +58,8 @@ export const fetchLimitedMembers = async (count: number): Promise<Member[]> => {
 // Function to fetch members by search criteria
 export const searchMembers = async (field: string, value: string): Promise<Member[]> => {
   try {
-    const membersRef = collection(db, "members");
+    // Change collection name from "members" to "anggota"
+    const membersRef = collection(db, "anggota");
     const q = query(membersRef, where(field, ">=", value), where(field, "<=", value + "\uf8ff"));
     const snapshot = await getDocs(q);
     
