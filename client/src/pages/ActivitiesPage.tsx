@@ -19,7 +19,7 @@ export default function ActivitiesPage() {
   
   // Filter activities based on category and search query
   const filteredActivities = activities?.filter(activity => {
-    const matchesCategory = categoryFilter ? activity.category === categoryFilter : true;
+    const matchesCategory = categoryFilter && categoryFilter !== "all" ? activity.category === categoryFilter : true;
     const matchesSearch = searchQuery 
       ? activity.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
         activity.description.toLowerCase().includes(searchQuery.toLowerCase())
@@ -65,7 +65,7 @@ export default function ActivitiesPage() {
                       <SelectValue placeholder="Semua Kategori" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Semua Kategori</SelectItem>
+                      <SelectItem value="all">Semua Kategori</SelectItem>
                       <SelectItem value="Ekspedisi">Ekspedisi</SelectItem>
                       <SelectItem value="Konservasi">Konservasi</SelectItem>
                       <SelectItem value="Edukasi">Edukasi</SelectItem>

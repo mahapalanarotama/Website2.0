@@ -1,0 +1,486 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { AlertCircle, CheckCircle, ArrowRight, Download, Calendar, Users, FileText, Mail } from "lucide-react";
+
+export default function PendaftaranPage() {
+  const [activeTab, setActiveTab] = useState<"general" | "requirements" | "timeline" | "faq">("general");
+  
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  return (
+    <>
+      <section className="py-12 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h1 className="font-heading text-3xl md:text-4xl font-bold text-gray-800 mb-4 relative inline-block">
+              Informasi Pendaftaran Anggota Baru
+              <span className="absolute -bottom-2 left-0 w-full h-1 bg-primary rounded-full"></span>
+            </h1>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto mt-6">
+              Bergabunglah dengan Mahapala Narotama dan jadilah bagian dari komunitas yang peduli terhadap pelestarian lingkungan dan eksplorasi alam.
+            </p>
+          </div>
+          
+          {/* Timeline Section */}
+          <motion.div 
+            className="max-w-4xl mx-auto mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="bg-gradient-to-br from-primary/5 to-primary/10 p-8 rounded-xl shadow-md">
+              <div className="flex flex-col md:flex-row justify-between mb-10 space-y-4 md:space-y-0">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-heading font-bold text-gray-800 mb-2">Periode Pendaftaran 2025</h2>
+                  <p className="text-gray-600">Pendaftaran anggota baru Mahapala tahun 2025</p>
+                </div>
+                <div>
+                  <Button className="gap-2 bg-primary hover:bg-primary/90">
+                    <Download size={16} />
+                    Unduh Formulir
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="mb-8">
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="bg-primary text-white p-3 rounded-full">
+                    <Calendar size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Jadwal Pendaftaran</h3>
+                    <p className="text-gray-600">15 Agustus - 30 September 2025</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="bg-primary text-white p-3 rounded-full">
+                    <Users size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Kuota Anggota</h3>
+                    <p className="text-gray-600">Maksimal 50 mahasiswa baru</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <div className="bg-primary text-white p-3 rounded-full">
+                    <FileText size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-lg">Persyaratan Utama</h3>
+                    <p className="text-gray-600">Mahasiswa aktif Universitas Narotama</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="font-medium text-lg mb-4">Timeline Pendaftaran & Seleksi</h3>
+                <div className="relative ml-6 pl-8 border-l-2 border-primary/30 space-y-10">
+                  {/* Timeline items */}
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">15 - 30 Agustus 2025</span>
+                      <h4 className="font-medium text-gray-800">Pendaftaran Online</h4>
+                      <p className="text-gray-600 text-sm">Pengisian formulir pendaftaran dan pengumpulan berkas persyaratan</p>
+                    </div>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">5 - 10 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Tes Tertulis & Wawancara</h4>
+                      <p className="text-gray-600 text-sm">Tes pengetahuan umum dan wawancara motivasi</p>
+                    </div>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">15 - 20 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Diklat Dasar</h4>
+                      <p className="text-gray-600 text-sm">Pelatihan dasar kepencintaalaman dan team building</p>
+                    </div>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">25 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Pengumuman Hasil Seleksi</h4>
+                      <p className="text-gray-600 text-sm">Pengumuman calon anggota yang lolos seleksi</p>
+                    </div>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">30 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Pelantikan Anggota Baru</h4>
+                      <p className="text-gray-600 text-sm">Upacara pelantikan dan penerimaan anggota baru</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+          
+          {/* Tab Navigation */}
+          <div className="mb-8 flex overflow-x-auto scrollbar-hide">
+            <div className="max-w-4xl mx-auto flex space-x-1 p-1 bg-gray-100 rounded-lg">
+              <Button 
+                variant={activeTab === "general" ? "default" : "ghost"}
+                onClick={() => setActiveTab("general")}
+                className="flex-1 whitespace-nowrap"
+              >
+                Informasi Umum
+              </Button>
+              <Button 
+                variant={activeTab === "requirements" ? "default" : "ghost"}
+                onClick={() => setActiveTab("requirements")}
+                className="flex-1 whitespace-nowrap"
+              >
+                Persyaratan
+              </Button>
+              <Button 
+                variant={activeTab === "timeline" ? "default" : "ghost"}
+                onClick={() => setActiveTab("timeline")}
+                className="flex-1 whitespace-nowrap"
+              >
+                Tahapan Seleksi
+              </Button>
+              <Button 
+                variant={activeTab === "faq" ? "default" : "ghost"}
+                onClick={() => setActiveTab("faq")}
+                className="flex-1 whitespace-nowrap"
+              >
+                FAQ
+              </Button>
+            </div>
+          </div>
+          
+          {/* Tab Content */}
+          <div className="max-w-4xl mx-auto">
+            {activeTab === "general" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white p-6 rounded-lg shadow-md"
+              >
+                <h3 className="font-heading text-xl font-semibold mb-4">Informasi Umum Pendaftaran</h3>
+                <p className="text-gray-700 mb-4">
+                  Mahapala Narotama membuka pendaftaran anggota baru untuk mahasiswa aktif Universitas Narotama yang memiliki minat dan kepedulian pada alam, lingkungan, dan kegiatan outdoor. Pendaftaran dilaksanakan setahun sekali pada awal tahun akademik.
+                </p>
+                <p className="text-gray-700 mb-4">
+                  Sebagai anggota Mahapala Narotama, Anda akan memiliki kesempatan untuk:
+                </p>
+                
+                <motion.ul 
+                  className="space-y-3 mb-6 pl-6"
+                  variants={container}
+                  initial="hidden"
+                  animate="show"
+                >
+                  <motion.li variants={item} className="flex items-start">
+                    <CheckCircle className="text-primary min-w-5 h-5 mr-2 mt-0.5" />
+                    <span>Mengikuti berbagai ekspedisi dan pendakian gunung di Indonesia</span>
+                  </motion.li>
+                  <motion.li variants={item} className="flex items-start">
+                    <CheckCircle className="text-primary min-w-5 h-5 mr-2 mt-0.5" />
+                    <span>Berpartisipasi dalam program konservasi dan pelestarian lingkungan</span>
+                  </motion.li>
+                  <motion.li variants={item} className="flex items-start">
+                    <CheckCircle className="text-primary min-w-5 h-5 mr-2 mt-0.5" />
+                    <span>Mempelajari keterampilan survival, navigasi, dan pertolongan pertama</span>
+                  </motion.li>
+                  <motion.li variants={item} className="flex items-start">
+                    <CheckCircle className="text-primary min-w-5 h-5 mr-2 mt-0.5" />
+                    <span>Membangun jaringan dengan komunitas pecinta alam di seluruh Indonesia</span>
+                  </motion.li>
+                  <motion.li variants={item} className="flex items-start">
+                    <CheckCircle className="text-primary min-w-5 h-5 mr-2 mt-0.5" />
+                    <span>Mengembangkan kemampuan kepemimpinan dan kerja sama tim</span>
+                  </motion.li>
+                </motion.ul>
+                
+                <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-6">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <AlertCircle className="h-5 w-5 text-amber-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-amber-700">
+                        Pendaftaran hanya dibuka selama periode yang ditentukan. Pastikan Anda melengkapi semua persyaratan dan mengikuti seluruh tahapan seleksi.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 flex justify-center">
+                  <Button className="gap-2">
+                    Daftar Sekarang <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+            
+            {activeTab === "requirements" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white p-6 rounded-lg shadow-md"
+              >
+                <h3 className="font-heading text-xl font-semibold mb-4">Persyaratan Pendaftaran</h3>
+                
+                <div className="mb-6">
+                  <h4 className="font-medium text-lg mb-2">Persyaratan Umum</h4>
+                  <ul className="space-y-2 pl-6 list-disc text-gray-700">
+                    <li>Mahasiswa aktif Universitas Narotama (dibuktikan dengan kartu mahasiswa)</li>
+                    <li>Minimal semester 1 dan maksimal semester 4</li>
+                    <li>Sehat jasmani dan rohani (dibuktikan dengan surat keterangan sehat)</li>
+                    <li>Memiliki minat dalam kegiatan alam terbuka</li>
+                    <li>Bersedia mengikuti seluruh rangkaian proses seleksi</li>
+                    <li>Mendapat izin dari orang tua/wali (dibuktikan dengan surat pernyataan)</li>
+                  </ul>
+                </div>
+                
+                <div className="mb-6">
+                  <h4 className="font-medium text-lg mb-2">Dokumen Pendaftaran</h4>
+                  <ul className="space-y-2 pl-6 list-disc text-gray-700">
+                    <li>Formulir pendaftaran yang telah diisi lengkap</li>
+                    <li>Pas foto berwarna ukuran 3x4 (3 lembar)</li>
+                    <li>Fotokopi Kartu Mahasiswa dan KTP</li>
+                    <li>Surat keterangan sehat dari dokter</li>
+                    <li>Surat pernyataan kesediaan mengikuti seleksi</li>
+                    <li>Surat izin orang tua/wali</li>
+                    <li>Essay singkat tentang motivasi bergabung dengan Mahapala (maksimal 1 halaman)</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                  <h4 className="font-medium text-lg mb-2">Biaya Pendaftaran</h4>
+                  <p className="text-gray-700 mb-2">
+                    Biaya pendaftaran: Rp 150.000,-
+                  </p>
+                  <p className="text-gray-700 mb-2">
+                    Biaya tersebut mencakup:
+                  </p>
+                  <ul className="space-y-1 pl-6 list-disc text-gray-700">
+                    <li>Administrasi pendaftaran</li>
+                    <li>Kit pendaftaran (formulir, modul, dan atribut)</li>
+                    <li>Konsumsi selama proses seleksi</li>
+                    <li>Biaya operasional diklat dasar</li>
+                  </ul>
+                  <p className="text-sm text-gray-500 mt-2">
+                    *Pembayaran dapat dilakukan melalui transfer bank atau tunai saat pendaftaran
+                  </p>
+                </div>
+                
+                <div className="bg-green-50 border-l-4 border-green-400 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <CheckCircle className="h-5 w-5 text-green-400" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-green-700">
+                        Semua dokumen persyaratan dikumpulkan dalam bentuk hardcopy pada saat pendaftaran dan softcopy dikirim ke email mahapala@narotama.ac.id dengan subjek "PENDAFTARAN_[NAMA]_[NPM]"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            
+            {activeTab === "timeline" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white p-6 rounded-lg shadow-md"
+              >
+                <h3 className="font-heading text-xl font-semibold mb-4">Tahapan Seleksi</h3>
+                
+                <div className="space-y-8">
+                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['1']">
+                    <h4 className="font-medium text-lg">Pendaftaran Online dan Pengumpulan Berkas</h4>
+                    <p className="text-gray-700 mt-1 mb-2">Pengisian formulir online dan pengumpulan berkas persyaratan</p>
+                    <div className="text-sm text-gray-500">15 - 30 Agustus 2025</div>
+                  </div>
+                  
+                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['2']">
+                    <h4 className="font-medium text-lg">Tes Tertulis</h4>
+                    <p className="text-gray-700 mt-1 mb-2">Tes pengetahuan umum, lingkungan, dan kegiatan outdoor</p>
+                    <ul className="list-disc pl-5 text-gray-700 text-sm mb-2">
+                      <li>Pengetahuan umum tentang lingkungan dan kepencintaalaman</li>
+                      <li>Pengetahuan dasar tentang navigasi dan survival</li>
+                      <li>Tes psikologi dasar</li>
+                    </ul>
+                    <div className="text-sm text-gray-500">5 September 2025</div>
+                  </div>
+                  
+                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['3']">
+                    <h4 className="font-medium text-lg">Wawancara</h4>
+                    <p className="text-gray-700 mt-1 mb-2">Wawancara untuk menggali motivasi dan komitmen</p>
+                    <ul className="list-disc pl-5 text-gray-700 text-sm mb-2">
+                      <li>Motivasi bergabung dengan Mahapala</li>
+                      <li>Pengalaman kegiatan outdoor</li>
+                      <li>Komitmen dan kontribusi yang dapat diberikan</li>
+                    </ul>
+                    <div className="text-sm text-gray-500">10 September 2025</div>
+                  </div>
+                  
+                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['4']">
+                    <h4 className="font-medium text-lg">Diklat Dasar</h4>
+                    <p className="text-gray-700 mt-1 mb-2">Pelatihan dasar kepencintaalaman dan team building</p>
+                    <ul className="list-disc pl-5 text-gray-700 text-sm mb-2">
+                      <li>Materi dasar kepencintaalaman</li>
+                      <li>Praktik navigasi dan survival dasar</li>
+                      <li>Simulasi penanggulangan bencana</li>
+                      <li>Team building dan problem solving</li>
+                    </ul>
+                    <div className="text-sm text-gray-500">15 - 20 September 2025</div>
+                  </div>
+                  
+                  <div className="relative pl-8 before:content-[''] before:absolute before:left-0 before:top-2 before:w-6 before:h-6 before:rounded-full before:bg-primary before:text-white before:flex before:items-center before:justify-center before:font-bold before:text-xs before:content-['5']">
+                    <h4 className="font-medium text-lg">Pengumuman dan Pelantikan</h4>
+                    <p className="text-gray-700 mt-1 mb-2">Pengumuman hasil seleksi dan pelantikan anggota baru</p>
+                    <div className="text-sm text-gray-500">25 - 30 September 2025</div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+            
+            {activeTab === "faq" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white p-6 rounded-lg shadow-md"
+              >
+                <h3 className="font-heading text-xl font-semibold mb-6">Pertanyaan Umum (FAQ)</h3>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="font-medium text-lg text-primary">Apakah harus memiliki pengalaman kegiatan outdoor sebelumnya?</h4>
+                    <p className="text-gray-700 mt-2">
+                      Tidak, Anda tidak harus memiliki pengalaman kegiatan outdoor sebelumnya. Mahapala Narotama akan memberikan pelatihan dasar untuk semua anggota baru. Yang terpenting adalah minat dan komitmen untuk belajar.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-lg text-primary">Apakah ada persyaratan fisik tertentu?</h4>
+                    <p className="text-gray-700 mt-2">
+                      Tidak ada persyaratan fisik khusus, namun Anda diharapkan dalam kondisi sehat dan siap mengikuti rangkaian kegiatan outdoor yang mungkin membutuhkan stamina dan ketahanan fisik. Latihan fisik dasar akan diberikan selama proses seleksi.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-lg text-primary">Berapa banyak waktu yang perlu diluangkan jika menjadi anggota Mahapala?</h4>
+                    <p className="text-gray-700 mt-2">
+                      Sebagai anggota Mahapala, Anda diharapkan dapat menghadiri pertemuan rutin mingguan (2-3 jam) dan berpartisipasi dalam kegiatan bulanan (biasanya pada akhir pekan). Kegiatan ekspedisi atau pendakian biasanya dilakukan pada masa liburan semester.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-lg text-primary">Berapa biaya yang diperlukan setelah menjadi anggota?</h4>
+                    <p className="text-gray-700 mt-2">
+                      Anggota Mahapala akan dikenakan iuran bulanan sebesar Rp 25.000,- yang digunakan untuk operasional organisasi. Untuk kegiatan-kegiatan tertentu seperti ekspedisi atau pendakian, akan ada biaya tambahan yang besarnya tergantung pada jenis dan lokasi kegiatan.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-lg text-primary">Apakah perlu memiliki perlengkapan outdoor sendiri?</h4>
+                    <p className="text-gray-700 mt-2">
+                      Untuk tahap awal, Anda tidak perlu memiliki semua perlengkapan outdoor. Mahapala memiliki beberapa perlengkapan yang dapat dipinjam oleh anggota. Seiring berjalannya waktu, Anda dapat secara bertahap melengkapi perlengkapan pribadi.
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-medium text-lg text-primary">Apakah saya bisa mengikuti kegiatan Mahapala sambil aktif di organisasi lain?</h4>
+                    <p className="text-gray-700 mt-2">
+                      Ya, Anda tetap bisa aktif di organisasi lain. Namun, perlu diingat bahwa sebagai anggota Mahapala, Anda diharapkan dapat berkomitmen untuk berpartisipasi dalam kegiatan-kegiatan penting dan memenuhi tanggung jawab sebagai anggota.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-8 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-center mb-3">Masih punya pertanyaan lain?</h4>
+                  <p className="text-gray-700 text-center mb-4">
+                    Jika Anda memiliki pertanyaan lain yang belum terjawab, jangan ragu untuk menghubungi kami.
+                  </p>
+                  <div className="flex justify-center">
+                    <Button variant="outline" className="gap-2">
+                      <Mail className="h-4 w-4" /> Hubungi Kami
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+          
+          {/* Contact Cards */}
+          <div className="mt-16">
+            <h3 className="font-heading text-2xl font-bold text-center mb-8">Kontak Informasi Pendaftaran</h3>
+            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              <Card className="hover:shadow-lg transition duration-300">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Sekretariat</CardTitle>
+                  <CardDescription>Kantor Mahapala Narotama</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">Gedung Kemahasiswaan Lt. 2, Universitas Narotama</p>
+                  <p className="text-sm text-gray-500 mt-1">Senin - Jumat, 09:00 - 16:00 WIB</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover:shadow-lg transition duration-300">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Narahubung</CardTitle>
+                  <CardDescription>Informasi Pendaftaran</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">Budi (Koordinator): 081234567890</p>
+                  <p className="text-sm">Dewi (Sekretaris): 089876543210</p>
+                </CardContent>
+              </Card>
+              
+              <Card className="hover:shadow-lg transition duration-300">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Media Sosial</CardTitle>
+                  <CardDescription>Ikuti kami untuk update</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">Instagram: @mahapala_narotama</p>
+                  <p className="text-sm">Email: mahapala@narotama.ac.id</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

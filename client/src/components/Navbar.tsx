@@ -33,7 +33,7 @@ export function Navbar() {
     { href: "/", label: "Beranda" },
     { href: "/kegiatan", label: "Kegiatan" },
     { href: "/pembelajaran", label: "Pembelajaran" },
-    { href: "/kartu-anggota", label: "Kartu Anggota" },
+    { href: "/pendaftaran", label: "Informasi Pendaftaran" },
   ];
 
   return (

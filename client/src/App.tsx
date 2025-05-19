@@ -7,6 +7,7 @@ import HomePage from "@/pages/HomePage";
 import ActivitiesPage from "@/pages/ActivitiesPage";
 import LearningPage from "@/pages/LearningPage";
 import MemberCardPage from "@/pages/MemberCardPage";
+import PendaftaranPage from "@/pages/PendaftaranPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/kegiatan" component={ActivitiesPage} />
           <Route path="/pembelajaran" component={LearningPage} />
           <Route path="/kartu-anggota" component={MemberCardPage} />
+          <Route path="/pendaftaran" component={PendaftaranPage} />
           <Route component={NotFound} />
         </Switch>
       </Layout>
