@@ -12,10 +12,14 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Instagram, Mail, Phone } from "lucide-react";
+import { useState } from "react";
 
 export default function HomePage() {
   const { data: activities, isLoading: activitiesLoading } = useActivities(3); // hanya 3 terbaru
   const { data: learningModules, isLoading: modulesLoading } = useLearningModules(3); // hanya 3 terbaru
+  const [showContact, setShowContact] = useState(false);
 
   return (
     <>
@@ -294,11 +298,58 @@ export default function HomePage() {
                 Informasi Pendaftaran
               </Button>
             </Link>
-            <Button variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10">
+            <Button
+              variant="outline"
+              className="bg-transparent border-2 border-white text-white hover:bg-white/10"
+              onClick={e => {
+                e.preventDefault();
+                setShowContact(true);
+              }}
+            >
               Hubungi Kami
             </Button>
           </div>
         </div>
+        {/* Dialog Kontak */}
+        <Dialog open={showContact} onOpenChange={setShowContact}>
+          <DialogContent className="max-w-xs w-full p-0 rounded-xl">
+            <div className="p-6 flex flex-col items-center gap-4">
+              <h2 className="font-heading text-lg font-bold mb-2">Hubungi Kami</h2>
+              <div className="flex gap-6 justify-center">
+                <a
+                  href="https://instagram.com/mahapalanarotama"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary hover:scale-110 transition-transform"
+                  title="Instagram"
+                >
+                  <Instagram size={36} />
+                </a>
+                <a
+                  href="https://wa.me/6281234567890"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-green-600 hover:scale-110 transition-transform"
+                  title="WhatsApp"
+                >
+                  <Phone size={36} />
+                </a>
+                <a
+                  href="mailto:ukm.mahapala@narotama.ac.id"
+                  className="hover:text-blue-600 hover:scale-110 transition-transform"
+                  title="Email"
+                >
+                  <Mail size={36} />
+                </a>
+              </div>
+              <div className="text-center text-xs text-gray-200 mt-2">
+                Instagram: @mahapalanarotama<br />
+                WhatsApp: 0812-3456-7890<br />
+                Email: ukm.mahapala@narotama.ac.id
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </section>
     </>
   );

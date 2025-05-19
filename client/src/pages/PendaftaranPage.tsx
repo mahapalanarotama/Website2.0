@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { AlertCircle, CheckCircle, ArrowRight, Download, Calendar, Users, FileText, Mail } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function PendaftaranPage() {
   const [activeTab, setActiveTab] = useState<"general" | "requirements" | "timeline" | "faq">("general");
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -134,7 +136,7 @@ export default function PendaftaranPage() {
                 </div>
                 
                 <div className="mt-6 flex justify-center">
-                  <Button className="gap-2">
+                  <Button className="gap-2" onClick={() => setShowForm(true)}>
                     Daftar Sekarang <ArrowRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -433,6 +435,52 @@ export default function PendaftaranPage() {
           </div>
         </div>
       </section>
+      {/* Dialog for registration form */}
+      <Dialog open={showForm} onOpenChange={setShowForm}>
+        <DialogContent className="max-w-xl w-full p-0 overflow-hidden">
+          <DialogHeader className="bg-primary text-white px-6 py-4">
+            <DialogTitle className="text-xl">Formulir Pendaftaran Anggota Baru</DialogTitle>
+          </DialogHeader>
+          <div className="p-6 bg-white max-h-[70vh] overflow-y-auto">
+            {/* --- FORM START --- */}
+            <form className="space-y-4">
+              <div>
+                <label className="block font-medium mb-1">Nama Lengkap</label>
+                <input type="text" className="w-full border rounded px-3 py-2" placeholder="Nama lengkap" required />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Email</label>
+                <input type="email" className="w-full border rounded px-3 py-2" placeholder="Email aktif" required />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Nomor HP</label>
+                <input type="tel" className="w-full border rounded px-3 py-2" placeholder="Nomor HP" required />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">NIM</label>
+                <input type="text" className="w-full border rounded px-3 py-2" placeholder="Nomor Induk Mahasiswa" required />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Angkatan</label>
+                <input type="number" className="w-full border rounded px-3 py-2" placeholder="Tahun angkatan" required />
+              </div>
+              <div>
+                <label className="block font-medium mb-1">Alasan Bergabung</label>
+                <textarea className="w-full border rounded px-3 py-2" placeholder="Ceritakan motivasi Anda" rows={3} required />
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                  Batal
+                </Button>
+                <Button type="submit" className="bg-primary text-white">
+                  Kirim
+                </Button>
+              </div>
+            </form>
+            {/* --- FORM END --- */}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
