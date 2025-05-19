@@ -4,6 +4,14 @@ import { ActivityCard } from "@/components/ActivityCard";
 import { LearningModule } from "@/components/LearningModule";
 import { useActivities } from "@/hooks/use-activities";
 import { useLearningModules } from "@/hooks/use-learning";
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious 
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 export default function HomePage() {
   const { data: activities, isLoading: activitiesLoading } = useActivities(3);
@@ -23,18 +31,77 @@ export default function HomePage() {
             </p>
           </div>
           
-          <div className="relative h-96 rounded-xl overflow-hidden shadow-xl">
-            <img 
-              src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080" 
-              alt="Anggota Mahapala Narotama dalam kegiatan konservasi lingkungan" 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-              <div className="p-6 text-white">
-                <h2 className="font-heading text-2xl font-bold mb-2">Bersama Melestarikan Alam</h2>
-                <p className="text-gray-200">Bergabunglah dalam misi kami untuk melindungi lingkungan dan eksplorasi alam.</p>
+          <div className="relative rounded-xl overflow-hidden shadow-xl">
+            <Carousel 
+              opts={{ 
+                align: "start",
+                loop: true,
+              }}
+              className="w-full"
+              plugins={[
+                Autoplay({
+                  delay: 5000,
+                }),
+              ]}
+            >
+              <CarouselContent>
+                {/* Slide 1 */}
+                <CarouselItem>
+                  <div className="relative h-96">
+                    <img 
+                      src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080" 
+                      alt="Anggota Mahapala Narotama dalam kegiatan konservasi lingkungan" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                      <div className="p-6 text-white">
+                        <h2 className="font-heading text-2xl font-bold mb-2">Bersama Melestarikan Alam</h2>
+                        <p className="text-gray-200">Bergabunglah dalam misi kami untuk melindungi lingkungan dan eksplorasi alam.</p>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+                
+                {/* Slide 2 */}
+                <CarouselItem>
+                  <div className="relative h-96">
+                    <img 
+                      src="https://images.unsplash.com/photo-1455156218388-5e61b526818b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080" 
+                      alt="Kelompok pendaki gunung Mahapala Narotama" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                      <div className="p-6 text-white">
+                        <h2 className="font-heading text-2xl font-bold mb-2">Petualangan Tanpa Batas</h2>
+                        <p className="text-gray-200">Eksplorasi keindahan alam Indonesia bersama Mahapala Narotama.</p>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+                
+                {/* Slide 3 */}
+                <CarouselItem>
+                  <div className="relative h-96">
+                    <img 
+                      src="https://images.unsplash.com/photo-1519331379826-f10be5486c6f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080" 
+                      alt="Kegiatan konservasi Mahapala Narotama" 
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                      <div className="p-6 text-white">
+                        <h2 className="font-heading text-2xl font-bold mb-2">Konservasi dan Edukasi</h2>
+                        <p className="text-gray-200">Kami berkomitmen untuk pendidikan lingkungan dan pelestarian alam.</p>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              </CarouselContent>
+              
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                <CarouselPrevious className="relative -left-0 translate-y-0 bg-white/20 hover:bg-white/40" />
+                <CarouselNext className="relative -right-0 translate-y-0 bg-white/20 hover:bg-white/40" />
               </div>
-            </div>
+            </Carousel>
           </div>
         </div>
       </section>
