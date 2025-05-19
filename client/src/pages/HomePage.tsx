@@ -16,7 +16,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h1 className="font-heading text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Selamat Datang di Organisasi Mahasiswa Pecinta Alam Universitas Narotama Surabaya
+              Selamat Datang di Website Resmi Organisasi Mahasiswa Pecinta Alam Universitas Narotama Surabaya
             </h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Menjelajahi alam, berbagi pengetahuan, dan menjaga kelestarian lingkungan.
