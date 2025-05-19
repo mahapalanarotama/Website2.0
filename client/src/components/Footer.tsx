@@ -67,17 +67,13 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <Link href="/kegiatan">
-                  <a className="text-gray-300 hover:text-white transition">
-                    Daftar Kegiatan
-                  </a>
+                <Link href="/kegiatan" className="text-gray-300 hover:text-white transition">
+                  Daftar Kegiatan
                 </Link>
               </li>
               <li>
-                <Link href="/kegiatan">
-                  <a className="text-gray-300 hover:text-white transition">
-                    Galeri Foto
-                  </a>
+                <Link href="/kegiatan" className="text-gray-300 hover:text-white transition">
+                  Galeri Foto
                 </Link>
               </li>
             </ul>
