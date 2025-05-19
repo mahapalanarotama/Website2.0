@@ -1,3 +1,4 @@
+
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -15,17 +16,17 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-
-// For debugging
-console.log("Firebase initialized successfully");
-const storage = getStorage(app);
+const firebaseApp = initializeApp(firebaseConfig);
+const firestore = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
 let analytics: any = null;
 
 // Initialize analytics only in browser environment
 if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
+  analytics = getAnalytics(firebaseApp);
 }
 
-export { app, db, storage, analytics };
+// For debugging
+console.log("Firebase initialized successfully");
+
+export { firebaseApp as app, firestore as db, storage, analytics };
