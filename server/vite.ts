@@ -33,7 +33,8 @@ export async function setupVite(app: Express, server: Server) {
       ...viteLogger,
       error: (msg, options) => {
         viteLogger.error(msg, options);
-        process.exit(1);
+        // Hapus process.exit agar Railway tidak crash
+        // process.exit(1);
       },
     },
     server: serverOptions,
