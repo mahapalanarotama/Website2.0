@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMembers } from "@/hooks/use-members";
 import { MemberCard } from "@/components/MemberCard";
 import { 
@@ -23,6 +23,75 @@ import { Search, IdCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
+// AnimatedNumber component
+function AnimatedNumber({ value, duration = 1000, className = "" }: { value: number, duration?: number, className?: string }) {
+  const [displayValue, setDisplayValue] = useState(0);
+  const raf = useRef<number>();
+  const startTimestamp = useRef<number>();
+  const startValue = useRef<number>(0);
+
+  useEffect(() => {
+    startValue.current = 0;
+    setDisplayValue(0);
+    function animate(ts: number) {
+      if (!startTimestamp.current) startTimestamp.current = ts;
+      const progress = Math.min((ts - startTimestamp.current) / duration, 1);
+      setDisplayValue(Math.floor(progress * (value - startValue.current) + startValue.current));
+      if (progress < 1) {
+        raf.current = requestAnimationFrame(animate);
+      } else {
+        setDisplayValue(value);
+      }
+    }
+    raf.current = requestAnimationFrame(animate);
+    return () => {
+      if (raf.current) cancelAnimationFrame(raf.current);
+      startTimestamp.current = undefined;
+    };
+  }, [value, duration]);
+
+  return <span className={className}>{displayValue.toLocaleString()}</span>;
+}
+
+// Tambahkan komponen 3D Card Popup
+function Card3DPopup({ open, onClose, frontUrl, backUrl, fullName }: { open: boolean, onClose: () => void, frontUrl: string, backUrl: string, fullName: string }) {
+  const [isFront, setIsFront] = useState(true);
+  useEffect(() => { if (open) setIsFront(true); }, [open]);
+  return (
+    open ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="absolute inset-0" onClick={onClose} />
+        <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl bg-white/10 p-6 flex flex-col items-center">
+          <div className="w-[340px] h-[220px] mb-4" style={{ perspective: 1200 }}>
+            <div
+              className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${isFront ? '' : '[transform:rotateY(180deg)]'}`}
+            >
+              <img
+                src={frontUrl}
+                alt={fullName + ' - depan'}
+                className="absolute w-full h-full object-cover rounded-2xl shadow-lg bg-white [backface-visibility:hidden]"
+                style={{ backfaceVisibility: 'hidden', aspectRatio: '340/220' }}
+              />
+              <img
+                src={backUrl}
+                alt={fullName + ' - belakang'}
+                className="absolute w-full h-full object-cover rounded-2xl shadow-lg bg-white [backface-visibility:hidden]"
+                style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden', aspectRatio: '340/220' }}
+              />
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <Button variant="secondary" onClick={() => setIsFront(!isFront)}>
+              {isFront ? 'Lihat Belakang' : 'Lihat Depan'}
+            </Button>
+            <Button variant="outline" onClick={onClose}>Tutup</Button>
+          </div>
+        </div>
+      </div>
+    ) : null
+  );
+}
+
 export default function MemberCardPage() {
   const [searchType, setSearchType] = useState<string>("fullName");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -30,6 +99,9 @@ export default function MemberCardPage() {
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [photoDialog, setPhotoDialog] = useState<{ open: boolean; photoUrl: string; fullName: string }>(
     { open: false, photoUrl: '', fullName: '' }
+  );
+  const [card3DPopup, setCard3DPopup] = useState<{ open: boolean; frontUrl: string; backUrl: string; fullName: string }>(
+    { open: false, frontUrl: '', backUrl: '', fullName: '' }
   );
   
   const { data: members, isLoading } = useMembers();
@@ -39,10 +111,6 @@ export default function MemberCardPage() {
     // If we were querying a large dataset, we'd submit this to the backend
   };
   
-  const handleCardClick = (memberId: number) => {
-    setSelectedMemberId(memberId);
-    setShowSearch(false);
-  };
   
   const handleBackToSearch = () => {
     setSelectedMemberId(null);
@@ -67,17 +135,65 @@ export default function MemberCardPage() {
   
   const selectedMember = members?.find(member => member.id === selectedMemberId);
 
+  // Dashboard calculations
+  const orgStartDate = new Date(2017, 0, 26); // 26 Januari 2017
+  const today = new Date();
+  const diffYears = today.getFullYear() - orgStartDate.getFullYear();
+  const diffMonths = today.getMonth() - orgStartDate.getMonth();
+  const diffDays = today.getDate() - orgStartDate.getDate();
+  let ageString = `${diffYears} tahun`;
+  if (diffMonths > 0 || (diffMonths === 0 && diffDays >= 0)) {
+    ageString = `${diffYears} tahun\n${diffMonths >= 0 ? diffMonths : 12 + diffMonths} bulan`;
+  } else if (diffYears > 0) {
+    ageString = `${diffYears - 1} tahun\n${12 + diffMonths} bulan`;
+  }
+
+  const totalMembers = members?.length || 0;
+  const uniqueBatches = members ? Array.from(new Set(members.map(m => m.batchName))).length : 0;
+  const totalMale = members ? members.filter(m => (m.gender || '').toLowerCase() === 'laki-laki' || (m.gender || '').toLowerCase() === 'l' || (m.gender || '').toLowerCase() === 'male').length : 0;
+  const totalFemale = members ? members.filter(m => (m.gender || '').toLowerCase() === 'perempuan' || (m.gender || '').toLowerCase() === 'p' || (m.gender || '').toLowerCase() === 'female').length : 0;
+
   return (
     <>
       <section id="kartu-anggota" className="py-12 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="font-heading text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Kartu Anggota Mahapala Narotama
-            </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Data anggota yang hanya dapat diakses melalui link khusus. Cari informasi anggota dan cetak kartu identitas resmi.
-            </p>
+          {/* DASHBOARD */}
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-10 text-center">
+            <div className="bg-green-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
+              <span className="text-xs text-gray-500 mb-1">Umur Organisasi</span>
+              <span className="text-2xl font-bold text-green-700 whitespace-pre-line">{ageString}</span>
+              <span className="text-xs text-gray-400 mt-1">Sejak 26 Januari 2017</span>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
+              <span className="text-xs text-gray-500 mb-1">Jumlah Anggota</span>
+              <AnimatedNumber value={totalMembers} className="text-2xl font-bold text-blue-700" />
+              <span className="text-xs text-gray-400 mt-1">Total anggota terdaftar</span>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
+              <span className="text-xs text-gray-500 mb-1">Jumlah Angkatan</span>
+              <AnimatedNumber value={uniqueBatches} className="text-2xl font-bold text-yellow-700" />
+              <span className="text-xs text-gray-400 mt-1">Angkatan unik</span>
+            </div>
+            <div className="bg-emerald-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
+              <span className="text-xs text-gray-500 mb-1">Anggota Penuh</span>
+              <AnimatedNumber value={members ? members.filter(m => m.membershipStatus === 'Anggota Penuh').length : 0} className="text-2xl font-bold text-emerald-700" />
+              <span className="text-xs text-gray-400 mt-1">Total anggota penuh</span>
+            </div>
+            <div className="bg-lime-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
+              <span className="text-xs text-gray-500 mb-1">Anggota Muda</span>
+              <AnimatedNumber value={members ? members.filter(m => m.membershipStatus === 'Anggota Muda').length : 0} className="text-2xl font-bold text-lime-700" />
+              <span className="text-xs text-gray-400 mt-1">Total anggota muda</span>
+            </div>
+            <div className="bg-indigo-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
+              <span className="text-xs text-gray-500 mb-1">Anggota Laki-laki</span>
+              <AnimatedNumber value={totalMale} className="text-2xl font-bold text-indigo-700" />
+              <span className="text-xs text-gray-400 mt-1">Total anggota laki-laki</span>
+            </div>
+            <div className="bg-pink-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
+              <span className="text-xs text-gray-500 mb-1">Anggota Perempuan</span>
+              <AnimatedNumber value={totalFemale} className="text-2xl font-bold text-pink-700" />
+              <span className="text-xs text-gray-400 mt-1">Total anggota perempuan</span>
+            </div>
           </div>
           
           {showSearch ? (
@@ -127,88 +243,86 @@ export default function MemberCardPage() {
               </div>
               
               {/* Results Table */}
-              <div className="overflow-x-auto bg-white rounded-lg shadow-md">
-                {isLoading ? (
-                  <div className="p-8">
-                    <div className="flex flex-col gap-4">
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
-                      <Skeleton className="h-8 w-full" />
+              {searchQuery ? (
+                <div className="overflow-x-auto bg-white rounded-lg shadow-md">
+                  {isLoading ? (
+                    <div className="p-8">
+                      <div className="flex flex-col gap-4">
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                        <Skeleton className="h-8 w-full" />
+                      </div>
                     </div>
-                  </div>
-                ) : filteredMembers && filteredMembers.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nama Lengkap</TableHead>
-                        <TableHead>Nama Lapangan</TableHead>
-                        <TableHead>Nama Angkatan</TableHead>
-                        <TableHead>Tahun Angkatan</TableHead>
-                        <TableHead>No. Registrasi</TableHead>
-                        <TableHead>Keanggotaan</TableHead>
-                        <TableHead>Aksi</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredMembers.map((member) => (
-                        <TableRow key={member.id}>
-                          <TableCell className="font-medium">{member.fullName}</TableCell>
-                          <TableCell>{member.fieldName}</TableCell>
-                          <TableCell>{member.batchName}</TableCell>
-                          <TableCell>{member.batchYear}</TableCell>
-                          <TableCell>{member.registrationNumber}</TableCell>
-                          <TableCell>
-                            {member.membershipStatus === 'Anggota Penuh' ? (
-                              <Badge variant="penuh">Anggota Penuh</Badge>
-                            ) : member.membershipStatus === 'Anggota Muda' ? (
-                              <Badge variant="muda">Anggota Muda</Badge>
-                            ) : (
-                              <Badge>{member.membershipStatus}</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="flex space-x-2">
-                            {/* Icon ID Card: show photo in popup with download */}
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setPhotoDialog({ open: true, photoUrl: member.photoUrl || '', fullName: member.fullName })}
-                              className="text-primary hover:text-primary-foreground hover:bg-primary"
-                              disabled={!member.photoUrl}
-                            >
-                              <IdCard className="h-4 w-4" />
-                            </Button>
-                            {/* Icon 3D: show url in new tab */}
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              onClick={() => member.qrCode && window.open(member.qrCode, '_blank')}
-                              className="text-primary hover:text-primary-foreground hover:bg-primary"
-                              disabled={!member.qrCode}
-                            >
-                              <span className="font-bold">3D</span>
-                            </Button>
-                          </TableCell>
+                  ) : filteredMembers && filteredMembers.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nama Lengkap</TableHead>
+                          <TableHead>Nama Lapangan</TableHead>
+                          <TableHead>Nama Angkatan</TableHead>
+                          <TableHead>Tahun Angkatan</TableHead>
+                          <TableHead>No. Registrasi</TableHead>
+                          <TableHead>Keanggotaan</TableHead>
+                          <TableHead>Aksi</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="text-center py-8">
-                    {searchQuery ? (
-                      <>
-                        <h3 className="text-lg font-medium text-gray-700">Tidak ada anggota ditemukan</h3>
-                        <p className="text-gray-500">Coba ubah kata kunci pencarian Anda</p>
-                      </>
-                    ) : (
-                      <>
-                        <h3 className="text-lg font-medium text-gray-700">Masukkan kata kunci untuk mencari anggota</h3>
-                        <p className="text-gray-500">Anda dapat mencari berdasarkan nama, tahun angkatan, atau nomor registrasi</p>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredMembers.map((member) => (
+                          <TableRow key={member.id}>
+                            <TableCell className="font-medium">{member.fullName}</TableCell>
+                            <TableCell>{member.fieldName}</TableCell>
+                            <TableCell>{member.batchName}</TableCell>
+                            <TableCell>{member.batchYear}</TableCell>
+                            <TableCell>{member.registrationNumber}</TableCell>
+                            <TableCell>
+                              {member.membershipStatus === 'Anggota Penuh' ? (
+                                <Badge variant="penuh">Anggota Penuh</Badge>
+                              ) : member.membershipStatus === 'Anggota Muda' ? (
+                                <Badge variant="muda">Anggota Muda</Badge>
+                              ) : (
+                                <Badge>{member.membershipStatus}</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="flex space-x-2">
+                              {/* Icon ID Card: show photo in popup with download */}
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setPhotoDialog({ open: true, photoUrl: member.photoUrl || '', fullName: member.fullName })}
+                                className="text-primary hover:text-primary-foreground hover:bg-primary"
+                                disabled={!member.photoUrl}
+                              >
+                                <IdCard className="h-4 w-4" />
+                              </Button>
+                              {/* Icon 3D: show 3D card popup */}
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setCard3DPopup({ open: true, frontUrl: member.photoUrl || '', backUrl: 'https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/back.png', fullName: member.fullName })}
+                                className="text-primary hover:text-primary-foreground hover:bg-primary"
+                                disabled={!member.photoUrl}
+                              >
+                                <span className="font-bold">3D</span>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-8">
+                      <h3 className="text-lg font-medium text-gray-700">Tidak ada anggota ditemukan</h3>
+                      <p className="text-gray-500">Coba ubah kata kunci pencarian Anda</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <h3 className="text-lg font-medium text-gray-700">Masukkan kata kunci untuk mencari anggota</h3>
+                  <p className="text-gray-500">Anda dapat mencari berdasarkan nama, tahun angkatan, atau nomor registrasi</p>
+                </div>
+              )}
               
               {/* Dialog for ID Card photo */}
               <Dialog open={photoDialog.open} onOpenChange={open => setPhotoDialog(v => ({ ...v, open }))}>
@@ -249,6 +363,15 @@ export default function MemberCardPage() {
                   )}
                 </DialogContent>
               </Dialog>
+
+              {/* 3D Card Popup */}
+              <Card3DPopup
+                open={card3DPopup.open}
+                onClose={() => setCard3DPopup(v => ({ ...v, open: false }))}
+                frontUrl={card3DPopup.frontUrl}
+                backUrl={card3DPopup.backUrl}
+                fullName={card3DPopup.fullName}
+              />
             </>
           ) : (
             <>

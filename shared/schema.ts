@@ -20,6 +20,7 @@ export const members = pgTable("members", {
   qrCode: text("qr_code"),
   email: text("email"),
   phone: text("phone"),
+  gender: text("gender"), // Tambah gender
 });
 
 export const activities = pgTable("activities", {
@@ -39,21 +40,43 @@ export const learningModules = pgTable("learning_modules", {
   link: text("link").notNull(),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
+// Perbaiki error .pick pada insertUserSchema
+export const insertUserSchema = z.object({
+  username: z.string(),
+  password: z.string(),
 });
 
-export const insertMemberSchema = createInsertSchema(members).omit({
-  id: true,
+// Perbaiki error: Type 'string' is not assignable to type 'never'.
+// Pastikan .omit() dan .pick() tidak menyebabkan type 'never'.
+// Solusi: tambahkan z.object schema manual untuk insertMemberSchema, insertActivitySchema, dst.
+
+export const insertMemberSchema = z.object({
+  fullName: z.string(),
+  fieldName: z.string(),
+  batchName: z.string(),
+  batchYear: z.number(),
+  registrationNumber: z.string(),
+  membershipStatus: z.string(),
+  photoUrl: z.string().optional(),
+  qrCode: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  gender: z.string().optional(),
 });
 
-export const insertActivitySchema = createInsertSchema(activities).omit({
-  id: true,
+export const insertActivitySchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  date: z.date(),
+  imageUrl: z.string().optional(),
+  category: z.string(),
 });
 
-export const insertLearningModuleSchema = createInsertSchema(learningModules).omit({
-  id: true,
+export const insertLearningModuleSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  icon: z.string(),
+  link: z.string(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

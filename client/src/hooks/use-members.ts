@@ -1,5 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { Member } from "@shared/schema";
+// Define Member type locally if not available from a module
+export interface Member {
+  id: number;
+  fullName: string;
+  fieldName: string;
+  batchName: string;
+  batchYear: number;
+  registrationNumber: string;
+  membershipStatus: string;
+  photoUrl: string;
+  qrCode: string;
+  email: string;
+  phone: string;
+  gender: string;
+}
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, limit, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
@@ -18,6 +32,7 @@ const convertToMember = (doc: QueryDocumentSnapshot<DocumentData>): Member => {
     qrCode: data.url || "",
     email: data.email || "",
     phone: data.phone || "",
+    gender: data.gender || '', // mapping gender jika ada di Firestore
   };
 };
 

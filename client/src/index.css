@@ -72,3 +72,45 @@
     font-family: 'Open Sans', sans-serif;
   }
 }
+
+@keyframes navbarLogo {
+  0% { letter-spacing: 0.1em; opacity: 0.7; }
+  100% { letter-spacing: 0.25em; opacity: 1; }
+}
+@keyframes navbarUnderline {
+  0% { transform: scaleX(0); opacity: 0; }
+  100% { transform: scaleX(1); opacity: 0.6; }
+}
+@keyframes navbarMobile {
+  0% { transform: translateY(-30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes cloudMove {
+  0% { transform: translateX(-10vw); }
+  100% { transform: translateX(110vw); }
+}
+/* Animasi piringan berputar lambat */
+@keyframes spin-slow {
+  100% { transform: rotate(360deg); }
+}
+.animate-navbar-logo {
+  animation: navbarLogo 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+.animate-navbar-underline {
+  animation: navbarUnderline 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+.animate-navbar-link {
+  transition: color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.animate-navbar-mobile {
+  animation: navbarMobile 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.animate-clouds > div {
+  animation: cloudMove 30s linear infinite;
+}
+.animate-cloud-move {
+  animation: cloudMove 30s linear infinite;
+}
+.animate-spin-slow {
+  animation: spin-slow 4s linear infinite;
+}
