@@ -8,9 +8,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
-  },
-  build: {
-    outDir: 'dist',
+  },  build: {
+    outDir: path.resolve(__dirname, 'dist'),
+    emptyOutDir: true,
   },
   server: {
     port: 5173,
