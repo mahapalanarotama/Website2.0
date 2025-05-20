@@ -3,6 +3,11 @@
   publish = "dist"
   command = "npm run build"
 
+# Environment variables for Netlify:
+# Set these in Netlify dashboard > Site settings > Environment variables
+# Example:
+# VITE_API_URL=https://your-api-url.com
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
