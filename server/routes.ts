@@ -8,7 +8,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes with /api prefix
   
   // Members routes
-  app.get("/api/members", async (req, res) => {
+  app.get("/api/members", async (_req, res) => {
     try {
       const members = await storage.getAllMembers();
       res.json(members);

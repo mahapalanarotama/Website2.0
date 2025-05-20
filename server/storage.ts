@@ -1,4 +1,4 @@
-import { users, User, InsertUser, Member, InsertMember, Activity, InsertActivity, LearningModule, InsertLearningModule } from "@shared/schema";
+import { Member, InsertMember, Activity, InsertActivity, LearningModule, InsertLearningModule, User, InsertUser } from "@shared/schema";
 
 export interface IStorage {
   // User methods
@@ -61,7 +61,6 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userId++;
-    // Type assertion to help TypeScript recognize the fields
     const user: User = { id, ...(insertUser as { username: string; password: string }) };
     this.users.set(id, user);
     return user;
@@ -84,7 +83,8 @@ export class MemStorage implements IStorage {
   
   async createMember(insertMember: InsertMember): Promise<Member> {
     const id = this.memberId++;
-    const member: Member = { id, ...(insertMember as Member) };
+    const { id: _omit, ...rest } = insertMember as Member;
+    const member: Member = { id, ...rest };
     this.members.set(id, member);
     return member;
   }
@@ -100,7 +100,8 @@ export class MemStorage implements IStorage {
   
   async createActivity(insertActivity: InsertActivity): Promise<Activity> {
     const id = this.activityId++;
-    const activity: Activity = { id, ...(insertActivity as Activity) };
+    const { id: _omit, ...rest } = insertActivity as Activity;
+    const activity: Activity = { id, ...rest };
     this.activities.set(id, activity);
     return activity;
   }
@@ -116,7 +117,8 @@ export class MemStorage implements IStorage {
   
   async createLearningModule(insertModule: InsertLearningModule): Promise<LearningModule> {
     const id = this.moduleId++;
-    const module: LearningModule = { id, ...(insertModule as LearningModule) };
+    const { id: _omit, ...rest } = insertModule as LearningModule;
+    const module: LearningModule = { id, ...rest };
     this.learningModules.set(id, module);
     return module;
   }

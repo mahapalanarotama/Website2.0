@@ -78,7 +78,7 @@ export function serveStatic(app: Express) {
 
   if (!fs.existsSync(distPath) || !fs.existsSync(indexPath)) {
     // Jangan crash, log error dan kirim response 500 jika di production
-    app.use((req, res) => {
+    app.use((_req, res) => {
       res.status(500).send(
         `Could not find the build directory or index.html: ${distPath}.\n` +
           `Make sure to build the client first.\n` +
