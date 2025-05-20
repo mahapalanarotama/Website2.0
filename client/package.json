@@ -1,10 +1,14 @@
 {
   "name": "client",
   "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "check": "tsc",
+    "db:push": "drizzle-kit push",
     "preview": "vite preview"
   },
   "dependencies": {
