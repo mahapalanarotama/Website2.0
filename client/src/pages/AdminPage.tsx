@@ -33,9 +33,6 @@ import type {
   Member,
 } from "@/components/ui/admin-forms";
 
-// Utilities and animations
-import { cn } from '@/lib/utils';
-
 // Icons
 import {   Calendar,
   Image as ImageIcon,
@@ -463,8 +460,14 @@ export default function AdminPage() {
                         <div>{member.email || '-'}</div>
                         <div className="text-gray-500">{member.phone || '-'}</div>
                         <div className="text-gray-500 mt-1">
-                          <Badge variant="secondary" className="text-xs ">
-                            {member.gender === 'L' ? 'Laki-laki' : member.gender === 'P' ? 'Perempuan' : 'Belum diatur'}
+                          <Badge variant="secondary" className="text-xs text-zinc-50">
+                            {(() => {
+                              const g = (member.gender || '').toString().trim().toUpperCase();
+                              if (g === 'L' || g === 'LAKI-LAKI' || g === 'LAKI' || g === 'LKI') return 'Laki-laki';
+                              if (g === 'P' || g === 'PEREMPUAN' || g === 'PR' || g === 'WANITA') return 'Perempuan';
+                              if (g.length > 0) return member.gender;
+                              return 'Belum diatur';
+                            })()}
                           </Badge>
                         </div>
                       </div>
@@ -478,13 +481,27 @@ export default function AdminPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge className={cn(
-                        member.membershipStatus === 'Aktif' ? 'bg-green-100 text-green-800' : 
-                        member.membershipStatus === 'Tidak Aktif' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      )}>
-                        {member.membershipStatus}
-                      </Badge>
+                      {member.membershipStatus === 'Anggota Penuh' ? (
+                        <Badge className="bg-green-600 text-white font-bold border-green-700 shadow">
+                          {member.membershipStatus}
+                        </Badge>
+                      ) : member.membershipStatus === 'Anggota Muda' ? (
+                        <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                          {member.membershipStatus}
+                        </Badge>
+                      ) : member.membershipStatus === 'Aktif' ? (
+                        <Badge className="bg-green-100 text-green-800 border-green-200">
+                          {member.membershipStatus}
+                        </Badge>
+                      ) : member.membershipStatus === 'Tidak Aktif' ? (
+                        <Badge className="bg-red-100 text-red-800 border-red-200">
+                          {member.membershipStatus}
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+                          {member.membershipStatus}
+                        </Badge>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
