@@ -10,6 +10,7 @@ import MemberCardPage from "@/pages/MemberCardPage";
 import PendaftaranPage from "@/pages/PendaftaranPage";
 import GalleryPage from "@/pages/GalleryPage";
 import AdminPage from "@/pages/AdminPage";
+import DetailActivityPage from "@/pages/DetailActivityPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/pendaftaran" component={PendaftaranPage} />
           <Route path="/galeri" component={GalleryPage} />
           <Route path="/admin" component={AdminPage} />
+          <Route path="/kegiatan/:id" component={DetailActivityPage} />
           <Route component={NotFound} />
         </Switch>
       </Layout>

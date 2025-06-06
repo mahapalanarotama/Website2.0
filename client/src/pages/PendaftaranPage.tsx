@@ -403,10 +403,10 @@ export default function PendaftaranPage() {
               <Card className="hover:shadow-lg transition duration-300">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">Sekretariat</CardTitle>
-                  <CardDescription>Kantor Mahapala Narotama</CardDescription>
+                  <CardDescription>Kesekretariatan Mahapala Narotama</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">Gedung Kemahasiswaan Lt. 2, Universitas Narotama</p>
+                  <p className="text-sm">Ruang BEM (D3.01), Gedung D Lt. 2, Universitas Narotama</p>
                   <p className="text-sm text-gray-500 mt-1">Senin - Jumat, 09:00 - 16:00 WIB</p>
                 </CardContent>
               </Card>
@@ -417,8 +417,8 @@ export default function PendaftaranPage() {
                   <CardDescription>Informasi Pendaftaran</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">Budi (Koordinator): 081234567890</p>
-                  <p className="text-sm">Dewi (Sekretaris): 089876543210</p>
+                  <p className="text-sm">Yuan (Koordinator): 081234567890</p>
+                  <p className="text-sm">Nadia (Sekretaris): 089876543210</p>
                 </CardContent>
               </Card>
               
@@ -428,8 +428,8 @@ export default function PendaftaranPage() {
                   <CardDescription>Ikuti kami untuk update</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">Instagram: @mahapala_narotama</p>
-                  <p className="text-sm">Email: mahapala@narotama.ac.id</p>
+                  <p className="text-sm">Instagram: @mahapalanarotama</p>
+                  <p className="text-sm">Youtube: @mahapalanarotama1216</p>
                 </CardContent>
               </Card>
             </div>

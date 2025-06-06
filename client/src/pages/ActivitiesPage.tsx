@@ -12,19 +12,24 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ActivitiesPage() {
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  
   const { data: activities, isLoading } = useActivities();
-  
-  // Filter activities based on category and search query
+
+  // Ambil kategori unik dari data kegiatan (case-insensitive, capitalize)
+  const categories = activities
+    ? Array.from(new Set(activities.map(a => (a.category || "").trim()).filter(Boolean)))
+    : [];
+
+  // Filter activities berdasarkan kategori dan pencarian (case-insensitive)
   const filteredActivities = activities?.filter(activity => {
-    const matchesCategory = categoryFilter && categoryFilter !== "all" ? activity.category === categoryFilter : true;
-    const matchesSearch = searchQuery 
-      ? activity.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        activity.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = categoryFilter === "all"
+      ? true
+      : (activity.category || "").toLowerCase() === categoryFilter.toLowerCase();
+    const matchesSearch = searchQuery
+      ? (activity.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         activity.description?.toLowerCase().includes(searchQuery.toLowerCase()))
       : true;
-    
     return matchesCategory && matchesSearch;
   });
 
@@ -64,11 +69,11 @@ export default function ActivitiesPage() {
                     <SelectTrigger id="category">
                       <SelectValue placeholder="Semua Kategori" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="all">Semua Kategori</SelectItem>
-                      <SelectItem value="Ekspedisi">Ekspedisi</SelectItem>
-                      <SelectItem value="Konservasi">Konservasi</SelectItem>
-                      <SelectItem value="Edukasi">Edukasi</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -96,7 +101,13 @@ export default function ActivitiesPage() {
           ) : filteredActivities && filteredActivities.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredActivities.map((activity) => (
-                <ActivityCard key={activity.id} activity={activity} />
+                <ActivityCard
+                  key={activity.id}
+                  activity={{
+                    ...activity,
+                    date: typeof activity.date === "string" ? activity.date : activity.date?.toISOString() ?? ""
+                  }}
+                />
               ))}
             </div>
           ) : (

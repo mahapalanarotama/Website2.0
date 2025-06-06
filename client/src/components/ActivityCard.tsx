@@ -1,4 +1,13 @@
-import { Activity } from "@shared/schema";
+// Define the Activity type locally if the import is missing
+type Activity = {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  imageUrl?: string;
+};
+
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
