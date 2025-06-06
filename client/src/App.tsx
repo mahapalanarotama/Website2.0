@@ -11,11 +11,13 @@ import PendaftaranPage from "@/pages/PendaftaranPage";
 import GalleryPage from "@/pages/GalleryPage";
 import AdminPage from "@/pages/AdminPage";
 import DetailActivityPage from "@/pages/DetailActivityPage";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 function App() {
   return (
     <TooltipProvider>
       <Toaster />
+      <ScrollToTop />
       <Layout>
         <Switch>
           <Route path="/" component={HomePage} />
