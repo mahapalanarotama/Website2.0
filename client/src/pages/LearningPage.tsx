@@ -3,16 +3,25 @@ import { LearningModule } from "@/components/LearningModule";
 import { useLearningModules } from "@/hooks/use-learning";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { learningModulesFront } from "@/components/externalLearningLinks";
 
 export default function LearningPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: modules, isLoading } = useLearningModules();
-  
-  // Filter modules based on search query
-  const filteredModules = modules?.filter(module => {
-    return searchQuery 
-      ? module.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        module.description.toLowerCase().includes(searchQuery.toLowerCase())
+
+  // Gabungkan data dari backend dan eksternal (frontend)
+  const allModules = [
+    ...(modules || []),
+    ...learningModulesFront.filter(
+      (ext) => !modules?.some((m) => m.title === ext.title)
+    ),
+  ];
+
+  // Filter modules berdasarkan search query
+  const filteredModules = allModules.filter((module) => {
+    return searchQuery
+      ? module.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          module.description.toLowerCase().includes(searchQuery.toLowerCase())
       : true;
   });
 
@@ -43,7 +52,7 @@ export default function LearningPage() {
             </div>
           </div>
           
-          {isLoading ? (
+          {isLoading && allModules.length === 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="bg-white p-6 rounded-lg shadow-md animate-pulse">
@@ -61,7 +70,7 @@ export default function LearningPage() {
           ) : filteredModules && filteredModules.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredModules.map((module) => (
-                <LearningModule key={module.id} module={module} />
+                <LearningModule key={module.id + module.title} module={module} />
               ))}
             </div>
           ) : (

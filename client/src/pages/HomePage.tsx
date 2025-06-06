@@ -18,6 +18,7 @@ import { Instagram, Mail, Phone } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 // @ts-ignore
 import backsound from "../assets/backsound.mp3";
+import { learningModulesFront } from "@/components/externalLearningLinks";
 
 function BacksoundPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -93,9 +94,17 @@ function BacksoundPlayer() {
 
 export default function HomePage() {
   const { data: activities, isLoading: activitiesLoading } = useActivities(3); // hanya 3 terbaru
-  const { data: learningModules, isLoading: modulesLoading } = useLearningModules(3); // hanya 3 terbaru
+  const { data: learningModules } = useLearningModules(3); // hanya 3 terbaru
   const { data: gallery, isLoading: galleryLoading } = useGallery();
   const [showContact, setShowContact] = useState(false);
+
+  // Gabungkan 3 terbaru dari backend dan eksternal (tanpa duplikasi judul)
+  const combinedModules = [
+    ...(learningModules || []),
+    ...learningModulesFront.filter(
+      (ext) => !learningModules?.some((m) => m.title === ext.title)
+    ),
+  ].slice(0, 3);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -254,7 +263,13 @@ export default function HomePage() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activities?.map((activity) => (
-                <ActivityCard key={activity.id} activity={activity} />
+                <ActivityCard
+                  key={activity.id}
+                  activity={{
+                    ...activity,
+                    date: typeof activity.date === "string" ? activity.date : activity.date.toISOString(),
+                  }}
+                />
               ))}
             </div>
           )}
@@ -276,28 +291,18 @@ export default function HomePage() {
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
             Materi dan panduan kegiatan alam bebas yang dapat diakses oleh seluruh anggota Mahapala Narotama.
           </p>
-          
-          {modulesLoading ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white p-6 rounded-lg shadow-md animate-pulse">
-                  <div className="flex items-center mb-4">
-                    <div className="bg-gray-300 rounded-full h-12 w-12 mr-4"></div>
-                    <div className="h-6 bg-gray-300 rounded w-3/4"></div>
-                  </div>
-                  <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
-                  <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
-                  <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {learningModules?.map((module) => (
-                <LearningModule key={module.id} module={module} />
-              ))}
-            </div>
-          )}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {combinedModules.map((module) => (
+              <LearningModule key={module.id + module.title} module={module} />
+            ))}
+          </div>
+          <div className="text-center mt-10">
+            <Link href="/pembelajaran">
+              <Button>
+                Lihat Semua Pembelajaran
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
