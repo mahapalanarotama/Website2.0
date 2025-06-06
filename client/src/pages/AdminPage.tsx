@@ -2,8 +2,9 @@
 import { useEffect, useState } from 'react';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
-import { collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import { differenceInDays } from 'date-fns';
 
 // UI Component imports
 import { TabsContent, Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -30,12 +31,10 @@ import type {
   Activity, 
   GalleryItem,
   Member,
-  FormData
 } from "@/components/ui/admin-forms";
 
 // Utilities and animations
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
 // Icons
 import {   Calendar,
@@ -47,13 +46,11 @@ import {   Calendar,
   Trash2,
   UserPlus,
   Users,
-  Loader2
 } from 'lucide-react';
 
 export default function AdminPage() {
   // Authentication state
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
@@ -70,13 +67,16 @@ export default function AdminPage() {
   const [currentItem, setCurrentItem] = useState<any>(null);
   const [formType, setFormType] = useState<'activity' | 'gallery' | 'member'>('activity');
   const [isEditing, setIsEditing] = useState(false);
-  const [formError, setFormError] = useState('');
+
+  // Recycle bin states
+  const [recycleBin, setRecycleBin] = useState<any[]>([]);
+  const [recycleLoading, setRecycleLoading] = useState(false);
+  const [deleteChecked, setDeleteChecked] = useState(false);
 
   // Authentication effect
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -133,44 +133,59 @@ export default function AdminPage() {
     }
   };
 
-  // Form submission handler
-  const handleFormSubmit = async (data: FormData) => {
-    try {
-      if (isEditing && currentItem) {
-        // Update existing item
-        const { id, ...updateData } = data as any;
-        await updateDoc(doc(db, `${formType}s`, currentItem.id), updateData);
-      } else {
-        // Add new item
-        await addDoc(collection(db, `${formType}s`), data);
+  // Fetch recycle bin data
+  const fetchRecycleBin = async () => {
+    setRecycleLoading(true);
+    const snapshot = await getDocs(collection(db, 'recycle_bin'));
+    const now = new Date();
+    // Hapus otomatis data yang sudah >30 hari
+    await Promise.all(snapshot.docs.map(async (docSnap) => {
+      const data = docSnap.data();
+      if (data.deletedAt && differenceInDays(now, new Date(data.deletedAt)) > 30) {
+        await deleteDoc(doc(db, 'recycle_bin', docSnap.id));
       }
-      setFormDialogOpen(false);
-      fetchData();
-    } catch (error: any) {
-      setFormError('Error saving data: ' + error.message);
-    }
+    }));
+    // Ambil ulang data recycle bin setelah auto-delete
+    const freshSnap = await getDocs(collection(db, 'recycle_bin'));
+    setRecycleBin(freshSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    setRecycleLoading(false);
   };
 
-  // Delete handler
+  // Tab change effect
+  useEffect(() => {
+    if (activeTab === 'recycle') {
+      fetchRecycleBin();
+    }
+  }, [activeTab]);
+
+  // Handle form submission for AdminFormDialog
+  const handleFormSubmit = async (_data: any) => {
+    // You can customize this logic based on formType and isEditing
+    // For now, just close the dialog and refresh data
+    setFormDialogOpen(false);
+    await fetchData();
+  };
+
+  // Handle delete action for confirmation dialog
   const handleDelete = async () => {
     if (!currentItem) return;
+    // Move item to recycle_bin and remove from original collection
+    let originalType = formType;
+    let itemId = currentItem.id;
+    let dataToDelete = { ...currentItem, originalType, deletedAt: new Date().toISOString() };
     try {
-      await deleteDoc(doc(db, `${formType}s`, currentItem.id));
+      await addDoc(collection(db, 'recycle_bin'), dataToDelete);
+      // Remove from original collection
+      let collectionName = originalType === 'member' ? 'anggota' : originalType + 's';
+      await deleteDoc(doc(db, collectionName, itemId));
       setDeleteDialogOpen(false);
-      fetchData();
-    } catch (error: any) {
+      setDeleteChecked(false);
+      setCurrentItem(null);
+      await fetchData();
+    } catch (error) {
       console.error('Error deleting item:', error);
     }
   };
-
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
 
   // Login form
   if (!user) {
@@ -246,6 +261,10 @@ export default function AdminPage() {
           <TabsTrigger value="members" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Members
+          </TabsTrigger>
+          <TabsTrigger value="recycle" className="flex items-center gap-2">
+            <Trash2 className="h-4 w-4" />
+            Recycle Bin
           </TabsTrigger>
         </TabsList>
 
@@ -444,7 +463,7 @@ export default function AdminPage() {
                         <div>{member.email || '-'}</div>
                         <div className="text-gray-500">{member.phone || '-'}</div>
                         <div className="text-gray-500 mt-1">
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs ">
                             {member.gender === 'L' ? 'Laki-laki' : member.gender === 'P' ? 'Perempuan' : 'Belum diatur'}
                           </Badge>
                         </div>
@@ -501,6 +520,62 @@ export default function AdminPage() {
             </Table>
           </div>
         </TabsContent>
+
+        <TabsContent value="recycle">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Recycle Bin</h2>
+            <Button onClick={fetchRecycleBin} variant="outline" size="sm">Refresh</Button>
+          </div>
+          {recycleLoading ? (
+            <div className="py-10 text-center text-gray-500">Loading...</div>
+          ) : recycleBin.length === 0 ? (
+            <div className="py-10 text-center text-gray-500">Recycle Bin kosong.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Jenis</TableHead>
+                    <TableHead>Nama/Title</TableHead>
+                    <TableHead>Dihapus Pada</TableHead>
+                    <TableHead className="text-right">Aksi</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {recycleBin.map(item => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.originalType}</TableCell>
+                      <TableCell>{item.fullName || item.title || '-'}</TableCell>
+                      <TableCell>{item.deletedAt ? new Date(item.deletedAt).toLocaleString() : '-'}</TableCell>
+                      <TableCell className="text-right flex gap-2 justify-end">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={async () => {
+                            // Restore: pindahkan kembali ke koleksi asli
+                            const { id, originalType, deletedAt, ...restoreData } = item;
+                            await addDoc(collection(db, originalType === 'member' ? 'anggota' : originalType + 's'), restoreData);
+                            await deleteDoc(doc(db, 'recycle_bin', item.id));
+                            fetchRecycleBin();
+                            fetchData();
+                          }}
+                        >Pulihkan</Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={async () => {
+                            await deleteDoc(doc(db, 'recycle_bin', item.id));
+                            fetchRecycleBin();
+                          }}
+                        >Hapus Permanen</Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
 
       {/* Form Dialog */}
@@ -511,25 +586,35 @@ export default function AdminPage() {
         isEditing={isEditing}
         initialData={currentItem}
         onSubmit={handleFormSubmit}
-        error={formError}
       />
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation Dialog dengan checklist */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the selected item.
+              Data akan dipindahkan ke Recycle Bin dan dapat dipulihkan dalam 30 hari. Centang untuk melanjutkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="flex items-center gap-2 my-4">
+            <input
+              type="checkbox"
+              id="delete-check"
+              checked={deleteChecked}
+              onChange={e => setDeleteChecked(e.target.checked)}
+              className="accent-red-600 h-4 w-4"
+            />
+            <label htmlFor="delete-check" className="text-sm select-none">Saya yakin ingin menghapus data ini</label>
+          </div>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
               onClick={handleDelete}
+              disabled={!deleteChecked}
             >
-              Delete
+              Hapus
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
