@@ -26,7 +26,7 @@ const convertToGalleryItem = (doc: QueryDocumentSnapshot<DocumentData>): Gallery
 };
 
 export const fetchGallery = async (): Promise<GalleryItem[]> => {
-  const galleryRef = collection(db, "gallery");
+  const galleryRef = collection(db, "gallerys"); // perbaikan di sini
   const snapshot = await getDocs(galleryRef);
   return snapshot.docs
     .filter(doc => {

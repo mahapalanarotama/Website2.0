@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
-import { collection, getDocs, addDoc, doc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { differenceInDays } from 'date-fns';
 
@@ -100,49 +100,191 @@ export default function AdminPage() {
   // Fetch data from Firestore
   const fetchData = async () => {
     try {
+      // Fetch recycle bin first
+      const recycleSnap = await getDocs(collection(db, 'recycle_bin'));
+      const recycleIds = new Set(recycleSnap.docs.map(doc => doc.id)); // Perbaikan di sini
       // Fetch activities
       const activitiesSnapshot = await getDocs(collection(db, 'activities'));
-      setActivities(activitiesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Activity[]);
-
+      setActivities(
+        activitiesSnapshot.docs
+          .filter(doc => !recycleIds.has(doc.id))
+          .map(doc => ({ id: doc.id, ...doc.data() })) as Activity[]
+      );
       // Fetch gallery items
-      const gallerySnapshot = await getDocs(collection(db, 'gallery'));
-      setGallery(gallerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as GalleryItem[]);      // Fetch members from "anggota" collection
+      const gallerySnapshot = await getDocs(collection(db, 'gallerys'));
+      setGallery(
+        gallerySnapshot.docs
+          .filter(doc => !recycleIds.has(doc.id))
+          .map(doc => ({ id: doc.id, ...doc.data() })) as GalleryItem[]
+      );      // Fetch members from "anggota" collection
       const membersSnapshot = await getDocs(collection(db, 'anggota'));
-      setMembers(membersSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          fullName: data.namalengkap || "",
-          fieldName: data.namalapangan || "",
-          batchName: data.namaangkatan || "",
-          batchYear: data.tahun || 0,
-          registrationNumber: data.nomorregistrasi || "",
-          membershipStatus: data.keanggotaan || "Tidak Aktif",
-          photoUrl: data.foto || "",
-          qrCode: data.url || "",
-          email: data.email || "",
-          phone: data.phone || "",
-          gender: data.gender || "",
-        };
-      }));
+      setMembers(
+        membersSnapshot.docs
+          .filter(doc => !recycleIds.has(doc.id))
+          .map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              fullName: data.namalengkap || "",
+              fieldName: data.namalapangan || "",
+              batchName: data.namaangkatan || "",
+              batchYear: data.tahun || 0,
+              registrationNumber: data.nomorregistrasi || "",
+              membershipStatus: data.keanggotaan || "Tidak Aktif",
+              photoUrl: data.foto || "",
+              qrCode: data.url || "",
+              email: data.email || "",
+              phone: data.phone || "",
+              gender: data.gender || "",
+            };
+          })
+      );
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
-  // Fetch recycle bin data
+  // Notifikasi sederhana
+  const notify = (msg: string) => window.alert(msg);
+
+  // CREATE/EDIT handler
+  const handleFormSubmit = async (data: any) => {
+    try {
+      let collectionName = formType === 'member' ? 'anggota' : formType + 's';
+      // --- AUTO GENERATE DOCUMENT ID FOR NEW MEMBER ---
+      if (formType === 'member' && !isEditing) {
+        // Get all member IDs (assume numeric string or fallback to 0)
+        const membersSnapshot = await getDocs(collection(db, 'anggota'));
+        const numericIds = membersSnapshot.docs
+          .map(doc => parseInt(doc.id, 10))
+          .filter(n => !isNaN(n));
+        const nextId = numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1;
+        const docId = String(nextId).padStart(4, '0'); // e.g. 0001, 0002, ...
+        const memberData = {
+          namalengkap: data.namalengkap || data.fullName || '',
+          namalapangan: data.namalapangan || data.fieldName || '',
+          namaangkatan: data.namaangkatan || data.batchName || '',
+          tahun: data.tahun || data.batchYear || new Date().getFullYear(),
+          nomorregistrasi: data.nomorregistrasi || data.registrationNumber || '',
+          keanggotaan: data.keanggotaan || data.membershipStatus || 'Anggota Muda',
+          foto: data.foto || data.photoUrl || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          gender: data.gender || '',
+          url: data.url || '',
+          updateat: new Date().toISOString(),
+          id: docId,
+        };
+        await setDoc(doc(db, 'anggota', docId), memberData);
+        notify('Data anggota berhasil ditambahkan dengan ID otomatis!');
+        setFormDialogOpen(false);
+        await fetchData();
+        return;
+      }
+      if (formType === 'member' && (data.id || data.customId)) {
+        // Always map to Firestore field names for update
+        const docId = data.customId || data.id;
+        const memberData = {
+          namalengkap: data.namalengkap || data.fullName || '',
+          namalapangan: data.namalapangan || data.fieldName || '',
+          namaangkatan: data.namaangkatan || data.batchName || '',
+          tahun: data.tahun || data.batchYear || new Date().getFullYear(),
+          nomorregistrasi: data.nomorregistrasi || data.registrationNumber || '',
+          keanggotaan: data.keanggotaan || data.membershipStatus || 'Anggota Muda',
+          foto: data.foto || data.photoUrl || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          gender: data.gender || '',
+          url: data.url || '',
+          updateat: new Date().toISOString(),
+          id: docId,
+        };
+        await setDoc(doc(db, collectionName, docId), memberData);
+        notify('Data anggota berhasil diperbarui!');
+      } else if (isEditing && data.id) {
+        // Update: gunakan setDoc agar update pada ID yang sama
+        const { id, ...updateData } = data;
+        await setDoc(doc(db, collectionName, id), updateData);
+        notify('Data berhasil diperbarui!');
+      } else {
+        // Create
+        if (formType === 'member' && data.customId) {
+          // Use customId as document ID
+          const { customId, ...memberData } = data;
+          await setDoc(doc(db, 'anggota', customId), memberData);
+          notify('Data berhasil ditambahkan dengan ID custom!');
+        } else {
+          await addDoc(collection(db, collectionName), data);
+          notify('Data berhasil ditambahkan!');
+        }
+      }
+      setFormDialogOpen(false);
+      await fetchData();
+    } catch (error) {
+      notify('Gagal menyimpan data!');
+      console.error(error);
+    }
+  };
+
+  // DELETE handler (pindah ke recycle bin)
+  // Refactor: handleDelete menerima parameter
+  const getCollectionName = (type: 'activity' | 'gallery' | 'member') => {
+    if (type === 'activity') return 'activities';
+    if (type === 'gallery') return 'gallerys'; // disesuaikan dengan nama koleksi Firestore
+    if (type === 'member') return 'anggota';
+    return '';
+  };
+
+  const handleDelete = async (type?: 'activity' | 'gallery' | 'member', item?: any) => {
+    const tipe = type || formType;
+    const dataItem = item || currentItem;
+    if (!dataItem || !dataItem.id) {
+      notify('Data tidak valid atau ID tidak ditemukan!');
+      return;
+    }
+    let originalType = tipe;
+    let itemId = dataItem.id;
+    let collectionName = getCollectionName(originalType);
+    try {
+      // Ambil data asli dari Firestore
+      const docSnap = await getDoc(doc(db, collectionName, itemId));
+      if (!docSnap.exists()) {
+        notify('Data tidak ditemukan di database!');
+        return;
+      }
+      const dataAsli = docSnap.data();
+      const dataToDelete = { ...dataAsli, originalType, deletedAt: new Date().toISOString() };
+      await setDoc(doc(db, 'recycle_bin', itemId), dataToDelete);
+      await deleteDoc(doc(db, collectionName, itemId));
+      setDeleteDialogOpen(false);
+      setDeleteChecked(false);
+      setCurrentItem(null);
+      await fetchData();
+      await fetchRecycleBin();
+      notify('Data berhasil dipindahkan ke Recycle Bin!');
+    } catch (error) {
+      notify('Gagal menghapus data!');
+      console.error(error);
+    }
+  };
+
+  // RESTORE handler di recycle bin
+  // (removed unused handleRestore function)
+
+  // PERMANENT DELETE handler di recycle bin
+  // (removed unused handlePermanentDelete function)
+
+  // AUTO DELETE recycle bin > 30 hari
   const fetchRecycleBin = async () => {
     setRecycleLoading(true);
     const snapshot = await getDocs(collection(db, 'recycle_bin'));
     const now = new Date();
-    // Hapus otomatis data yang sudah >30 hari
     await Promise.all(snapshot.docs.map(async (docSnap) => {
       const data = docSnap.data();
       if (data.deletedAt && differenceInDays(now, new Date(data.deletedAt)) > 30) {
         await deleteDoc(doc(db, 'recycle_bin', docSnap.id));
       }
     }));
-    // Ambil ulang data recycle bin setelah auto-delete
     const freshSnap = await getDocs(collection(db, 'recycle_bin'));
     setRecycleBin(freshSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     setRecycleLoading(false);
@@ -154,35 +296,6 @@ export default function AdminPage() {
       fetchRecycleBin();
     }
   }, [activeTab]);
-
-  // Handle form submission for AdminFormDialog
-  const handleFormSubmit = async (_data: any) => {
-    // You can customize this logic based on formType and isEditing
-    // For now, just close the dialog and refresh data
-    setFormDialogOpen(false);
-    await fetchData();
-  };
-
-  // Handle delete action for confirmation dialog
-  const handleDelete = async () => {
-    if (!currentItem) return;
-    // Move item to recycle_bin and remove from original collection
-    let originalType = formType;
-    let itemId = currentItem.id;
-    let dataToDelete = { ...currentItem, originalType, deletedAt: new Date().toISOString() };
-    try {
-      await addDoc(collection(db, 'recycle_bin'), dataToDelete);
-      // Remove from original collection
-      let collectionName = originalType === 'member' ? 'anggota' : originalType + 's';
-      await deleteDoc(doc(db, collectionName, itemId));
-      setDeleteDialogOpen(false);
-      setDeleteChecked(false);
-      setCurrentItem(null);
-      await fetchData();
-    } catch (error) {
-      console.error('Error deleting item:', error);
-    }
-  };
 
   // Login form
   if (!user) {
@@ -319,8 +432,8 @@ export default function AdminPage() {
                           size="icon"
                           className="text-red-600"
                           onClick={() => {
-                            setFormType('activity');
                             setCurrentItem(activity);
+                            setFormType('activity');
                             setDeleteDialogOpen(true);
                           }}
                         >
@@ -383,8 +496,8 @@ export default function AdminPage() {
                       size="sm"
                       className="text-red-600"
                       onClick={() => {
-                        setFormType('gallery');
                         setCurrentItem(item);
+                        setFormType('gallery');
                         setDeleteDialogOpen(true);
                       }}
                     >
@@ -415,12 +528,15 @@ export default function AdminPage() {
           </div>
 
           <div className="bg-white rounded-lg shadow">
-            <Table>              <TableHeader>
+            <Table>
+              <TableHeader>
                 <TableRow>
                   <TableHead className="w-[250px]">Informasi Anggota</TableHead>
                   <TableHead>Info Kontak</TableHead>
                   <TableHead>Angkatan</TableHead>
                   <TableHead>Status</TableHead>
+                  {/* Optionally show Document ID column if needed: */}
+                  {/* <TableHead>Document ID</TableHead> */}
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -431,27 +547,15 @@ export default function AdminPage() {
                       <div className="flex items-start gap-3">
                         <div className="h-10 w-10 rounded-full overflow-hidden bg-gray-100">
                           {member.photoUrl ? (
-                            <img 
-                              src={member.photoUrl} 
-                              alt={member.fullName}
-                              className="h-full w-full object-cover"
-                            />
+                            <img src={member.photoUrl} alt={member.fullName} className="h-full w-full object-cover" />
                           ) : (
-                            <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary">
-                              {member.fullName.charAt(0).toUpperCase()}
-                            </div>
+                            <div className="h-full w-full flex items-center justify-center bg-primary/10 text-primary">{member.fullName.charAt(0).toUpperCase()}</div>
                           )}
                         </div>
                         <div>
                           <div className="font-medium">{member.fullName}</div>
-                          <div className="text-sm text-gray-500">
-                            <Badge variant="outline" className="mt-1">
-                              {member.fieldName || 'Belum ada nama lapangan'}
-                            </Badge>
-                          </div>
-                          <div className="text-sm text-gray-500 mt-1">
-                            {member.registrationNumber || 'No. Reg belum diatur'}
-                          </div>
+                          <div className="text-sm text-gray-500"><Badge variant="outline" className="mt-1">{member.fieldName || 'Belum ada nama lapangan'}</Badge></div>
+                          <div className="text-sm text-gray-500 mt-1">{member.registrationNumber || 'No. Reg belum diatur'}</div>
                         </div>
                       </div>
                     </TableCell>
@@ -475,9 +579,7 @@ export default function AdminPage() {
                     <TableCell>
                       <div className="text-sm">
                         <div>{member.batchName || 'Belum diatur'}</div>
-                        <div className="text-gray-500">
-                          {member.batchYear ? `Tahun ${member.batchYear}` : 'Tahun belum diatur'}
-                        </div>
+                        <div className="text-gray-500">{member.batchYear ? `Tahun ${member.batchYear}` : 'Tahun belum diatur'}</div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -503,6 +605,8 @@ export default function AdminPage() {
                         </Badge>
                       )}
                     </TableCell>
+                    {/* Optionally show Document ID in table row if needed: */}
+                    {/* <TableCell>{member.id}</TableCell> */}
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
@@ -522,8 +626,8 @@ export default function AdminPage() {
                           size="icon"
                           className="text-red-600"
                           onClick={() => {
-                            setFormType('member');
                             setCurrentItem(member);
+                            setFormType('member');
                             setDeleteDialogOpen(true);
                           }}
                         >
@@ -569,20 +673,34 @@ export default function AdminPage() {
                           size="sm"
                           variant="outline"
                           onClick={async () => {
-                            // Restore: pindahkan kembali ke koleksi asli
-                            const { id, originalType, deletedAt, ...restoreData } = item;
-                            await addDoc(collection(db, originalType === 'member' ? 'anggota' : originalType + 's'), restoreData);
-                            await deleteDoc(doc(db, 'recycle_bin', item.id));
-                            fetchRecycleBin();
-                            fetchData();
+                            try {
+                              const { id, originalType, deletedAt, ...restoreData } = item;
+                              const collectionName = originalType === 'member' ? 'anggota' : originalType + 's';
+                              // Pulihkan ke koleksi asal dengan ID asli
+                              await setDoc(doc(db, collectionName, id), restoreData);
+                              await deleteDoc(doc(db, 'recycle_bin', id));
+                              await fetchData();
+                              await fetchRecycleBin();
+                              notify('Data berhasil dipulihkan!');
+                            } catch (error) {
+                              notify('Gagal memulihkan data!');
+                              console.error(error);
+                            }
                           }}
                         >Pulihkan</Button>
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={async () => {
-                            await deleteDoc(doc(db, 'recycle_bin', item.id));
-                            fetchRecycleBin();
+                            if (!window.confirm('Yakin ingin menghapus data ini secara permanen?')) return;
+                            try {
+                              await deleteDoc(doc(db, 'recycle_bin', item.id));
+                              await fetchRecycleBin();
+                              notify('Data berhasil dihapus permanen!');
+                            } catch (error) {
+                              notify('Gagal menghapus data permanen!');
+                              console.error(error);
+                            }
                           }}
                         >Hapus Permanen</Button>
                       </TableCell>
@@ -603,6 +721,7 @@ export default function AdminPage() {
         isEditing={isEditing}
         initialData={currentItem}
         onSubmit={handleFormSubmit}
+        activities={activities}
       />
 
       {/* Delete Confirmation Dialog dengan checklist */}
@@ -628,7 +747,7 @@ export default function AdminPage() {
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
-              onClick={handleDelete}
+              onClick={() => handleDelete(currentItem && formType, currentItem)}
               disabled={!deleteChecked}
             >
               Hapus

@@ -10,7 +10,10 @@ import {
   DialogHeader,
   DialogFooter,
   DialogTitle,
+  DialogDescription,
 } from './dialog';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 // Base model interfaces
 export interface BaseModel {
@@ -76,6 +79,7 @@ export interface MemberFormData {
   email?: string;
   phone?: string;
   gender?: string;
+  customId?: string; // Tambahan agar ID dokumen selalu ada
 }
 
 export type FormData = ActivityFormData | GalleryFormData | MemberFormData;
@@ -107,7 +111,25 @@ export function AdminFormDialog({
   const galleryInitialData = type === 'gallery' ? initialData as Partial<GalleryFormData> : null;
   const memberInitialData = type === 'member' ? initialData as Partial<MemberFormData> : null;
 
-  const [formData, setFormData] = useState<FormData>(
+  // Helper untuk mapping Firestore ke form (Firestore -> camelCase)
+  const mapFirestoreToForm = (data: any) => ({
+    fullName: data.namalengkap || data.fullName || '',
+    fieldName: data.namalapangan || data.fieldName || '',
+    batchName: data.namaangkatan || data.batchName || '',
+    batchYear: data.tahun || data.batchYear || new Date().getFullYear(),
+    registrationNumber: data.nomorregristrasi || data.registrationNumber || '',
+    membershipStatus: data.keanggotaan || data.membershipStatus || 'Anggota Muda',
+    photoUrl: data.foto || data.photoUrl || '',
+    email: data.email || '',
+    phone: data.phone || '',
+    gender: data.gender || '',
+    url: data.url || '',
+    updateat: data.updateat || '',
+    id: data.id || '',
+  });
+
+  // Always use mapFirestoreToForm for member formData initialization
+  const [formData, setFormData] = useState<any>(
     type === 'activity'
       ? {
           title: activityInitialData?.title || '',
@@ -123,30 +145,14 @@ export function AdminFormDialog({
           imageUrl: galleryInitialData?.imageUrl || '',
           activityId: galleryInitialData?.activityId || '',
         } as GalleryFormData
-      : {
-          fullName: memberInitialData?.fullName || '',
-          fieldName: memberInitialData?.fieldName || '',
-          batchName: memberInitialData?.batchName || '',
-          batchYear: memberInitialData?.batchYear || new Date().getFullYear(),
-          registrationNumber: memberInitialData?.registrationNumber || '',
-          membershipStatus: memberInitialData?.membershipStatus || 'Active',
-          photoUrl: memberInitialData?.photoUrl || '',
-          email: memberInitialData?.email || '',
-          phone: memberInitialData?.phone || '',
-          gender: memberInitialData?.gender || '',
-        } as MemberFormData
+      : mapFirestoreToForm(memberInitialData || {})
   );
 
-  // Tambahkan efek agar formData selalu sinkron dengan initialData saat edit
+  // Tambahkan state untuk nextDocumentId
+  const [nextDocumentId, setNextDocumentId] = useState('');
+
+  // Update formData when initialData changes (for edit mode)
   useEffect(() => {
-    // Helper to normalize gender
-    const normalizeGender = (val?: string) => {
-      if (!val) return '';
-      const v = val.toLowerCase();
-      if (v === 'l' || v === 'laki-laki' || v === 'male') return 'Laki-laki';
-      if (v === 'p' || v === 'perempuan' || v === 'female') return 'Perempuan';
-      return val; // fallback to original
-    };
     if (type === 'activity') {
       setFormData({
         title: (initialData as ActivityFormData)?.title || '',
@@ -162,34 +168,63 @@ export function AdminFormDialog({
         imageUrl: (initialData as GalleryFormData)?.imageUrl || '',
         activityId: (initialData as GalleryFormData)?.activityId || '',
       });
-    } else {
-      setFormData({
-        fullName: (initialData as MemberFormData)?.fullName || '',
-        fieldName: (initialData as MemberFormData)?.fieldName || '',
-        batchName: (initialData as MemberFormData)?.batchName || '',
-        batchYear: (initialData as MemberFormData)?.batchYear || new Date().getFullYear(),
-        registrationNumber: (initialData as MemberFormData)?.registrationNumber || '',
-        membershipStatus: (initialData as MemberFormData)?.membershipStatus || 'Anggota Muda',
-        photoUrl: (initialData as MemberFormData)?.photoUrl || '',
-        email: (initialData as MemberFormData)?.email || '',
-        phone: (initialData as MemberFormData)?.phone || '',
-        gender: normalizeGender((initialData as MemberFormData)?.gender),
-      });
+    } else if (type === 'member') {
+      setFormData(mapFirestoreToForm(initialData || {}));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialData, type, isEditing, open]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Ambil nextDocumentId hanya saat tambah anggota (bukan edit)
+  useEffect(() => {
+    async function fetchNextId() {
+      if (type === 'member' && open && !isEditing) {
+        const membersSnapshot = await getDocs(collection(db, 'anggota'));
+        const numericIds = membersSnapshot.docs
+          .map(doc => parseInt(doc.id, 10))
+          .filter(n => !isNaN(n));
+        const nextId = numericIds.length > 0 ? Math.max(...numericIds) + 1 : 1;
+        setNextDocumentId(String(nextId));
+        setFormData((prev: any) => ({ ...prev, id: String(nextId) }));
+      }
+    }
+    fetchNextId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type, open, isEditing]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await onSubmit(formData);
+    if (type === 'member') {
+      // Map camelCase formData to Firestore field names, cast as any to avoid TS error
+      await onSubmit({
+        namalengkap: formData.fullName || '',
+        namalapangan: formData.fieldName || '',
+        namaangkatan: formData.batchName || '',
+        tahun: formData.batchYear || new Date().getFullYear(),
+        nomorregistrasi: formData.registrationNumber || '',
+        keanggotaan: formData.membershipStatus || 'Anggota Muda',
+        foto: formData.photoUrl || '',
+        email: formData.email || '',
+        phone: formData.phone || '',
+        gender: formData.gender || '',
+        url: formData.url || '',
+        updateat: new Date().toISOString(),
+        id: formData.id || '',
+      } as any);
+    } else if (isEditing && type === 'gallery' && (initialData as any)?.id) {
+      await onSubmit({ ...(formData as any), id: (initialData as any).id });
+    } else if (isEditing && type === 'activity' && (initialData as any)?.id) {
+      await onSubmit({ ...(formData as any), id: (initialData as any).id });
+    } else {
+      await onSubmit(formData);
+    }
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => {
-      if (name === 'batchYear') {
+    setFormData((prev: any) => {
+      if (name === 'tahun') {
         return { ...prev, [name]: parseInt(value, 10) };
       }
       return { ...prev, [name]: value };
@@ -198,7 +233,7 @@ export function AdminFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl w-full p-0 overflow-hidden">
+      <DialogContent className="max-w-2xl w-full p-0 overflow-hidden" aria-describedby="form-description">
         <DialogHeader className="bg-primary text-white px-6 py-4">
           <DialogTitle className="text-xl">
             {isEditing
@@ -213,13 +248,13 @@ export function AdminFormDialog({
               ? 'Tambah Kegiatan Baru'
               : 'Tambah Galeri Baru'}
           </DialogTitle>
-          <p id="form-description" className="text-sm text-gray-200">
+          <DialogDescription id="form-description">
             {type === 'activity'
               ? 'Silakan lengkapi detail kegiatan berikut. Semua field wajib diisi.'
               : type === 'gallery'
               ? 'Silakan lengkapi detail galeri berikut. Semua field wajib diisi.'
               : 'Silakan lengkapi data anggota berikut. Field dengan tanda * wajib diisi.'}
-          </p>
+          </DialogDescription>
         </DialogHeader>
         <div className="p-6 bg-white max-h-[70vh] overflow-y-auto">
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -230,37 +265,34 @@ export function AdminFormDialog({
                   <Input
                     id="fullName"
                     name="fullName"
-                    value={(formData as MemberFormData).fullName}
+                    value={formData.fullName || ''}
                     onChange={handleChange}
                     placeholder="Masukkan nama lengkap"
                     required
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="fieldName">Nama Lapangan *</Label>
                   <Input
                     id="fieldName"
                     name="fieldName"
-                    value={(formData as MemberFormData).fieldName}
+                    value={formData.fieldName || ''}
                     onChange={handleChange}
                     placeholder="Masukkan nama lapangan"
                     required
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="batchName">Nama Angkatan *</Label>
                   <Input
                     id="batchName"
                     name="batchName"
-                    value={(formData as MemberFormData).batchName}
+                    value={formData.batchName || ''}
                     onChange={handleChange}
                     placeholder="Contoh: Elang"
                     required
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="batchYear">Tahun Angkatan *</Label>
                   <Input
@@ -269,30 +301,28 @@ export function AdminFormDialog({
                     type="number"
                     min="1990"
                     max={new Date().getFullYear()}
-                    value={(formData as MemberFormData).batchYear}
+                    value={formData.batchYear ?? ''}
                     onChange={handleChange}
                     required
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="registrationNumber">Nomor Registrasi *</Label>
                   <Input
                     id="registrationNumber"
                     name="registrationNumber"
-                    value={(formData as MemberFormData).registrationNumber}
+                    value={formData.registrationNumber || ''}
                     onChange={handleChange}
                     placeholder="Contoh: MPN-2025-001"
                     required
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="membershipStatus">Status Keanggotaan *</Label>
                   <select
                     id="membershipStatus"
                     name="membershipStatus"
-                    value={(formData as MemberFormData).membershipStatus}
+                    value={formData.membershipStatus || ''}
                     onChange={handleChange}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                     required
@@ -302,13 +332,12 @@ export function AdminFormDialog({
                     <option value="Tidak Aktif">Tidak Aktif</option>
                   </select>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
                   <select
                     id="gender"
                     name="gender"
-                    value={(formData as MemberFormData).gender}
+                    value={formData.gender || ''}
                     onChange={handleChange}
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                   >
@@ -317,40 +346,64 @@ export function AdminFormDialog({
                     <option value="Perempuan">Perempuan</option>
                   </select>
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    value={(formData as MemberFormData).email}
+                    value={formData.email || ''}
                     onChange={handleChange}
                     placeholder="contoh@email.com"
                   />
                 </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="phone">Nomor Telepon</Label>
                   <Input
                     id="phone"
                     name="phone"
                     type="tel"
-                    value={(formData as MemberFormData).phone}
+                    value={formData.phone || ''}
                     onChange={handleChange}
                     placeholder="Contoh: 081234567890"
                   />
                 </div>
-
-                <div className="space-y-2 col-span-2">
+                <div className="space-y-2">
                   <Label htmlFor="photoUrl">URL Foto KTA</Label>
                   <Input
                     id="photoUrl"
                     name="photoUrl"
                     type="url"
                     placeholder="Masukkan URL foto KTA"
-                    value={(formData as MemberFormData).photoUrl}
+                    value={formData.photoUrl || ''}
                     onChange={handleChange}
+                  />
+                  {Boolean(formData.photoUrl) && (
+                    <div className="mt-2">
+                      <span className="block text-xs text-gray-500 mb-1">Preview:</span>
+                      {/^https?:\/\//.test(formData.photoUrl || '') ? (
+                        <img
+                          src={formData.photoUrl}
+                          alt="Preview Foto KTA"
+                          className="max-h-32 rounded border"
+                          onError={e => (e.currentTarget.style.display = 'none')}
+                        />
+                      ) : (
+                        <span className="text-xs text-red-500">URL tidak valid</span>
+                      )}
+                      <div className="text-xs text-blue-600 break-all mt-1">{formData.photoUrl}</div>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="documentId">Document ID</Label>
+                  <Input
+                    id="documentId"
+                    name="documentId"
+                    value={isEditing ? formData.id || '' : nextDocumentId || formData.id || ''}
+                    readOnly
+                    className="bg-gray-100 cursor-not-allowed"
+                    placeholder="ID dokumen Firestore"
                   />
                 </div>
               </div>
@@ -361,7 +414,7 @@ export function AdminFormDialog({
                   <Input
                     id="title"
                     name="title"
-                    value={(formData as ActivityFormData | GalleryFormData).title}
+                    value={(formData as ActivityFormData | GalleryFormData).title || ''}
                     onChange={handleChange}
                     required
                   />
@@ -372,7 +425,7 @@ export function AdminFormDialog({
                   <Textarea
                     id="description"
                     name="description"
-                    value={(formData as ActivityFormData | GalleryFormData).description}
+                    value={(formData as ActivityFormData | GalleryFormData).description || ''}
                     onChange={handleChange}
                     required={type === 'activity'}
                   />
@@ -386,7 +439,7 @@ export function AdminFormDialog({
                         id="date"
                         name="date"
                         type="date"
-                        value={(formData as ActivityFormData).date}
+                        value={(formData as ActivityFormData).date || ''}
                         onChange={handleChange}
                         required
                       />
@@ -397,7 +450,7 @@ export function AdminFormDialog({
                       <Input
                         id="category"
                         name="category"
-                        value={(formData as ActivityFormData).category}
+                        value={(formData as ActivityFormData).category || ''}
                         onChange={handleChange}
                         required
                       />
@@ -411,7 +464,7 @@ export function AdminFormDialog({
                     <select
                       id="activityId"
                       name="activityId"
-                      value={(formData as GalleryFormData).activityId}
+                      value={(formData as GalleryFormData).activityId || ''}
                       onChange={handleChange}
                       className="w-full rounded-md border p-2"
                     >
@@ -432,7 +485,7 @@ export function AdminFormDialog({
                     name="imageUrl"
                     type="url"
                     placeholder="Enter the URL of the image"
-                    value={(formData as ActivityFormData | GalleryFormData).imageUrl}
+                    value={(formData as ActivityFormData | GalleryFormData).imageUrl || ''}
                     onChange={handleChange}
                     required
                   />
@@ -452,3 +505,5 @@ export function AdminFormDialog({
     </Dialog>
   );
 }
+
+// Note: Table whitespace warning is likely in AdminPage, not here. If needed, fix there.
