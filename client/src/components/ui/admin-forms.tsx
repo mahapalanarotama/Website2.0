@@ -211,11 +211,32 @@ export function AdminFormDialog({
         id: formData.id || '',
       } as any);
     } else if (isEditing && type === 'gallery' && (initialData as any)?.id) {
-      await onSubmit({ ...(formData as any), id: (initialData as any).id });
+      // Only include updatedAt for gallery
+      await onSubmit({
+        title: formData.title || '',
+        description: formData.description || '',
+        imageUrl: formData.imageUrl || '',
+        activityId: formData.activityId || '',
+        createdAt: formData.createdAt || null,
+        // Only add updatedAt if the type is GalleryFormData
+        ...(type === 'gallery' ? { updatedAt: new Date().toISOString() } : {}),
+        id: (initialData as any).id,
+      } as GalleryFormData & { id: string; updatedAt?: string });
     } else if (isEditing && type === 'activity' && (initialData as any)?.id) {
       await onSubmit({ ...(formData as any), id: (initialData as any).id });
     } else {
-      await onSubmit(formData);
+      // For create, only submit known fields for the type
+      if (type === 'gallery') {
+        await onSubmit({
+          title: formData.title || '',
+          description: formData.description || '',
+          imageUrl: formData.imageUrl || '',
+          activityId: formData.activityId || '',
+          createdAt: formData.createdAt || null,
+        } as GalleryFormData);
+      } else {
+        await onSubmit(formData);
+      }
     }
   };
 
@@ -381,7 +402,7 @@ export function AdminFormDialog({
                   {Boolean(formData.photoUrl) && (
                     <div className="mt-2">
                       <span className="block text-xs text-gray-500 mb-1">Preview:</span>
-                      {/^https?:\/\//.test(formData.photoUrl || '') ? (
+                      {/https?:\/\//.test(formData.photoUrl || '') ? (
                         <img
                           src={formData.photoUrl}
                           alt="Preview Foto KTA"
@@ -414,7 +435,7 @@ export function AdminFormDialog({
                   <Input
                     id="title"
                     name="title"
-                    value={(formData as ActivityFormData | GalleryFormData).title || ''}
+                    value={type === 'activity' || type === 'gallery' ? formData.title || '' : ''}
                     onChange={handleChange}
                     required
                   />
@@ -425,7 +446,7 @@ export function AdminFormDialog({
                   <Textarea
                     id="description"
                     name="description"
-                    value={(formData as ActivityFormData | GalleryFormData).description || ''}
+                    value={type === 'activity' || type === 'gallery' ? formData.description || '' : ''}
                     onChange={handleChange}
                     required={type === 'activity'}
                   />
@@ -485,7 +506,7 @@ export function AdminFormDialog({
                     name="imageUrl"
                     type="url"
                     placeholder="Enter the URL of the image"
-                    value={(formData as ActivityFormData | GalleryFormData).imageUrl || ''}
+                    value={type === 'activity' || type === 'gallery' ? formData.imageUrl || '' : ''}
                     onChange={handleChange}
                     required
                   />

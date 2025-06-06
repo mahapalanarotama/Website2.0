@@ -54,7 +54,7 @@ export default function AdminPage() {
 
   // Data states
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [gallery, setGallery] = useState<GalleryItem[]>([]);
+  const [gallerys, setGallery] = useState<GalleryItem[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [activeTab, setActiveTab] = useState('activities');
 
@@ -115,7 +115,15 @@ export default function AdminPage() {
       setGallery(
         gallerySnapshot.docs
           .filter(doc => !recycleIds.has(doc.id))
-          .map(doc => ({ id: doc.id, ...doc.data() })) as GalleryItem[]
+          .map(doc => ({
+            id: doc.id,
+            title: doc.data().title || '',
+            description: doc.data().description || '',
+            imageUrl: doc.data().imageUrl || '',
+            activityId: doc.data().activityId || '',
+            createdAt: doc.data().createdAt || null,
+            updatedAt: doc.data().updatedAt || null,
+          }))
       );      // Fetch members from "anggota" collection
       const membersSnapshot = await getDocs(collection(db, 'anggota'));
       setMembers(
@@ -201,11 +209,44 @@ export default function AdminPage() {
         };
         await setDoc(doc(db, collectionName, docId), memberData);
         notify('Data anggota berhasil diperbarui!');
-      } else if (isEditing && data.id) {
-        // Update: gunakan setDoc agar update pada ID yang sama
-        const { id, ...updateData } = data;
-        await setDoc(doc(db, collectionName, id), updateData);
-        notify('Data berhasil diperbarui!');
+      } else if (isEditing && formType === 'activity' && data.id) {
+        // Pastikan mapping field activity ke Firestore benar
+        const activityData = {
+          title: data.title || '',
+          description: data.description || '',
+          date: data.date || '',
+          category: data.category || '',
+          imageUrl: data.imageUrl || '',
+          id: data.id,
+        };
+        await setDoc(doc(db, 'activities', data.id), activityData);
+        notify('Data kegiatan berhasil diperbarui!');
+      } else if (isEditing && formType === 'gallery' && data.id) {
+        // Mapping field galeri ke Firestore harus konsisten
+        const galleryData = {
+          title: data.title || '',
+          description: data.description || '',
+          imageUrl: data.imageUrl || '',
+          activityId: data.activityId || '',
+          createdAt: data.createdAt || null,
+          updatedAt: new Date().toISOString(),
+          id: data.id,
+        };
+        await setDoc(doc(db, 'gallerys', data.id), galleryData);
+        notify('Data galeri berhasil diperbarui!');
+      } else if (formType === 'activity' && !isEditing) {
+        // TAMBAH DATA KEGIATAN BARU
+        const activityData = {
+          title: data.title || '',
+          description: data.description || '',
+          date: data.date || '',
+          category: data.category || '',
+          imageUrl: data.imageUrl || '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await addDoc(collection(db, 'activities'), activityData);
+        notify('Data kegiatan berhasil ditambahkan!');
       } else {
         // Create
         if (formType === 'member' && data.customId) {
@@ -228,9 +269,10 @@ export default function AdminPage() {
 
   // DELETE handler (pindah ke recycle bin)
   // Refactor: handleDelete menerima parameter
+  // Helper to map formType to Firestore collection name
   const getCollectionName = (type: 'activity' | 'gallery' | 'member') => {
     if (type === 'activity') return 'activities';
-    if (type === 'gallery') return 'gallerys'; // disesuaikan dengan nama koleksi Firestore
+    if (type === 'gallery') return 'gallerys'; // Firestore collection is 'gallerys'
     if (type === 'member') return 'anggota';
     return '';
   };
@@ -466,7 +508,7 @@ export default function AdminPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gallery.map((item) => (
+            {gallerys.map((item) => (
               <Card key={item.id} className="overflow-hidden">
                 <div className="relative aspect-video">
                   <img
@@ -675,9 +717,20 @@ export default function AdminPage() {
                           onClick={async () => {
                             try {
                               const { id, originalType, deletedAt, ...restoreData } = item;
-                              const collectionName = originalType === 'member' ? 'anggota' : originalType + 's';
-                              // Pulihkan ke koleksi asal dengan ID asli
-                              await setDoc(doc(db, collectionName, id), restoreData);
+                              let collectionName = originalType === 'member' ? 'anggota' : originalType === 'activity' ? 'activities' : originalType + 's';
+                              let dataToRestore = restoreData;
+                              if (originalType === 'activity') {
+                                // Only restore allowed fields for activity
+                                dataToRestore = {
+                                  title: restoreData.title || '',
+                                  description: restoreData.description || '',
+                                  date: restoreData.date || '',
+                                  category: restoreData.category || '',
+                                  imageUrl: restoreData.imageUrl || '',
+                                  id: id,
+                                };
+                              }
+                              await setDoc(doc(db, collectionName, id), dataToRestore);
                               await deleteDoc(doc(db, 'recycle_bin', id));
                               await fetchData();
                               await fetchRecycleBin();
