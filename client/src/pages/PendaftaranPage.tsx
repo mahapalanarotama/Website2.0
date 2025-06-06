@@ -406,7 +406,7 @@ export default function PendaftaranPage() {
                   <CardDescription>Kesekretariatan Mahapala Narotama</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">Ruang BEM (D3.01), Gedung D Lt. 2, Universitas Narotama</p>
+                  <p className="text-sm">Ruang BEM (D3.01), Gedung D Lt. 3, Universitas Narotama</p>
                   <p className="text-sm text-gray-500 mt-1">Senin - Jumat, 09:00 - 16:00 WIB</p>
                 </CardContent>
               </Card>
