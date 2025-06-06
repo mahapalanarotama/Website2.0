@@ -2,7 +2,8 @@
   "name": "rest-express",
   "version": "1.0.0",
   "type": "module",
-  "license": "MIT",  "scripts": {
+  "license": "MIT",
+  "scripts": {
     "dev": "NODE_ENV=development tsx server/index.ts",
     "build": "npm run build --workspace client && npm run build --workspace server",
     "start": "node dist/index.js",
@@ -102,6 +103,7 @@
     "drizzle-kit": "^0.30.4",
     "esbuild": "^0.25.0",
     "postcss": "^8.4.47",
+    "rollup": "^4.41.1",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.4",
     "typescript": "5.6.3",
