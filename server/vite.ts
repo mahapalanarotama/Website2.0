@@ -4,7 +4,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
-import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
 
 // Fix for __dirname in ESM
@@ -24,6 +23,8 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  // Dynamically import the Vite config as ESM, omitting the extension for Node compatibility
+  const viteConfig = (await import("../vite.config.mjs")).default;
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -48,7 +49,6 @@ export async function setupVite(app: Express, server: Server) {
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
-
     try {
       // Use built index.html in production, source in dev
       const clientTemplate =

@@ -380,7 +380,7 @@ export default function MemberCardPage() {
                   ← Kembali ke Pencarian
                 </Button>
                 
-                {selectedMember && <MemberCard member={selectedMember} />}
+                {selectedMember && <MemberCard member={{ ...selectedMember, id: String(selectedMember.id) }} />}
               </div>
             </>
           )}

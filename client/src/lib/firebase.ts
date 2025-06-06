@@ -1,7 +1,6 @@
-
 import { initializeApp } from "firebase/app";
+import { getAuth, browserLocalPersistence, setPersistence } from 'firebase/auth';
 import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 
 // Firebase configuration
@@ -17,16 +16,31 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
+
+// Initialize auth with local persistence to handle third-party cookie restrictions
+const auth = getAuth(firebaseApp);
+setPersistence(auth, browserLocalPersistence)
+  .catch((error) => {
+    console.warn('Auth persistence configuration failed:', error);
+  });
+
 const firestore = getFirestore(firebaseApp);
-const storage = getStorage(firebaseApp);
+
 let analytics: any = null;
 
-// Initialize analytics only in browser environment
+// Initialize analytics only if consent is given
 if (typeof window !== 'undefined') {
-  analytics = getAnalytics(firebaseApp);
+  try {
+    const hasConsent = localStorage.getItem('cookieConsent') === 'true';
+    if (hasConsent) {
+      analytics = getAnalytics(firebaseApp);
+    }
+  } catch (error) {
+    console.warn('Analytics disabled due to cookie/storage restrictions:', error);
+  }
 }
 
 // For debugging
 console.log("Firebase initialized successfully");
 
-export { firebaseApp as app, firestore as db, storage, analytics };
+export { firebaseApp as app, auth, firestore as db, analytics };

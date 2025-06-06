@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { AlertCircle, CheckCircle, ArrowRight, Download, Calendar, Users, FileText, Mail } from "lucide-react";
+import { AlertCircle, CheckCircle, ArrowRight, Download, Calendar, Users, FileText, Mail, Instagram, Phone } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function PendaftaranPage() {
   const [activeTab, setActiveTab] = useState<"general" | "requirements" | "timeline" | "faq">("general");
   const [showForm, setShowForm] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -331,7 +332,7 @@ export default function PendaftaranPage() {
                     Jika Anda memiliki pertanyaan lain yang belum terjawab, jangan ragu untuk menghubungi kami.
                   </p>
                   <div className="flex justify-center">
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => setShowContact(true)}>
                       <Mail className="h-4 w-4" /> Hubungi Kami
                     </Button>
                   </div>
@@ -478,6 +479,47 @@ export default function PendaftaranPage() {
               </div>
             </form>
             {/* --- FORM END --- */}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Dialog for contact information */}
+      <Dialog open={showContact} onOpenChange={setShowContact}>
+        <DialogContent className="max-w-xs w-full p-0 rounded-xl">
+          <div className="p-6 flex flex-col items-center gap-4">
+            <h2 className="font-heading text-lg font-bold mb-2">Hubungi Kami</h2>
+            <div className="flex gap-6 justify-center">
+              <a
+                href="https://instagram.com/mahapalanarotama"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary hover:scale-110 transition-transform"
+                title="Instagram"
+              >
+                <Instagram size={36} />
+              </a>
+              <a
+                href="https://wa.me/6281234567890"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-green-600 hover:scale-110 transition-transform"
+                title="WhatsApp"
+              >
+                <Phone size={36} />
+              </a>
+              <a
+                href="mailto:ukm.mahapala@narotama.ac.id"
+                className="hover:text-blue-600 hover:scale-110 transition-transform"
+                title="Email"
+              >
+                <Mail size={36} />
+              </a>
+            </div>
+            <div className="text-center text-xs text-gray-500 mt-2">
+              Instagram: @mahapalanarotama<br />
+              WhatsApp: 0812-3456-7890<br />
+              Email: ukm.mahapala@narotama.ac.id
+            </div>
           </div>
         </DialogContent>
       </Dialog>

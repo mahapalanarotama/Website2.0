@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { Member } from "@shared/schema";
+// Update the import path below to the actual location of your Member type definition
+// Define the Member type locally if the import is missing
+export interface Member {
+  id: string;
+  fullName: string;
+  registrationNumber: string;
+  membershipStatus: string;
+  photoUrl?: string;
+  fieldName?: string;
+  batchName?: string;
+  batchYear?: string | number;
+}
 import { QRCodeSVG } from "qrcode.react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

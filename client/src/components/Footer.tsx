@@ -83,8 +83,8 @@ export function Footer() {
             <h3 className="font-heading text-xl font-bold mb-4">Hubungi Kami</h3>
             <address className="not-italic text-gray-300">
               <p className="mb-2 flex items-center">
-                <MapPin className="h-4 w-4 mr-2" /> 
-                Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur
+                <MapPin className="h-4 w-4 mr-2" />
+                <span>Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</span>
               </p>
               <p className="mb-2 flex items-center">
                 <Phone className="h-4 w-4 mr-2" /> 
@@ -92,7 +92,7 @@ export function Footer() {
               </p>
               <p className="flex items-center">
                 <Mail className="h-4 w-4 mr-2" /> 
-                mahapala@narotama.ac.id
+                ukm.mahapala@narotama.ac.id
               </p>
             </address>
           </div>
@@ -100,7 +100,7 @@ export function Footer() {
         
         <div className="border-t border-gray-700 pt-6">
           <p className="text-center text-gray-400 text-sm">
-            &copy; {currentYear} Organisasi Pecinta Alam. All rights reserved.
+            &copy; {currentYear} Mahapala Narotama. All rights reserved.
           </p>
         </div>
       </div>

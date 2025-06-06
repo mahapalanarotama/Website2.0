@@ -131,13 +131,13 @@ export default function HomePage() {
                 <CarouselItem>
                   <div className="relative h-96">
                     <img 
-                      src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080" 
-                      alt="Anggota Mahapala Narotama dalam kegiatan konservasi lingkungan" 
+                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/anggota%20mahapala%20narotama.jpg" 
+                      alt="Anggota Mahapala Narotama" 
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                       <div className="p-6 text-white">
-                        <h2 className="font-heading text-2xl font-bold mb-2">Bersama Melestarikan Alam</h2>
+                        <h2 className="font-heading text-2xl font-bold mb-2">Kebersamaan adalah simbol Kekuatan</h2>
                         <p className="text-gray-200">Bergabunglah dalam misi kami untuk melindungi lingkungan dan eksplorasi alam.</p>
                       </div>
                     </div>
@@ -148,8 +148,8 @@ export default function HomePage() {
                 <CarouselItem>
                   <div className="relative h-96">
                     <img 
-                      src="https://images.unsplash.com/photo-1455156218388-5e61b526818b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080" 
-                      alt="Kelompok pendaki gunung Mahapala Narotama" 
+                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/eksplorasi%20alam.jpg" 
+                      alt="Pendidikan Rimba Gunung Mahapala Narotama" 
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
@@ -165,13 +165,13 @@ export default function HomePage() {
                 <CarouselItem>
                   <div className="relative h-96">
                     <img 
-                      src="https://images.unsplash.com/photo-1519331379826-f10be5486c6f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080" 
-                      alt="Kegiatan konservasi Mahapala Narotama" 
+                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/panjat%20tebing.png" 
+                      alt="Pendidikan Panjat Tebing Mahapala Narotama" 
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
                       <div className="p-6 text-white">
-                        <h2 className="font-heading text-2xl font-bold mb-2">Konservasi dan Edukasi</h2>
+                        <h2 className="font-heading text-2xl font-bold mb-2">Keseruan dalam Berpetualang</h2>
                         <p className="text-gray-200">Kami berkomitmen untuk pendidikan lingkungan dan pelestarian alam.</p>
                       </div>
                     </div>
@@ -420,7 +420,7 @@ export default function HomePage() {
                   <Mail size={36} />
                 </a>
               </div>
-              <div className="text-center text-xs text-gray-200 mt-2">
+              <div className="text-center text-xs text-gray-500 mt-2">
                 Instagram: @mahapalanarotama<br />
                 WhatsApp: 0812-3456-7890<br />
                 Email: ukm.mahapala@narotama.ac.id
