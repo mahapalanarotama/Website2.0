@@ -171,7 +171,7 @@ export default function PendaftaranPage() {
                   <ul className="space-y-2 pl-6 list-disc text-gray-700">
                     <li>Formulir pendaftaran yang telah diisi lengkap</li>
                     <li>Pas foto berwarna ukuran 3x4 (3 lembar)</li>
-                    <li>Fotokopi Kartu Mahasiswa dan KTP</li>
+                    <li>Fotokopi Kartu Mahasiswa</li>
                     <li>Surat keterangan sehat dari dokter</li>
                     <li>Surat pernyataan kesediaan mengikuti seleksi</li>
                     <li>Surat izin orang tua/wali</li>
@@ -182,7 +182,7 @@ export default function PendaftaranPage() {
                 <div className="bg-gray-50 p-4 rounded-lg mb-6">
                   <h4 className="font-medium text-lg mb-2">Biaya Pendaftaran</h4>
                   <p className="text-gray-700 mb-2">
-                    Biaya pendaftaran: Rp 150.000,-
+                    Biaya pendaftaran: Rp 250.000,-
                   </p>
                   <p className="text-gray-700 mb-2">
                     Biaya tersebut mencakup:
@@ -205,7 +205,7 @@ export default function PendaftaranPage() {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm text-green-700">
-                        Semua dokumen persyaratan dikumpulkan dalam bentuk hardcopy pada saat pendaftaran dan softcopy dikirim ke email mahapala@narotama.ac.id dengan subjek "PENDAFTARAN_[NAMA]_[NPM]"
+                        Semua dokumen persyaratan dikumpulkan dalam bentuk hardcopy pada saat pendaftaran dan softcopy dikirim ke email ukm.mahapala@narotama.ac.id dengan subjek "PENDAFTARAN2025_[NAMA]_[NIM]"
                       </p>
                     </div>
                   </div>
