@@ -429,7 +429,7 @@ export default function PendaftaranPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">Instagram: @mahapalanarotama</p>
-                  <p className="text-sm">Youtube: @mahapalanarotama1216</p>
+                  <p className="text-sm">YouTube: @mahapalanarotama1216</p>
                 </CardContent>
               </Card>
             </div>
