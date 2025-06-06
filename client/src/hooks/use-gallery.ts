@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import { collection, getDocs, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 
 export interface GalleryItem {
   id: string;
@@ -27,9 +27,13 @@ const convertToGalleryItem = (doc: QueryDocumentSnapshot<DocumentData>): Gallery
 
 export const fetchGallery = async (): Promise<GalleryItem[]> => {
   const galleryRef = collection(db, "gallery");
-  const q = query(galleryRef, where("deletedAt", "==", null));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(convertToGalleryItem);
+  const snapshot = await getDocs(galleryRef);
+  return snapshot.docs
+    .filter(doc => {
+      const data = doc.data();
+      return !('deletedAt' in data) || data.deletedAt === null;
+    })
+    .map(convertToGalleryItem);
 };
 
 export const useGallery = () => {

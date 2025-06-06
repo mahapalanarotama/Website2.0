@@ -4,6 +4,7 @@ import { ActivityCard } from "@/components/ActivityCard";
 import { LearningModule } from "@/components/LearningModule";
 import { useActivities } from "@/hooks/use-activities";
 import { useLearningModules } from "@/hooks/use-learning";
+import { useGallery } from "@/hooks/use-gallery";
 import { 
   Carousel, 
   CarouselContent, 
@@ -93,6 +94,7 @@ function BacksoundPlayer() {
 export default function HomePage() {
   const { data: activities, isLoading: activitiesLoading } = useActivities(3); // hanya 3 terbaru
   const { data: learningModules, isLoading: modulesLoading } = useLearningModules(3); // hanya 3 terbaru
+  const { data: gallery, isLoading: galleryLoading } = useGallery();
   const [showContact, setShowContact] = useState(false);
 
   useEffect(() => {
@@ -306,53 +308,33 @@ export default function HomePage() {
           <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
             Sekilas dokumentasi kegiatan yang telah dilaksanakan oleh anggota Mahapala Narotama
           </p>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="relative group overflow-hidden rounded-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1536431311719-398b6704d4cc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800" 
-                alt="Pendakian Gunung Semeru" 
-                className="w-full h-full object-cover transition group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                <p className="text-white text-sm text-center font-medium p-2">Pendakian Gunung Semeru 2023</p>
-              </div>
+          {galleryLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="bg-gray-200 h-48 rounded-lg animate-pulse" />
+              ))}
             </div>
-            
-            <div className="relative group overflow-hidden rounded-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1488462237308-ecaa28b729d7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800" 
-                alt="Kegiatan Bersih Pantai" 
-                className="w-full h-full object-cover transition group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                <p className="text-white text-sm text-center font-medium p-2">Bersih Pantai Kenjeran 2023</p>
-              </div>
+          ) : gallery && gallery.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {gallery.slice(0,4).map(item => (
+                <div key={item.id} className="relative group overflow-hidden rounded-lg">
+                  <img 
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover transition group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                    <div>
+                      <p className="text-white text-sm text-center font-medium p-2">{item.title}</p>
+                      {item.description && <p className="text-white text-xs text-center p-1">{item.description}</p>}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            
-            <div className="relative group overflow-hidden rounded-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800" 
-                alt="Pelatihan Tali-Temali" 
-                className="w-full h-full object-cover transition group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                <p className="text-white text-sm text-center font-medium p-2">Pelatihan Teknik Tali-Temali 2022</p>
-              </div>
-            </div>
-            
-            <div className="relative group overflow-hidden rounded-lg">
-              <img 
-                src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=800" 
-                alt="Ekspedisi Hutan Jawa Timur" 
-                className="w-full h-full object-cover transition group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                <p className="text-white text-sm text-center font-medium p-2">Ekspedisi Hutan Jawa Timur 2022</p>
-              </div>
-            </div>
-          </div>
-          
+          ) : (
+            <div className="text-center text-gray-500 py-10">Tidak ada data galeri.</div>
+          )}
           <div className="text-center mt-10">
             <Link href="/galeri">
               <Button>

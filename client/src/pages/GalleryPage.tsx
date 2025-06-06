@@ -1,4 +1,4 @@
-import { useActivities } from "@/hooks/use-activities";
+import { useGallery } from "@/hooks/use-gallery";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Instagram, Mail, Phone } from "lucide-react";
@@ -7,7 +7,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 export default function GalleryPage() {
-  const { data: activities, isLoading } = useActivities();
+  const { data: gallery, isLoading } = useGallery();
   const [showContact, setShowContact] = useState(false);
 
   return (
@@ -44,19 +44,11 @@ export default function GalleryPage() {
               <div key={i} className="bg-gray-200 h-40 sm:h-56 md:h-64 rounded-xl" />
             ))}
           </div>
-        ) : activities && activities.length > 0 ? (
-          <motion.div
-            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 auto-rows-[160px] xs:auto-rows-[180px] sm:auto-rows-[220px] md:auto-rows-[250px]"
-            initial="hidden"
-            animate="show"
-            variants={{
-              hidden: { opacity: 0 },
-              show: { opacity: 1, transition: { staggerChildren: 0.07 } },
-            }}
-          >
-            {activities.map((activity, idx) => (
-              <motion.div
-                key={activity.id}
+        ) : gallery && gallery.length > 0 ? (
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 auto-rows-[160px] xs:auto-rows-[180px] sm:auto-rows-[220px] md:auto-rows-[250px]">
+            {gallery.map((item, idx) => (
+              <div
+                key={item.id}
                 className={`relative overflow-hidden rounded-xl shadow-lg group border border-gray-100 bg-white hover:shadow-2xl transition-all duration-300 ${
                   idx % 7 === 0
                     ? 'md:row-span-2 md:col-span-2 h-[320px] md:h-[520px]'
@@ -64,13 +56,11 @@ export default function GalleryPage() {
                     ? 'md:row-span-2 h-[320px] md:h-[520px]'
                     : 'h-full'
                 }`}
-                whileHover={{ scale: 1.03 }}
-                variants={{ hidden: { opacity: 0, y: 30 }, show: { opacity: 1, y: 0 } }}
               >
-                {activity.imageUrl ? (
+                {item.imageUrl ? (
                   <img
-                    src={activity.imageUrl}
-                    alt={activity.title}
+                    src={item.imageUrl}
+                    alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 ) : (
@@ -78,22 +68,17 @@ export default function GalleryPage() {
                     Tidak ada gambar
                   </div>
                 )}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center"
-                  initial={{ opacity: 0 }}
-                  whileHover={{ opacity: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center">
                   <div className="w-full p-4 pb-6 text-white text-center bg-gradient-to-t from-black/60 to-transparent rounded-b-xl">
-                    <h3 className="font-bold text-lg mb-1 drop-shadow-lg">{activity.title}</h3>
-                    <p className="text-sm line-clamp-3 drop-shadow">{activity.description}</p>
+                    <h3 className="font-bold text-lg mb-1 drop-shadow-lg">{item.title}</h3>
+                    {item.description && <p className="text-sm line-clamp-3 drop-shadow">{item.description}</p>}
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         ) : (
-          <div className="text-center text-gray-500 py-20">Tidak ada data kegiatan.</div>
+          <div className="text-center text-gray-500 py-20">Tidak ada data galeri.</div>
         )}
         <Dialog open={showContact} onOpenChange={setShowContact}>
           <DialogContent className="max-w-xs w-full p-0 rounded-xl">
