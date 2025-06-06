@@ -355,10 +355,17 @@ export default function PendaftaranPage() {
                   <p className="text-gray-600">Pendaftaran anggota baru Mahapala tahun 2025</p>
                 </div>
                 <div>
-                  <Button className="gap-2 bg-primary hover:bg-primary/90">
+                  <a
+                  href="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/assets/form%20pendaftaran%20anggota.docx"
+                  download="formulir_pendaftaran_anggota.docx"
+                  >
+                  <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
+                    <span>
                     <Download size={16} />
                     Unduh Formulir
+                    </span>
                   </Button>
+                  </a>
                 </div>
               </div>
               
