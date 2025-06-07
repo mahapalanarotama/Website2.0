@@ -126,6 +126,15 @@ export default function AdminPage() {
           }))
       );      // Fetch members from "anggota" collection
       const membersSnapshot = await getDocs(collection(db, 'anggota'));
+      const updateStatusAktif = ['Caba', 'Cella', 'Ratel', 'Lupus', 'Orca', 'Loni', 'Ola'];
+      const batch: Promise<any>[] = [];
+      membersSnapshot.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        if (updateStatusAktif.includes(data.namalengkap) && data.statusMahasiswa !== 'Aktif') {
+          batch.push(setDoc(doc(db, 'anggota', docSnap.id), { ...data, statusMahasiswa: 'Aktif' }, { merge: true }));
+        }
+      });
+      if (batch.length > 0) await Promise.all(batch);
       setMembers(
         membersSnapshot.docs
           .filter(doc => !recycleIds.has(doc.id))
@@ -144,6 +153,7 @@ export default function AdminPage() {
               email: data.email || "",
               phone: data.phone || "",
               gender: data.gender || "",
+              statusMahasiswa: data.statusMahasiswa, // Tambahkan mapping untuk statusMahasiswa
             };
           })
       );
@@ -179,6 +189,7 @@ export default function AdminPage() {
           email: data.email || '',
           phone: data.phone || '',
           gender: data.gender || '',
+          statusMahasiswa: data.statusMahasiswa, // Perbaikan di sini
           url: data.url || '',
           updateat: new Date().toISOString(),
           id: docId,
@@ -203,6 +214,7 @@ export default function AdminPage() {
           email: data.email || '',
           phone: data.phone || '',
           gender: data.gender || '',
+          statusMahasiswa: data.statusMahasiswa, // Perbaikan di sini
           url: data.url || '',
           updateat: new Date().toISOString(),
           id: docId,
@@ -576,7 +588,8 @@ export default function AdminPage() {
                   <TableHead className="w-[250px]">Informasi Anggota</TableHead>
                   <TableHead>Info Kontak</TableHead>
                   <TableHead>Angkatan</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Keanggotaan</TableHead>
+                  <TableHead>Status Mahasiswa</TableHead>
                   {/* Optionally show Document ID column if needed: */}
                   {/* <TableHead>Document ID</TableHead> */}
                   <TableHead className="text-right">Actions</TableHead>
@@ -647,8 +660,24 @@ export default function AdminPage() {
                         </Badge>
                       )}
                     </TableCell>
-                    {/* Optionally show Document ID in table row if needed: */}
-                    {/* <TableCell>{member.id}</TableCell> */}
+                    <TableCell>
+                      {/* Status Mahasiswa */}
+                      <Badge
+                        className={
+                          member.statusMahasiswa === 'Aktif'
+                            ? 'bg-green-100 text-green-800 border-green-200'
+                            : member.statusMahasiswa === 'Tidak Aktif'
+                            ? 'bg-red-100 text-red-800 border-red-200'
+                            : member.statusMahasiswa === 'Lulus'
+                            ? 'bg-blue-100 text-blue-800 border-blue-200'
+                            : member.statusMahasiswa === 'Cuti'
+                            ? 'bg-yellow-100 text-yellow-900 border-yellow-300'
+                            : 'bg-gray-100 text-gray-800 border-gray-200'
+                        }
+                      >
+                        {member.statusMahasiswa || 'Belum diatur'}
+                      </Badge>
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button

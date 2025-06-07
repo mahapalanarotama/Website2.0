@@ -66,6 +66,7 @@ export interface Member {
   email?: string;
   phone?: string;
   gender?: string;
+  statusMahasiswa?: string;
 }
 
 export interface MemberFormData {
@@ -79,6 +80,7 @@ export interface MemberFormData {
   email?: string;
   phone?: string;
   gender?: string;
+  statusMahasiswa?: string;
   customId?: string; // Tambahan agar ID dokumen selalu ada
 }
 
@@ -117,12 +119,13 @@ export function AdminFormDialog({
     fieldName: data.namalapangan || data.fieldName || '',
     batchName: data.namaangkatan || data.batchName || '',
     batchYear: data.tahun || data.batchYear || new Date().getFullYear(),
-    registrationNumber: data.nomorregristrasi || data.registrationNumber || '',
+    registrationNumber: data.nomorregistrasi || data.registrationNumber || '',
     membershipStatus: data.keanggotaan || data.membershipStatus || 'Anggota Muda',
     photoUrl: data.foto || data.photoUrl || '',
     email: data.email || '',
     phone: data.phone || '',
     gender: data.gender || '',
+    statusMahasiswa: data.statusMahasiswa || '',
     url: data.url || '',
     updateat: data.updateat || '',
     id: data.id || '',
@@ -194,7 +197,6 @@ export function AdminFormDialog({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (type === 'member') {
-      // Map camelCase formData to Firestore field names, cast as any to avoid TS error
       await onSubmit({
         namalengkap: formData.fullName || '',
         namalapangan: formData.fieldName || '',
@@ -206,6 +208,7 @@ export function AdminFormDialog({
         email: formData.email || '',
         phone: formData.phone || '',
         gender: formData.gender || '',
+        statusMahasiswa: formData.statusMahasiswa,
         url: formData.url || '',
         updateat: new Date().toISOString(),
         id: formData.id || '',
@@ -351,6 +354,22 @@ export function AdminFormDialog({
                     <option value="Anggota Muda">Anggota Muda</option>
                     <option value="Anggota Penuh">Anggota Penuh</option>
                     <option value="Tidak Aktif">Tidak Aktif</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="statusMahasiswa">Status Mahasiswa *</Label>
+                  <select
+                    id="statusMahasiswa"
+                    name="statusMahasiswa"
+                    value={formData.statusMahasiswa || ''}
+                    onChange={handleChange}
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                    required
+                  >
+                    <option value="Aktif">Aktif</option>
+                    <option value="Tidak Aktif">Tidak Aktif</option>
+                    <option value="Lulus">Lulus</option>
+                    <option value="Cuti">Cuti</option>
                   </select>
                 </div>
                 <div className="space-y-2">
