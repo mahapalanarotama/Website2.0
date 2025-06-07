@@ -92,6 +92,77 @@ function Card3DPopup({ open, onClose, frontUrl, backUrl, fullName }: { open: boo
   );
 }
 
+// Tambahkan state dan komponen BirthdayCountdown dummy agar error hilang
+type BirthdayCountdownProps = { name: string; onClose: () => void };
+function BirthdayCountdown({ onClose }: BirthdayCountdownProps) {
+  const [timeLeft, setTimeLeft] = useState<{days: number, hours: number, minutes: number, seconds: number} | null>(null);
+
+  useEffect(() => {
+    function getNextAnniversary() {
+      const now = new Date();
+      const year = now.getMonth() > 0 || (now.getMonth() === 0 && now.getDate() > 26) ? now.getFullYear() + 1 : now.getFullYear();
+      return new Date(year, 0, 26, 0, 0, 0, 0); // Jan = 0
+    }
+    function calculateTimeLeft() {
+      const now = new Date();
+      const nextAnniv = getNextAnniversary();
+      const diff = nextAnniv.getTime() - now.getTime();
+      if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      return { days, hours, minutes, seconds };
+    }
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
+      <div className="bg-white rounded-lg shadow-lg p-8 max-w-sm w-full text-center">
+        <h2 className="text-xl font-bold mb-4">Countdown Ulang Tahun</h2>
+        {timeLeft ? (
+          <div className="mb-4 text-2xl font-mono flex justify-center gap-2">
+            <span>{timeLeft.days} <span className="text-xs font-normal">hari</span></span>
+            <span>:</span>
+            <span>{String(timeLeft.hours).padStart(2, '0')}<span className="text-xs font-normal">j</span></span>
+            <span>:</span>
+            <span>{String(timeLeft.minutes).padStart(2, '0')}<span className="text-xs font-normal">m</span></span>
+            <span>:</span>
+            <span>{String(timeLeft.seconds).padStart(2, '0')}<span className="text-xs font-normal">d</span></span>
+          </div>
+        ) : (
+          <p className="mb-4">Menghitung...</p>
+        )}
+        <p className="mb-4">
+          Menuju ulang tahun <b>Mahapala Narotama</b> yang ke{" "}
+          {
+            (() => {
+              const now = new Date();
+              const orgStartYear = 2017;
+              const nextYear = now.getMonth() > 0 || (now.getMonth() === 0 && now.getDate() > 26)
+                ? now.getFullYear() + 1
+                : now.getFullYear();
+              return nextYear - orgStartYear;
+            })()
+          }
+          {" "}pada tanggal 26 Januari {(() => {
+            const now = new Date();
+            return now.getMonth() > 0 || (now.getMonth() === 0 && now.getDate() > 26)
+              ? now.getFullYear() + 1
+              : now.getFullYear();
+          })()}
+        </p>
+        <Button onClick={onClose}>Tutup</Button>
+      </div>
+    </div>
+  );
+}
+
 export default function MemberCardPage() {
   const [searchType, setSearchType] = useState<string>("fullName");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -103,6 +174,7 @@ export default function MemberCardPage() {
   const [card3DPopup, setCard3DPopup] = useState<{ open: boolean; frontUrl: string; backUrl: string; fullName: string }>(
     { open: false, frontUrl: '', backUrl: '', fullName: '' }
   );
+  const [showBirthdayCountdown, setShowBirthdayCountdown] = useState(false);
   
   const { data: members, isLoading } = useMembers();
   
@@ -159,40 +231,72 @@ export default function MemberCardPage() {
         <div className="container mx-auto px-4">
           {/* DASHBOARD */}
           <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-10 text-center">
-            <div className="bg-green-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
+            <div className="bg-green-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full relative">
+              {/* Icon countdown di pojok kanan atas */}
+              <button
+                type="button"
+                className="absolute top-2 right-2 p-1 rounded-full hover:bg-green-100 transition"
+                aria-label="Lihat hitung mundur ulang tahun"
+                onClick={() => setShowBirthdayCountdown(true)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7c0-1.105.895-2 2-2s2 .895 2 2" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7c0-1.105-.895-2-2-2s-2 .895-2 2" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v2" />
+                </svg>
+              </button>
               <span className="text-xs text-gray-500 mb-1">Umur Organisasi</span>
               <span className="text-2xl font-bold text-green-700 whitespace-pre-line">{ageString}</span>
               <span className="text-xs text-gray-400 mt-1">Sejak 26 Januari 2017</span>
+              {/* Birthday Countdown Popup */}
+              {showBirthdayCountdown && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="absolute inset-0" onClick={() => setShowBirthdayCountdown(false)} />
+                <div className="relative z-10 bg-white rounded-xl shadow-lg p-8 flex flex-col items-center min-w-[320px]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-pink-500 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7c0-1.105.895-2 2-2s2 .895 2 2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7c0-1.105-.895-2-2-2s-2 .895-2 2" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v2" />
+                </svg>
+                <BirthdayCountdown name="Organisasi" onClose={() => setShowBirthdayCountdown(false)} />
+                <Button className="mt-4" variant="outline" onClick={() => setShowBirthdayCountdown(false)}>
+                  Tutup
+                </Button>
+                </div>
+              </div>
+              )}
             </div>
             <div className="bg-blue-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
-              <span className="text-xs text-gray-500 mb-1">Jumlah Anggota</span>
+              <span className="text-s text-gray-500 mb-1">Jumlah Anggota</span>
               <AnimatedNumber value={totalMembers} className="text-2xl font-bold text-blue-700" />
-              <span className="text-xs text-gray-400 mt-1">Total anggota terdaftar</span>
+              <span className="text-s text-gray-400 mt-1">Total anggota terdaftar</span>
             </div>
             <div className="bg-yellow-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
-              <span className="text-xs text-gray-500 mb-1">Jumlah Angkatan</span>
+              <span className="text-s text-gray-500 mb-1">Jumlah Angkatan</span>
               <AnimatedNumber value={uniqueBatches} className="text-2xl font-bold text-yellow-700" />
-              <span className="text-xs text-gray-400 mt-1">Angkatan unik</span>
+              <span className="text-s text-gray-400 mt-1">Total Angkatan</span>
             </div>
             <div className="bg-emerald-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
-              <span className="text-xs text-gray-500 mb-1">Anggota Penuh</span>
+              <span className="text-s text-gray-500 mb-1">Anggota Penuh</span>
               <AnimatedNumber value={members ? members.filter(m => m.membershipStatus === 'Anggota Penuh').length : 0} className="text-2xl font-bold text-emerald-700" />
-              <span className="text-xs text-gray-400 mt-1">Total anggota penuh</span>
+              <span className="text-s text-gray-400 mt-1">Total anggota penuh</span>
             </div>
             <div className="bg-lime-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
-              <span className="text-xs text-gray-500 mb-1">Anggota Muda</span>
+              <span className="text-s text-gray-500 mb-1">Anggota Muda</span>
               <AnimatedNumber value={members ? members.filter(m => m.membershipStatus === 'Anggota Muda').length : 0} className="text-2xl font-bold text-lime-700" />
-              <span className="text-xs text-gray-400 mt-1">Total anggota muda</span>
+              <span className="text-s text-gray-400 mt-1">Total anggota muda</span>
             </div>
             <div className="bg-indigo-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
-              <span className="text-xs text-gray-500 mb-1">Anggota Laki-laki</span>
+              <span className="text-s text-gray-500 mb-1">Anggota Laki-laki</span>
               <AnimatedNumber value={totalMale} className="text-2xl font-bold text-indigo-700" />
-              <span className="text-xs text-gray-400 mt-1">Total anggota laki-laki</span>
+              <span className="text-s text-gray-400 mt-1">Total anggota laki-laki</span>
             </div>
             <div className="bg-pink-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full">
-              <span className="text-xs text-gray-500 mb-1">Anggota Perempuan</span>
+              <span className="text-s text-gray-500 mb-1">Anggota Perempuan</span>
               <AnimatedNumber value={totalFemale} className="text-2xl font-bold text-pink-700" />
-              <span className="text-xs text-gray-400 mt-1">Total anggota perempuan</span>
+              <span className="text-s text-gray-400 mt-1">Total anggota perempuan</span>
             </div>
           </div>
           
