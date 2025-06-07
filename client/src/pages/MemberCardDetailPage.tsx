@@ -98,7 +98,7 @@ export default function MemberCardDetailPage() {
             className="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 disabled:opacity-60"
             disabled={downloading}
           >
-            {downloading ? "Mengunduh..." : "Unduh Kartu Anggota"}
+            {downloading ? "Mengunduh..." : "Unduh Kartu Anggota Untuk Print"}
           </button>
         </div>
         <div className="grid md:grid-cols-2 gap-8">
