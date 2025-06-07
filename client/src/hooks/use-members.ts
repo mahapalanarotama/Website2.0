@@ -85,6 +85,25 @@ export const searchMembers = async (field: string, value: string): Promise<Membe
   }
 };
 
+// Fetch member by field (for detail card)
+export const getMemberByField = async (field: string, value: string) => {
+  const membersRef = collection(db, "anggota");
+  const q = query(membersRef, where(field, "==", value), limit(1));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
+  const doc = snapshot.docs[0];
+  const data = doc.data();
+  return {
+    fullName: data.namalengkap || "",
+    fieldName: data.namalapangan || "",
+    batchName: data.namaangkatan || "",
+    batchYear: data.tahun || 0,
+    registrationNumber: data.nomorregistrasi || "",
+    membershipStatus: data.keanggotaan || "Tidak Aktif",
+    photoUrl: data.foto || "",
+  };
+};
+
 // React Query hooks for members
 export const useMembers = (limitCount?: number) => {
   return useQuery({

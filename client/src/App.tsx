@@ -11,6 +11,7 @@ import PendaftaranPage from "@/pages/PendaftaranPage";
 import GalleryPage from "@/pages/GalleryPage";
 import AdminPage from "@/pages/AdminPage";
 import DetailActivityPage from "@/pages/DetailActivityPage";
+import MemberCardDetailPage from "@/pages/MemberCardDetailPage";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useLeafCursor } from "@/components/CursorLeafTrail";
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="/galeri" component={GalleryPage} />
           <Route path="/admin" component={AdminPage} />
           <Route path="/kegiatan/:id" component={DetailActivityPage} />
+          <Route path="/kartu-anggota-detail" component={MemberCardDetailPage} />
           <Route component={NotFound} />
         </Switch>
       </Layout>
