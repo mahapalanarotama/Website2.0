@@ -19,6 +19,7 @@ import { useState, useEffect, useRef } from "react";
 // @ts-ignore
 import backsound from "../assets/backsound.mp3";
 import { learningModulesFront } from "@/components/externalLearningLinks";
+import BirthdayCountdownHome from "@/components/BirthdayCountdownHome";
 
 function BacksoundPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -97,6 +98,28 @@ export default function HomePage() {
   const { data: learningModules } = useLearningModules(3); // hanya 3 terbaru
   const { data: gallery, isLoading: galleryLoading } = useGallery();
   const [showContact, setShowContact] = useState(false);
+  // Birthday popup state
+  const [showBirthdayPopup, setShowBirthdayPopup] = useState(false);
+
+  useEffect(() => {
+    // Cek apakah ulang tahun kurang dari 1 bulan (31 hari)
+    const now = new Date();
+    const nextAnniv = (() => {
+      const year = now.getMonth() > 0 || (now.getMonth() === 0 && now.getDate() > 26) ? now.getFullYear() + 1 : now.getFullYear();
+      return new Date(year, 0, 26, 0, 0, 0, 0);
+    })();
+    const diff = nextAnniv.getTime() - now.getTime();
+    const days = diff / (1000 * 60 * 60 * 24);
+    // Cek sessionStorage agar popup tidak muncul berulang kali dalam 1 sesi
+    if (days <= 31 && !sessionStorage.getItem('hideBirthdayPopup')) {
+      setShowBirthdayPopup(true);
+    }
+  }, []);
+
+  const handleCloseBirthdayPopup = () => {
+    setShowBirthdayPopup(false);
+    sessionStorage.setItem('hideBirthdayPopup', '1');
+  };
 
   // Gabungkan 3 terbaru dari backend dan eksternal (tanpa duplikasi judul)
   const combinedModules = [
@@ -112,6 +135,7 @@ export default function HomePage() {
 
   return (
     <>
+      <BirthdayCountdownHome open={showBirthdayPopup} onClose={handleCloseBirthdayPopup} />
       {/* Hero Section */}
       <section className="py-12 md:py-20 bg-white">
         <div className="container mx-auto px-4">
