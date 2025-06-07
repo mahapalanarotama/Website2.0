@@ -12,8 +12,11 @@ import GalleryPage from "@/pages/GalleryPage";
 import AdminPage from "@/pages/AdminPage";
 import DetailActivityPage from "@/pages/DetailActivityPage";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import { useLeafCursor } from "@/components/CursorLeafTrail";
 
 function App() {
+  useLeafCursor();
+
   return (
     <TooltipProvider>
       <Toaster />
