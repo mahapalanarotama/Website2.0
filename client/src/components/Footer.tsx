@@ -79,23 +79,23 @@ export function Footer() {
             </ul>
           </div>
           
-          <div>
+            <div>
             <h3 className="font-heading text-xl font-bold mb-4">Hubungi Kami</h3>
             <address className="not-italic text-gray-300">
               <p className="mb-2 flex items-center">
-                <MapPin className="h-4 w-4 mr-2" />
-                <span>Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</span>
+              <MapPin className="h-5 w-5 mr-2" strokeWidth={2} />
+              <span>Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</span>
               </p>
               <p className="mb-2 flex items-center">
-                <Phone className="h-4 w-4 mr-2" /> 
-                (031) 34133 2882
+              <Phone className="h-5 w-5 mr-2" strokeWidth={2} /> 
+              <span>(031) 34133 2882</span>
               </p>
               <p className="flex items-center">
-                <Mail className="h-4 w-4 mr-2" /> 
-                ukm.mahapala@narotama.ac.id
+              <Mail className="h-5 w-5 mr-2" strokeWidth={2} /> 
+              <span>ukm.mahapala@narotama.ac.id</span>
               </p>
             </address>
-          </div>
+            </div>
         </div>
         
         <div className="border-t border-gray-700 pt-6">
