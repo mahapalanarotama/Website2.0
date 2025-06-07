@@ -17,6 +17,7 @@ export default function MemberCardDetailPage() {
   useLocation();
   const [member, setMember] = useState<MemberDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const params = new URLSearchParams(window.location.search);
   const type = params.get("type") || "fieldName";
   const input = params.get("input") || "";
@@ -41,6 +42,37 @@ export default function MemberCardDetailPage() {
     });
   }, [type, input]);
 
+  // Fungsi untuk mengunduh kartu anggota (depan & belakang)
+  const handleDownloadCard = async () => {
+    setDownloading(true);
+    // Download bagian depan dari photoUrl
+    if (member?.photoUrl) {
+      const response = await fetch(member.photoUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `kartu-anggota-${member.registrationNumber || member.fieldName}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+    // Download bagian belakang dari URL statis
+    const backUrl = "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/back.png";
+    const responseBack = await fetch(backUrl);
+    const blobBack = await responseBack.blob();
+    const urlBack = window.URL.createObjectURL(blobBack);
+    const linkBack = document.createElement("a");
+    linkBack.href = urlBack;
+    linkBack.download = `kartu-anggota-${member?.registrationNumber || member?.fieldName}-belakang.png`;
+    document.body.appendChild(linkBack);
+    linkBack.click();
+    document.body.removeChild(linkBack);
+    window.URL.revokeObjectURL(urlBack);
+    setDownloading(false);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -60,9 +92,18 @@ export default function MemberCardDetailPage() {
     <div className="max-w-5xl mx-auto p-4">
       <Card className="p-6">
         <h2 className="text-2xl font-bold text-center mb-6">Verifikasi Kartu Anggota</h2>
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={handleDownloadCard}
+            className="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 disabled:opacity-60"
+            disabled={downloading}
+          >
+            {downloading ? "Mengunduh..." : "Unduh Kartu Anggota"}
+          </button>
+        </div>
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Hanya menampilkan gambar kartu dari URL KTA Firestore */}
-          <div className="flex flex-col items-center justify-center w-full">
+          {/* Bagian depan kartu */}
+          <div className="flex flex-col items-center justify-center w-full" id="member-card-front">
             {member.photoUrl ? (
               <div className="p-2 border-2 border-gray-400 rounded-lg">
                 <img
@@ -77,6 +118,7 @@ export default function MemberCardDetailPage() {
               </div>
             )}
           </div>
+          {/* Bagian belakang kartu tidak ditampilkan di halaman, hanya didownload */}
           {/* Detail tabel */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Detail Anggota</h3>
