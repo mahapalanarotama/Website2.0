@@ -72,7 +72,7 @@ export default function MemberCardDetailPage() {
                 />
               </div>
             ) : (
-              <div className="p-2 border-2 border-gray-400 rounded-lg w-full flex items-center justify-center min-h-[300px]">
+              <div className="p-2 border-2 border-gray-400 rounded-lg w-full flex items-center justify-center min-h-[275px]">
                 <span className="text-gray-400 text-center">Kartu anggota tidak tersedia.</span>
               </div>
             )}
