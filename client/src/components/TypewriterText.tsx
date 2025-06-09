@@ -1,18 +1,33 @@
-// client/src/components/TypewriterText.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-export default function TypewriterText({ text, speed = 40 }: { text: string; speed?: number }) {
+interface TypewriterTextProps {
+  text: string;
+  speed?: number;
+}
+
+export default function TypewriterText({ text, speed = 50 }: TypewriterTextProps) {
   const [displayed, setDisplayed] = useState("");
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setDisplayed("");
     let i = 0;
-    const interval = setInterval(() => {
-      setDisplayed((prev) => prev + text.charAt(i));
-      i++;
-      if (i >= text.length) clearInterval(interval);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setDisplayed((prev) => {
+        // Hindari race condition jika text berubah saat animasi berjalan
+        if (i < text.length) {
+          return prev + text.charAt(i++);
+        } else {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          return prev;
+        }
+      });
     }, speed);
-    return () => clearInterval(interval);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [text, speed]);
 
   return <span>{displayed}</span>;
