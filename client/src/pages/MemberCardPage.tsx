@@ -168,8 +168,8 @@ export default function MemberCardPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showSearch, setShowSearch] = useState<boolean>(true);
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
-  const [photoDialog, setPhotoDialog] = useState<{ open: boolean; photoUrl: string; fullName: string }>(
-    { open: false, photoUrl: '', fullName: '' }
+  const [photoDialog, setPhotoDialog] = useState<{ open: boolean; photoUrl: string; fullName: string; zoom?: boolean }>(
+    { open: false, photoUrl: '', fullName: '', zoom: false }
   );
   const [card3DPopup, setCard3DPopup] = useState<{ open: boolean; frontUrl: string; backUrl: string; fullName: string }>(
     { open: false, frontUrl: '', backUrl: '', fullName: '' }
@@ -312,7 +312,7 @@ export default function MemberCardPage() {
                         <SelectTrigger>
                           <SelectValue placeholder="Pilih Tipe Pencarian" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-white">
                           <SelectItem value="fullName">Nama Lengkap</SelectItem>
                           <SelectItem value="batchYear">Tahun Angkatan</SelectItem>
                           <SelectItem value="registrationNumber">Nomor Registrasi</SelectItem>
@@ -429,44 +429,99 @@ export default function MemberCardPage() {
               )}
               
               {/* Dialog for ID Card photo */}
-              <Dialog open={photoDialog.open} onOpenChange={open => setPhotoDialog(v => ({ ...v, open }))}>
+                <Dialog open={photoDialog.open} onOpenChange={open => setPhotoDialog(v => ({ ...v, open }))}>
                 <DialogContent className="flex flex-col items-center">
                   {photoDialog.photoUrl && (
-                    <>
+                  <>
+                    <div
+                    className="relative overflow-hidden rounded border mt-5 mb-4 bg-white"
+                    style={{
+                      width: 480,
+                      height: 300,
+                      maxWidth: "90vw",
+                      maxHeight: "70vh",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "zoom-in"
+                    }}
+                    tabIndex={0}
+                    onClick={e => {
+                      // Open zoom modal
+                      e.stopPropagation();
+                      setPhotoDialog(v => ({ ...v, zoom: true }));
+                    }}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" || e.key === " ") {
+                      setPhotoDialog(v => ({ ...v, zoom: true }));
+                      }
+                    }}
+                    aria-label="Perbesar gambar"
+                    >
+                    <img
+                      src={photoDialog.photoUrl}
+                      alt={photoDialog.fullName}
+                      className="object-contain w-full h-full"
+                      style={{ aspectRatio: '3/2', maxHeight: "100%", maxWidth: "100%" }}
+                    />
+                    <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded pointer-events-none">
+                      Klik untuk zoom
+                    </span>
+                    </div>
+                    <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={async () => {
+                      try {
+                      const response = await fetch(photoDialog.photoUrl, { mode: 'cors' });
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = photoDialog.photoUrl.split('/').pop() || 'kartu-anggota.jpg';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      window.URL.revokeObjectURL(url);
+                      } catch (err) {
+                      window.open(photoDialog.photoUrl, '_blank');
+                      }
+                    }}
+                    >
+                    Unduh Kartu
+                    </Button>
+                    {/* Zoom Modal */}
+                    {photoDialog.zoom && (
+                    <div
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+                      onClick={() => setPhotoDialog(v => ({ ...v, zoom: false }))}
+                      style={{ cursor: "zoom-out" }}
+                    >
                       <img
-                        src={photoDialog.photoUrl}
-                        alt={photoDialog.fullName}
-                        className="w-[320px] h-[200px] object-contain rounded border mb-4"
-                        style={{ aspectRatio: '320/200' }}
+                      src={photoDialog.photoUrl}
+                      alt={photoDialog.fullName}
+                      className="object-contain max-w-4xl max-h-[90vh] rounded shadow-lg"
+                      style={{ background: "white" }}
+                      onClick={e => e.stopPropagation()}
                       />
-                      <Button
-                        variant="default"
-                        className="w-full"
-                        onClick={async () => {
-                          // Download file as blob to force download from URL (bypass CORS if possible)
-                          try {
-                            const response = await fetch(photoDialog.photoUrl, { mode: 'cors' });
-                            const blob = await response.blob();
-                            const url = window.URL.createObjectURL(blob);
-                            const link = document.createElement('a');
-                            link.href = url;
-                            link.download = photoDialog.photoUrl.split('/').pop() || 'kartu-anggota.jpg';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            window.URL.revokeObjectURL(url);
-                          } catch (err) {
-                            // fallback: open in new tab if fetch fails
-                            window.open(photoDialog.photoUrl, '_blank');
-                          }
-                        }}
+                      <button
+                      className="absolute top-4 right-4 bg-white rounded-full p-2 shadow hover:bg-gray-100"
+                      onClick={e => {
+                        e.stopPropagation();
+                        setPhotoDialog(v => ({ ...v, zoom: false }));
+                      }}
+                      aria-label="Tutup zoom"
                       >
-                        Unduh Kartu
-                      </Button>
-                    </>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      </button>
+                    </div>
+                    )}
+                  </>
                   )}
                 </DialogContent>
-              </Dialog>
+                </Dialog>
 
               {/* 3D Card Popup */}
               <Card3DPopup
