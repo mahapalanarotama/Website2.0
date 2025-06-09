@@ -101,6 +101,7 @@ export const getMemberByField = async (field: string, value: string) => {
     registrationNumber: data.nomorregistrasi || "",
     membershipStatus: data.keanggotaan || "Tidak Aktif",
     photoUrl: data.foto || "",
+    statusMahasiswa: data.statusMahasiswa || "",
   };
 };
 

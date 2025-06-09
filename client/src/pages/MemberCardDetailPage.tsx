@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { getMemberByField } from "@/hooks/use-members";
+import { motion } from "framer-motion";
 
 interface MemberDetail {
   fullName: string;
@@ -11,6 +12,7 @@ interface MemberDetail {
   registrationNumber: string;
   membershipStatus: string;
   photoUrl: string;
+  statusMahasiswa?: string;
 }
 
 export default function MemberCardDetailPage() {
@@ -34,6 +36,7 @@ export default function MemberCardDetailPage() {
           registrationNumber: data.registrationNumber,
           membershipStatus: data.membershipStatus,
           photoUrl: data.photoUrl,
+          statusMahasiswa: data.statusMahasiswa,
         });
       } else {
         setMember(null);
@@ -103,7 +106,25 @@ export default function MemberCardDetailPage() {
         </div>
         <div className="grid md:grid-cols-2 gap-8">
           {/* Bagian depan kartu */}
-          <div className="flex flex-col items-center justify-center w-full" id="member-card-front">
+          <div className="flex flex-col items-center justify-center w-full relative" id="member-card-front">
+            {member.statusMahasiswa === 'Aktif' && (
+              <motion.span
+                initial={{ opacity: 0.7, textShadow: '0 0 0px #22c55e' }}
+                animate={{
+                  opacity: [0.7, 1, 0.7],
+                  textShadow: [
+                    '0 0 0px #22c55e',
+                    '0 0 12px #22c55e, 0 0 24px #16a34a',
+                    '0 0 0px #22c55e'
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute top-3 right-2 z-10 px-3 py-1 rounded-full font-bold text-sm select-none"
+                style={{ color: '#22c55e' }}
+              >
+                • Mahasiswa Aktif
+              </motion.span>
+            )}
             {member.photoUrl ? (
               <div className="p-2 border-2 border-gray-400 rounded-lg">
                 <img

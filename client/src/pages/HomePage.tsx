@@ -20,6 +20,8 @@ import { useState, useEffect, useRef } from "react";
 import backsound from "../assets/backsound.mp3";
 import { learningModulesFront } from "@/components/externalLearningLinks";
 import BirthdayCountdownHome from "@/components/BirthdayCountdownHome";
+import TypewriterText from "@/components/TypewriterText";
+import { motion } from "framer-motion";
 
 function BacksoundPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -137,18 +139,35 @@ export default function HomePage() {
     <>
       <BirthdayCountdownHome open={showBirthdayPopup} onClose={handleCloseBirthdayPopup} />
       {/* Hero Section */}
-      <section className="py-12 md:py-20 bg-white">
+      <motion.section
+        className="py-12 md:py-20 bg-white"
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.7 }}
+          >
             <h1 className="font-heading text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Selamat Datang di Website Resmi Organisasi Mahasiswa Pecinta Alam Universitas Narotama Surabaya
+              <TypewriterText
+                text="Selamat Datang di Website Resmi Organisasi Mahasiswa Pecinta Alam Universitas Narotama Surabaya"
+                speed={30}
+              />
             </h1>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               Menjelajahi alam, berbagi pengetahuan, dan menjaga kelestarian lingkungan.
             </p>
-          </div>
-          
-          <div className="relative rounded-xl overflow-hidden shadow-xl">
+          </motion.div>
+          <motion.div
+            className="relative rounded-xl overflow-hidden shadow-xl"
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
+          >
             <Carousel 
               opts={{ 
                 align: "start",
@@ -219,48 +238,65 @@ export default function HomePage() {
                 <CarouselNext className="relative -right-0 translate-y-0 bg-white/20 hover:bg-white/40" />
               </div>
             </Carousel>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Info Organisasi Section */}
-      <section id="info-organisasi" className="py-16 bg-gray-50">
+      <motion.section id="info-organisasi" className="py-16 bg-gray-50"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto px-4">
           <h2 className="font-heading text-3xl font-bold text-center mb-12">Informasi Organisasi</h2>
           
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="font-heading text-xl font-semibold text-primary mb-4">Sejarah</h3>
-              <p className="text-gray-700 mb-4">
-                Mahapala Narotama adalah Unit Kegiatan Mahasiswa Pecinta Alam di Universitas Narotama, Surabaya yang berdiri sejak tahun 2016. Organisasi ini berperan aktif dalam mengadakan kegiatan alam bebas dan konservasi lingkungan, serta turut serta dalam menjelajahi, mempelajari, Mahapala Narotama juga berperan dalam menyelenggarakan pendidikan dasar kepencintaalaman untuk mahasiswa baru.
-              </p>
-              <p className="text-gray-700">
-                Sejak pendiriannya, Mahapala Narotama telah melaksanakan berbagai program konservasi, ekspedisi alam, dan kegiatan sosial di berbagai daerah di Indonesia.
-              </p>
+                <p className="text-gray-700 mb-4 text-justify indent-8">
+                Mahapala Narotama adalah Unit Kegiatan Mahasiswa Pecinta Alam di Universitas Narotama, Surabaya yang berdiri sejak tahun 2016. Organisasi ini berperan aktif dalam mengadakan kegiatan alam bebas dan konservasi lingkungan, serta turut serta dalam pengabdian masyarakat. Mahapala Narotama juga berperan dalam meningkatkan kesadaran akan pentingnya pelestarian alam dan lingkungan hidup di kalangan mahasiswa dan masyarakat umum.
+                </p>
+                <p className="text-gray-700 mb-4 text-justify indent-8">
+                Universitas Narotama sendiri didirikan pada tahun 1981 oleh Yayasan Pawiyatan Gita Patria. Nama "Narotama" diambil dari seorang tokoh sejarah, Mahapatih dari Prabu Airlangga, yang dikenal sebagai guru ilmu kenegaraan, agama, dan kedigdayaan. Sejak awal berdirinya, universitas ini memiliki komitmen kuat dalam bidang pendidikan dan pengabdian kepada masyarakat.
+                </p>
+                <p className="text-gray-700 mb-4 text-justify indent-8">
+                Mahapala Narotama, sebagai bagian integral dari universitas, telah menunjukkan dedikasi dalam berbagai kegiatan, termasuk pendakian, ekspedisi, dan program konservasi. Mereka juga aktif dalam kolaborasi dengan organisasi lain untuk meningkatkan dampak positif terhadap lingkungan dan masyarakat.
+                </p>
+                <p className="text-gray-700 mb-4 text-justify indent-8">
+                Dengan semangat yang terus berkobar, Mahapala Narotama berkomitmen untuk melanjutkan peranannya dalam menjaga kelestarian alam dan meningkatkan kesadaran lingkungan di kalangan generasi muda.
+                </p>
             </div>
             
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="font-heading text-xl font-semibold text-primary mb-4">Visi & Misi</h3>
               <div className="mb-4">
                 <h4 className="font-heading font-medium mb-2">Visi:</h4>
-                <p className="text-gray-700">Membangun kembali semangat kebersamaan dan keilmuan anggota untuk menjadikan organisasi Mahapala sebagai wadah yang solid, aktif, dan berprestasi di bidang kepencintaalaman.</p>
+                <p className="text-gray-700 text-justify">Membangun kembali semangat kebersamaan dan keaktifan anggota untuk menjadikan organisasi Mahapala sebagai wadah yang solid, aktif, dan berprestasi di bidang kepecintaalaman.</p>
               </div>
               <div>
                 <h4 className="font-heading font-medium mb-2">Misi:</h4>
                 <ul className="text-gray-700 list-disc pl-5 space-y-1">
-                  <li>Mengembangkan keterampilan dan pengetahuan anggota dalam kegiatan alam bebas</li>
-                  <li>Berkontribusi dalam upaya pelestarian lingkungan</li>
-                  <li>Membangun jaringan dengan organisasi pecinta alam lainnya</li>
-                  <li>Menyelenggarakan kegiatan ekspedisi dan konservasi alam secara berkala</li>
+                  <li>Membangun dan memperkuat ikatan antaranggota dalam organisasi mahasiswa pecinta alam,</li>
+                  <li>Meningkatkan keterlibatan anggota melalui kegiatan berbasis kolaborasi,</li>
+                  <li>Menghidupkan kembali program kerja yang relevan dan inovatif,</li>
+                  <li>Melakukan rekrutmen anggota baru secara masif dan strategis,</li>
+                  <li>Membangun budaya komunikasi yang transparan dan terbuka.</li>
                 </ul>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Kegiatan Section */}
-      <section id="kegiatan" className="py-16 bg-white">
+      <motion.section id="kegiatan" className="py-16 bg-white"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto px-4">
           <h2 className="font-heading text-3xl font-bold text-center mb-4">Kegiatan Terbaru</h2>
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
@@ -306,10 +342,15 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Pembelajaran Section */}
-      <section id="pembelajaran" className="py-16 bg-gray-50">
+      <motion.section id="pembelajaran" className="py-16 bg-gray-50"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto px-4">
           <h2 className="font-heading text-3xl font-bold text-center mb-4">Pembelajaran</h2>
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
@@ -328,10 +369,15 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Gallery Section */}
-      <section className="py-16 bg-white">
+      <motion.section className="py-16 bg-white"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto px-4">
           <h2 className="font-heading text-3xl font-bold text-center mb-4">Galeri Kegiatan</h2>
           <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
@@ -372,10 +418,15 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary text-white">
+      <motion.section className="py-16 bg-primary text-white"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-heading text-3xl font-bold mb-4">Bergabung dengan Mahapala Narotama</h2>
           <p className="text-lg mb-8 max-w-2xl mx-auto">
@@ -439,7 +490,7 @@ export default function HomePage() {
             </div>
           </DialogContent>
         </Dialog>
-      </section>
+      </motion.section>
 
       <BacksoundPlayer />
     </>
