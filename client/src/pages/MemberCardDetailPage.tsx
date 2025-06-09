@@ -96,13 +96,15 @@ export default function MemberCardDetailPage() {
       <Card className="p-6">
         <h2 className="text-2xl font-bold text-center mb-6">Verifikasi Kartu Anggota</h2>
         <div className="flex justify-end mb-4">
-          <button
-            onClick={handleDownloadCard}
-            className="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 disabled:opacity-60"
-            disabled={downloading}
-          >
-            {downloading ? "Mengunduh..." : "Unduh Kartu Anggota Untuk Print"}
-          </button>
+          {member.photoUrl && (
+            <button
+              onClick={handleDownloadCard}
+              className="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 disabled:opacity-60"
+              disabled={downloading}
+            >
+              {downloading ? "Mengunduh..." : "Unduh Kartu Anggota Untuk Print"}
+            </button>
+          )}
         </div>
         <div className="grid md:grid-cols-2 gap-8">
           {/* Bagian depan kartu */}
