@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
-import { collection, getDocs, addDoc, doc, deleteDoc, setDoc, getDoc, query, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, deleteDoc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { differenceInDays } from 'date-fns';
 
