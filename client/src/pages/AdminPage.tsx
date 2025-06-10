@@ -822,6 +822,7 @@ export default function AdminPage() {
                   <th>Lat</th>
                   <th>Lon</th>
                   <th>Status</th>
+                  <th>View Maps</th>
                 </tr>
               </thead>
               <tbody>
@@ -835,6 +836,21 @@ export default function AdminPage() {
                       <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${t.online ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}`}>
                         {t.online ? 'Online' : 'Offline'}
                       </span>
+                    </td>
+                    <td>
+                      {t.lat && t.lon ? (
+                        <a
+                          href={`https://www.google.com/maps?q=${t.lat},${t.lon}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline hover:text-blue-800"
+                          title="Lihat di Google Maps"
+                        >
+                          Lihat Maps
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
                     </td>
                   </tr>
                 ))}

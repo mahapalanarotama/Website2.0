@@ -9,15 +9,16 @@ const OFFLINE_URLS = [
   '/panduan-survival.pdf',
   '/ppgd.pdf',
   '/navigasi-darat.pdf',
-  // Tambahkan seluruh asset hasil build agar SPA bisa offline
-  '/assets/index-BGOrKOQc.js',
-  '/assets/index-UbqMtLHe.js',
+  // Semua asset hasil build dari server/public/assets
+  '/assets/backsound-BBcioZr7.mp3',
   '/assets/index-14VCckBn.css',
+  '/assets/index-BGOrKOQc.js',
   '/assets/index-BJ_22dnw.css',
   '/assets/index-bWXjXQwU.js',
   '/assets/index-CfFcCRyT.css',
   '/assets/index-CVdhqAZu.js',
   '/assets/index-iazrxU6o.css',
+  '/assets/index-UbqMtLHe.js',
   // Tambahkan asset lain jika ada
 ];
 
@@ -46,7 +47,8 @@ self.addEventListener('fetch', event => {
       if (event.request.mode === 'navigate') {
         return caches.match('/index.html');
       }
-      return fetch(event.request).catch(() => caches.match('/offline'));
+      // Fallback ke /offline jika asset tidak ditemukan
+      return caches.match('/offline');
     })
   );
 });
