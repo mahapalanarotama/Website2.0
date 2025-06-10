@@ -1,3 +1,4 @@
+import React from "react";
 import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,9 +16,17 @@ import MemberCardDetailPage from "@/pages/MemberCardDetailPage";
 import MemberCard3DPage from "@/pages/MemberCard3DPage";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useLeafCursor } from "@/components/CursorLeafTrail";
+import OfflineSurvivalApp from "@/pages/OfflineSurvivalApp";
 
 function App() {
   useLeafCursor();
+
+  React.useEffect(() => {
+    // Register service worker untuk PWA offline
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js');
+    }
+  }, []);
 
   return (
     <TooltipProvider>
@@ -25,6 +34,7 @@ function App() {
       <ScrollToTop />
       <Layout>
         <Switch>
+          <Route path="/offline" component={OfflineSurvivalApp} />
           <Route path="/" component={HomePage} />
           <Route path="/kegiatan" component={ActivitiesPage} />
           <Route path="/pembelajaran" component={LearningPage} />

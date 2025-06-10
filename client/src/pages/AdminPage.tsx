@@ -56,6 +56,7 @@ export default function AdminPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [gallerys, setGallery] = useState<GalleryItem[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [trackers, setTrackers] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('activities');
 
   // Dialog states
@@ -160,6 +161,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error fetching data:', error);
     }
+  };
+
+  // Fetch GPS tracker data
+  const fetchTrackers = async () => {
+    const snap = await getDocs(collection(db, "gps_tracker"));
+    setTrackers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   };
 
   // Notifikasi sederhana
@@ -348,6 +355,8 @@ export default function AdminPage() {
   useEffect(() => {
     if (activeTab === 'recycle') {
       fetchRecycleBin();
+    } else if (activeTab === 'tracker') {
+      fetchTrackers();
     }
   }, [activeTab]);
 
@@ -429,6 +438,9 @@ export default function AdminPage() {
           <TabsTrigger value="recycle" className="flex items-center gap-2">
             <Trash2 className="h-4 w-4" />
             Recycle Bin
+          </TabsTrigger>
+          <TabsTrigger value="tracker" className="flex items-center gap-2">
+            <span role="img" aria-label="GPS">📍</span> Tracker
           </TabsTrigger>
         </TabsList>
 
@@ -792,6 +804,41 @@ export default function AdminPage() {
               </Table>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="tracker">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">GPS Tracker</h2>
+            <Button onClick={fetchTrackers} variant="outline" size="sm">Refresh</Button>
+          </div>
+          <div className="overflow-x-auto bg-white rounded-lg shadow p-2">
+            <table className="w-full text-sm">
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Waktu</th>
+                  <th>Lat</th>
+                  <th>Lon</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {trackers.map((t) => (
+                  <tr key={t.id}>
+                    <td>{t.nama}</td>
+                    <td>{t.time}</td>
+                    <td>{t.lat}</td>
+                    <td>{t.lon}</td>
+                    <td>
+                      <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${t.online ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}`}>
+                        {t.online ? 'Online' : 'Offline'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </TabsContent>
       </Tabs>
 

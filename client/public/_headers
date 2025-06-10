@@ -1,2 +1,10 @@
 /sitemap.xml
   Content-Type: application/xml
+/offline
+  Cache-Control: public, max-age=0, must-revalidate
+/offline-survival-app*
+  Cache-Control: public, max-age=0, must-revalidate
+/service-worker.js
+  Cache-Control: public, max-age=0, must-revalidate
+/manifest.json
+  Cache-Control: public, max-age=0, must-revalidate
