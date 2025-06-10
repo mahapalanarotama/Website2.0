@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertMemberSchema, insertActivitySchema, insertLearningModuleSchema } from "@shared/schema";
 import { z } from "zod";
+import path from "path";
+import fs from "fs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes with /api prefix
@@ -128,6 +130,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid learning module data", errors: (error as z.ZodError).errors });
       }
       res.status(500).json({ message: "Failed to create learning module" });
+    }
+  });
+
+  // Serve sitemap.xml with correct content-type
+  app.get("/sitemap.xml", (req, res) => {
+    const sitemapPath = path.join(__dirname, "public", "sitemap.xml");
+    if (fs.existsSync(sitemapPath)) {
+      res.setHeader("Content-Type", "application/xml");
+      fs.createReadStream(sitemapPath).pipe(res);
+    } else {
+      res.status(404).send("Not found");
     }
   });
 
