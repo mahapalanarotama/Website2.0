@@ -24,19 +24,7 @@ const OFFLINE_URLS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      await cache.addAll(OFFLINE_URLS);
-      // Cache seluruh file di /assets/ secara dinamis
-      if ('caches' in self && 'fetch' in self) {
-        try {
-          const resp = await fetch('/assets-manifest.json');
-          if (resp.ok) {
-            const assets = await resp.json();
-            await cache.addAll(assets);
-          }
-        } catch (e) { /* abaikan jika manifest tidak ada */ }
-      }
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_URLS))
   );
   self.skipWaiting();
 });

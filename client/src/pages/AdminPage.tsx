@@ -58,7 +58,6 @@ export default function AdminPage() {
   const [gallerys, setGallery] = useState<GalleryItem[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [trackers, setTrackers] = useState<any[]>([]);
-  const [trackerHistory, setTrackerHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('activities');
 
   // Dialog states
@@ -72,11 +71,6 @@ export default function AdminPage() {
   const [recycleBin, setRecycleBin] = useState<any[]>([]);
   const [recycleLoading, setRecycleLoading] = useState(false);
   const [deleteChecked, setDeleteChecked] = useState(false);
-
-  // PIN input states
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
-  const [showHistory, setShowHistory] = useState(false);
 
   // Authentication effect
   useEffect(() => {
@@ -175,12 +169,6 @@ export default function AdminPage() {
     const snap = await getDocs(collection(db, "gps_tracker"));
     setTrackers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   };
-
-  // Fetch tracker history (tracker yang sudah dihapus)
-  async function fetchTrackerHistory() {
-    const snap = await getDocs(collection(db, 'gps_tracker_history'));
-    setTrackerHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-  }
 
   // Notifikasi sederhana
   const notify = (msg: string) => window.alert(msg);
@@ -868,58 +856,6 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
-          </div>
-          {/* Riwayat Tracker */}
-          <div className="mt-8">
-            <h3 className="font-semibold mb-2">Riwayat Tracker (Tracker yang sudah dihapus)</h3>
-            {!showHistory ? (
-              <div className="flex gap-2 items-center">
-                <input
-                  type="password"
-                  placeholder="Masukkan PIN"
-                  value={pinInput}
-                  onChange={e => setPinInput(e.target.value)}
-                  className="border rounded px-2 py-1 text-sm"
-                />
-                <Button size="sm" onClick={() => {
-                  if (pinInput === '2408') {
-                    setShowHistory(true);
-                    setPinError('');
-                    fetchTrackerHistory();
-                  } else {
-                    setPinError('PIN salah');
-                  }
-                }}>Lihat Riwayat</Button>
-                {pinError && <span className="text-red-500 text-xs ml-2">{pinError}</span>}
-              </div>
-            ) : (
-              <div className="overflow-x-auto bg-gray-50 rounded-lg shadow p-2 mt-2">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr>
-                      <th>Nama</th>
-                      <th>Waktu</th>
-                      <th>Lat</th>
-                      <th>Lon</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {trackerHistory.length === 0 ? (
-                      <tr><td colSpan={5} className="text-center text-gray-400">Belum ada riwayat tracker terhapus.</td></tr>
-                    ) : trackerHistory.map((t) => (
-                      <tr key={t.id}>
-                        <td>{t.nama}</td>
-                        <td>{t.time}</td>
-                        <td>{t.lat}</td>
-                        <td>{t.lon}</td>
-                        <td>{t.online ? 'Online' : 'Offline'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </div>
         </TabsContent>
       </Tabs>
