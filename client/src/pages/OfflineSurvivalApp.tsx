@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 // Helper untuk download buku panduan (dummy PDF)
@@ -154,7 +154,7 @@ function PelacakGPS() {
   });
   const [inputNama, setInputNama] = useState('');
   const [nama, setNama] = useState(() => localStorage.getItem('gps_nama') || '');
-  let watchId: any = null;
+  let watchId: any = React.useRef(null);
 
   // Simpan tracker ke localStorage (array)
   function saveTrackerLocal(data: any) {
@@ -180,15 +180,30 @@ function PelacakGPS() {
     if (success) localStorage.removeItem("gps_tracker");
   }
 
-  // Event listener: saat online, sync otomatis
-  React.useEffect(() => {
-    window.addEventListener("online", syncTrackerToFirestore);
-    // Sync sekali saat komponen mount jika online
-    if (navigator.onLine) syncTrackerToFirestore();
-    return () => {
-      window.removeEventListener("online", syncTrackerToFirestore);
-    };
-  }, []);
+  // Hapus semua data tracker user ini di Firestore
+  async function deleteUserTrackFromFirestore() {
+    if (!nama) return;
+    const q = query(collection(db, "gps_tracker"), where("nama", "==", nama));
+    const snap = await getDocs(q);
+    for (const docu of snap.docs) {
+      await deleteDoc(docu.ref);
+    }
+  }
+
+  function stopTracking() {
+    setTracking(false);
+    if (watchId.current) {
+      navigator.geolocation.clearWatch(watchId.current);
+      watchId.current = null;
+    }
+    // Hapus data lokal
+    setPositions([]);
+    localStorage.removeItem("gps_track");
+    localStorage.removeItem("gps_tracker");
+    // Hapus data di Firestore
+    deleteUserTrackFromFirestore();
+    setStatus("Pelacakan dimatikan dan data dihapus.");
+  }
 
   function startTracking() {
     if (!nama) return;
@@ -198,7 +213,7 @@ function PelacakGPS() {
     }
     setTracking(true);
     setStatus("Pelacakan aktif...");
-    watchId = navigator.geolocation.watchPosition(
+    watchId.current = navigator.geolocation.watchPosition(
       pos => {
         const data = {
           lat: pos.coords.latitude,
@@ -220,7 +235,7 @@ function PelacakGPS() {
     );
   }
   React.useEffect(() => {
-    return () => { if (watchId) navigator.geolocation.clearWatch(watchId); };
+    return () => { if (watchId.current) navigator.geolocation.clearWatch(watchId.current); };
   }, []);
   function resetTrack() {
     setPositions([]);
@@ -263,6 +278,7 @@ function PelacakGPS() {
       ) : null}
       <button className="btn-nav mb-4" onClick={startTracking} disabled={tracking || !nama}>Aktifkan Pelacakan</button>
       <button className="btn-nav mb-4 ml-2" onClick={resetTrack}>Reset Data Lokasi</button>
+      <button className="btn-nav mb-4 ml-2 bg-red-600 hover:bg-red-700" onClick={stopTracking} disabled={!tracking}>Matikan GPS</button>
       <div className="mb-2 text-green-700 text-sm">{status}</div>
       <div className="overflow-x-auto bg-green-100 rounded-lg p-2 text-xs">
         <table className="w-full">
