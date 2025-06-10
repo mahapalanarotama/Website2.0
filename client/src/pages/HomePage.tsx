@@ -140,12 +140,12 @@ export default function HomePage() {
       <BirthdayCountdownHome open={showBirthdayPopup} onClose={handleCloseBirthdayPopup} />
       {/* Hero Section */}
       <motion.section
-        className="py-12 md:py-20 bg-white"
+        className="py-8 sm:py-16 bg-white"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-2 sm:px-4">
           <motion.div
             className="text-center mb-12"
             initial={{ opacity: 0, y: 30 }}
@@ -243,13 +243,13 @@ export default function HomePage() {
       </motion.section>
 
       {/* Info Organisasi Section */}
-      <motion.section id="info-organisasi" className="py-16 bg-gray-50"
+      <motion.section id="info-organisasi" className="py-8 sm:py-16 bg-gray-50"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-2 sm:px-4">
           <h2 className="font-heading text-3xl font-bold text-center mb-12">Informasi Organisasi</h2>
           
           <div className="grid md:grid-cols-2 gap-8">
@@ -291,13 +291,13 @@ export default function HomePage() {
       </motion.section>
 
       {/* Kegiatan Section */}
-      <motion.section id="kegiatan" className="py-16 bg-white"
+      <motion.section id="kegiatan" className="py-8 sm:py-16 bg-white"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-2 sm:px-4">
           <h2 className="font-heading text-3xl font-bold text-center mb-4">Kegiatan Terbaru</h2>
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
             Dokumentasi berbagai kegiatan yang telah dilaksanakan oleh Mahapala Narotama dalam menjalankan misi pelestarian dan eksplorasi alam.
@@ -345,13 +345,13 @@ export default function HomePage() {
       </motion.section>
 
       {/* Pembelajaran Section */}
-      <motion.section id="pembelajaran" className="py-16 bg-gray-50"
+      <motion.section id="pembelajaran" className="py-8 sm:py-16 bg-gray-50"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-2 sm:px-4">
           <h2 className="font-heading text-3xl font-bold text-center mb-4">Pembelajaran</h2>
           <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
             Materi dan panduan kegiatan alam bebas yang dapat diakses oleh seluruh anggota Mahapala Narotama.
@@ -372,13 +372,13 @@ export default function HomePage() {
       </motion.section>
 
       {/* Gallery Section */}
-      <motion.section className="py-16 bg-white"
+      <motion.section className="py-8 sm:py-16 bg-white"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-2 sm:px-4">
           <h2 className="font-heading text-3xl font-bold text-center mb-4">Galeri Kegiatan</h2>
           <p className="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
             Sekilas dokumentasi kegiatan yang telah dilaksanakan oleh anggota Mahapala Narotama
@@ -421,13 +421,13 @@ export default function HomePage() {
       </motion.section>
 
       {/* CTA Section */}
-      <motion.section className="py-16 bg-primary text-white"
+      <motion.section className="py-8 sm:py-16 bg-primary text-white"
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.7 }}
       >
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-2 sm:px-4 text-center">
           <h2 className="font-heading text-3xl font-bold mb-4">Bergabung dengan Mahapala Narotama</h2>
           <p className="text-lg mb-8 max-w-2xl mx-auto">
             Mari bergabung dalam misi kami untuk melestarikan alam dan mengeksplorasi keindahan Indonesia. Kami membuka pendaftaran anggota baru setiap awal tahun akademik.

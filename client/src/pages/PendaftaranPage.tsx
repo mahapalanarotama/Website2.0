@@ -31,21 +31,21 @@ export default function PendaftaranPage() {
 
   return (
     <>
-      <section className="py-12 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="font-heading text-3xl md:text-4xl font-bold text-gray-800 mb-4 relative inline-block">
+      <section className="py-8 sm:py-12 bg-white">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-3 sm:mb-4 relative inline-block">
               Informasi Pendaftaran Anggota Baru
               <span className="absolute -bottom-2 left-0 w-full h-1 bg-primary rounded-full"></span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto mt-6">
+            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto mt-4 sm:mt-6">
               Bergabunglah dengan Mahapala Narotama dan jadilah bagian dari komunitas yang peduli terhadap pelestarian lingkungan dan eksplorasi alam.
             </p>
           </div>
 
           {/* Tab Navigation */}
-          <div className="mb-8 flex overflow-x-auto scrollbar-hide">
-            <div className="max-w-4xl mx-auto flex space-x-1 p-1 bg-gray-100 rounded-lg">
+          <div className="mb-6 sm:mb-8 flex overflow-x-auto scrollbar-hide">
+            <div className="max-w-4xl mx-auto flex space-x-1 p-1 bg-gray-100 rounded-lg w-full">
               <Button 
                 variant={activeTab === "general" ? "default" : "ghost"}
                 onClick={() => setActiveTab("general")}

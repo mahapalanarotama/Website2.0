@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { getMemberByField } from "@/hooks/use-members";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
 
 interface MemberDetail {
   fullName: string;
@@ -45,11 +47,12 @@ export default function MemberCardDetailPage() {
     });
   }, [type, input]);
 
-  // Fungsi untuk mengunduh kartu anggota (depan & belakang)
+  // Fungsi download kartu anggota (depan & belakang)
   const handleDownloadCard = async () => {
+    if (!member?.photoUrl) return;
     setDownloading(true);
-    // Download bagian depan dari photoUrl
-    if (member?.photoUrl) {
+    try {
+      // Download depan
       const response = await fetch(member.photoUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -60,19 +63,21 @@ export default function MemberCardDetailPage() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      // Download belakang
+      const backUrl = "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/back.png";
+      const responseBack = await fetch(backUrl);
+      const blobBack = await responseBack.blob();
+      const urlBack = window.URL.createObjectURL(blobBack);
+      const linkBack = document.createElement("a");
+      linkBack.href = urlBack;
+      linkBack.download = `kartu-anggota-${member.registrationNumber || member.fieldName}-belakang.png`;
+      document.body.appendChild(linkBack);
+      linkBack.click();
+      document.body.removeChild(linkBack);
+      window.URL.revokeObjectURL(urlBack);
+    } catch (e) {
+      alert("Gagal mengunduh kartu. Silakan coba lagi.");
     }
-    // Download bagian belakang dari URL statis
-    const backUrl = "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/back.png";
-    const responseBack = await fetch(backUrl);
-    const blobBack = await responseBack.blob();
-    const urlBack = window.URL.createObjectURL(blobBack);
-    const linkBack = document.createElement("a");
-    linkBack.href = urlBack;
-    linkBack.download = `kartu-anggota-${member?.registrationNumber || member?.fieldName}-belakang.png`;
-    document.body.appendChild(linkBack);
-    linkBack.click();
-    document.body.removeChild(linkBack);
-    window.URL.revokeObjectURL(urlBack);
     setDownloading(false);
   };
 
@@ -92,23 +97,25 @@ export default function MemberCardDetailPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
-      <Card className="p-6">
-        <h2 className="text-2xl font-bold text-center mb-6">Verifikasi Kartu Anggota</h2>
-        <div className="flex justify-end mb-4">
-          {member.photoUrl && (
-            <button
+    <div className="max-w-5xl mx-auto p-2 sm:p-4">
+      <Card className="p-2 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Verifikasi Kartu Anggota</h2>
+        {/* Tombol unduh tampil jika ada foto KTA */}
+        {member.photoUrl && (
+          <div className="flex justify-center mb-6">
+            <Button
+              className="gap-2 bg-primary text-white"
               onClick={handleDownloadCard}
-              className="bg-primary text-white px-4 py-2 rounded shadow hover:bg-primary/90 disabled:opacity-60"
               disabled={downloading}
             >
+              <Printer className="w-4 h-4" />
               {downloading ? "Mengunduh..." : "Unduh Kartu Anggota Untuk Print"}
-            </button>
-          )}
-        </div>
-        <div className="grid md:grid-cols-2 gap-8">
+            </Button>
+          </div>
+        )}
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 mb-4 sm:mb-8">
           {/* Bagian depan kartu */}
-          <div className="flex flex-col items-center justify-center w-full relative" id="member-card-front">
+          <div className="flex flex-col items-center justify-center w-full sm:w-1/2 relative" id="member-card-front">
             {member.statusMahasiswa === 'Aktif' && (
               <motion.span
                 initial={{ opacity: 0.7, textShadow: '0 0 0px #22c55e' }}
@@ -141,11 +148,10 @@ export default function MemberCardDetailPage() {
               </div>
             )}
           </div>
-          {/* Bagian belakang kartu tidak ditampilkan di halaman, hanya didownload */}
           {/* Detail tabel */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Detail Anggota</h3>
-            <div className="divide-y">
+          <div className="w-full sm:w-1/2">
+            <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Detail Anggota</h3>
+            <div className="divide-y text-xs sm:text-base">
               <div className="flex justify-between py-2"><span className="font-medium">Nama Lengkap</span><span>{member.fullName}</span></div>
               <div className="flex justify-between py-2"><span className="font-medium">Nomor Registrasi</span><span>{member.registrationNumber}</span></div>
               <div className="flex justify-between py-2"><span className="font-medium">Nama Lapangan</span><span>{member.fieldName}</span></div>
@@ -155,7 +161,7 @@ export default function MemberCardDetailPage() {
             </div>
           </div>
         </div>
-        <div className="flex justify-between items-center mt-8 text-xs text-gray-500">
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 text-xs text-gray-500 gap-2">
           <span>© {new Date().getFullYear()} Mahapala Narotama</span>
           <span>www.mahapalanarotama.web.id</span>
         </div>

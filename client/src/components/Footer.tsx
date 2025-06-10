@@ -16,7 +16,7 @@ export function Footer() {
             </p>
             <div className="flex space-x-4">
               <a 
-                href="https://instagram.com" 
+                href="https://www.instagram.com/mahapalanarotama?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition"
@@ -25,7 +25,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a 
-                href="https://youtube.com" 
+                href="https://www.youtube.com/@mahapalanarotama1216" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition"

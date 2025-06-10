@@ -238,10 +238,10 @@ export default function MemberCardPage() {
 
   return (
     <>
-      <section id="kartu-anggota" className="py-12 bg-white">
-        <div className="container mx-auto px-4">
+      <section id="kartu-anggota" className="py-8 sm:py-12 bg-white">
+        <div className="container mx-auto px-2 sm:px-4">
           {/* DASHBOARD */}
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-4 mb-10 text-center">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4 mb-6 sm:mb-10 text-center">
             <div className="bg-green-50 rounded-lg p-4 flex flex-col items-center justify-center text-center shadow h-full relative">
               {/* Icon countdown di pojok kanan atas */}
               <button
@@ -314,7 +314,7 @@ export default function MemberCardPage() {
           {showSearch ? (
             <>
               {/* Search Form */}
-              <div className="max-w-3xl mx-auto mb-10 bg-gray-50 p-6 rounded-lg shadow-md">
+              <div className="max-w-3xl mx-auto mb-8 sm:mb-10 bg-gray-50 p-3 sm:p-6 rounded-lg shadow-md">
                 <div className="mb-6">
                   <p className="text-gray-700 mb-4">Masukkan informasi anggota untuk pencarian:</p>
                   <div className="flex flex-col md:flex-row gap-4">
@@ -370,7 +370,7 @@ export default function MemberCardPage() {
                       </div>
                     </div>
                   ) : filteredMembers && filteredMembers.length > 0 ? (
-                    <Table>
+                    <Table className="min-w-[600px] text-xs sm:text-sm md:text-base">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Nama Lengkap</TableHead>
@@ -441,21 +441,12 @@ export default function MemberCardPage() {
               
               {/* Dialog for ID Card photo */}
                 <Dialog open={photoDialog.open} onOpenChange={open => setPhotoDialog(v => ({ ...v, open }))}>
-                <DialogContent className="flex flex-col items-center">
+                <DialogContent className="flex flex-col items-center max-w-full p-2 sm:p-6">
                   {photoDialog.photoUrl && (
                   <>
                   <div
-                  className="relative overflow-hidden rounded border mt-5 mb-4 bg-white"
-                  style={{
-                    width: 480,
-                    height: 300,
-                    maxWidth: "90vw",
-                    maxHeight: "70vh",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "zoom-in"
-                  }}
+                  className="relative overflow-hidden rounded border mt-3 mb-4 bg-white w-full max-w-[480px] h-[220px] sm:h-[300px] flex items-center justify-center cursor-zoom-in"
+                  style={{ maxWidth: "95vw", maxHeight: "70vh" }}
                   tabIndex={0}
                   onClick={e => {
                     // Open zoom modal
@@ -505,15 +496,15 @@ export default function MemberCardPage() {
                   {photoDialog.zoom && (
                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={() => setPhotoDialog(v => ({ ...v, zoom: false }))}>
                     <div
-                      className="relative bg-white rounded-lg shadow-lg p-4"
-                      style={{ maxWidth: "95vw", maxHeight: "90vh" }}
+                      className="relative bg-white rounded-lg shadow-lg p-2 sm:p-4"
+                      style={{ maxWidth: "98vw", maxHeight: "95vh" }}
                       onClick={e => e.stopPropagation()}
                     >
                       <img
                         src={photoDialog.photoUrl}
                         alt={photoDialog.fullName}
                         className="object-contain"
-                        style={{ maxHeight: "80vh", maxWidth: "90vw" }}
+                        style={{ maxHeight: "80vh", maxWidth: "95vw" }}
                       />
                       <Button
                         variant="outline"

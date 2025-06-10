@@ -9,20 +9,26 @@ function Card3D({ frontUrl, backUrl }: { frontUrl: string; backUrl: string }) {
   const textures = useTexture([frontUrl, backUrl]);
   return (
     <group>
+      {/* 3D card body with slight thickness */}
       <mesh>
-        <boxGeometry args={[3.4, 2.2, 0.05]} />
+        <boxGeometry args={[3.4, 2.2, 0.06]} />
         {/* 0: right, 1: left, 2: top, 3: bottom, 4: front, 5: back */}
-        <meshStandardMaterial color="#e5e7eb" />
-        <meshStandardMaterial color="#e5e7eb" />
-        <meshStandardMaterial color="#e5e7eb" />
-        <meshStandardMaterial color="#e5e7eb" />
-        <meshStandardMaterial map={textures[0]} />
-        <meshStandardMaterial map={textures[1]} />
+        <meshStandardMaterial attach="material-0" color="#e5e7eb" />
+        <meshStandardMaterial attach="material-1" color="#e5e7eb" />
+        <meshStandardMaterial attach="material-2" color="#e5e7eb" />
+        <meshStandardMaterial attach="material-3" color="#e5e7eb" />
+        <meshStandardMaterial attach="material-4" map={textures[0]} />
+        <meshStandardMaterial attach="material-5" map={textures[1]} />
       </mesh>
-      {/* Overlay plane di sisi depan, ukurannya sama persis dengan box */}
-      <mesh position={[0, 0, 0.0255]}>
+      {/* Overlay plane for front */}
+      <mesh position={[0, 0, 0.031]}> {/* slightly above front face */}
         <planeGeometry args={[3.4, 2.2]} />
         <meshBasicMaterial map={textures[0]} transparent />
+      </mesh>
+      {/* Overlay plane for back */}
+      <mesh position={[0, 0, -0.031]} rotation={[0, Math.PI, 0]}> {/* slightly above back face */}
+        <planeGeometry args={[3.4, 2.2]} />
+        <meshBasicMaterial map={textures[1]} transparent />
       </mesh>
     </group>
   );
@@ -95,11 +101,11 @@ export default function MemberCard3DPage() {
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
-      <div className="flex items-center justify-between p-4 bg-black/70">
-        <span className="text-white font-bold text-lg">3D Kartu Anggota: {params.fullName}</span>
-        <div className="flex gap-2">
+      <div className="sticky top-0 flex flex-col sm:flex-row items-center justify-between gap-2 p-3 sm:p-4 bg-black/70 z-10 w-full">
+        <span className="text-white font-bold text-base sm:text-lg text-center w-full sm:w-auto truncate">3D Kartu Anggota: {params.fullName}</span>
+        <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
           <Button
-            className="bg-primary text-white"
+            className="bg-primary text-white w-full sm:w-auto"
             onClick={handleDownloadCard}
             disabled={downloading}
           >
@@ -107,18 +113,20 @@ export default function MemberCard3DPage() {
             {downloading ? "Mengunduh..." : "Unduh Kartu Anggota Untuk Print"}
           </Button>
           <button
-            className="text-white bg-gray-800 hover:bg-gray-700 rounded px-4 py-2"
+            className="text-white bg-gray-800 hover:bg-gray-700 rounded px-4 py-2 w-full sm:w-auto"
             onClick={() => setLocation('/kartu-anggota')}
           >Tutup</button>
         </div>
       </div>
-      <div className="flex-1">
-        <Canvas camera={{ position: [0, 0, 6], fov: 50 }} style={{ width: '100vw', height: '100vh' }}>
-          <ambientLight intensity={0.7} />
-          <directionalLight position={[5, 5, 5]} intensity={0.7} />
-          <Card3DWrapper frontUrl={params.frontUrl} backUrl={params.backUrl} />
-          <OrbitControls enablePan={false} />
-        </Canvas>
+      <div className="flex-1 min-h-0">
+        <div className="w-full h-[60vh] sm:h-full">
+          <Canvas camera={{ position: [0, 0, 6], fov: 50 }} style={{ width: '100vw', height: '100%', minHeight: 320, maxHeight: '100vh', background: 'black' }}>
+            <ambientLight intensity={0.7} />
+            <directionalLight position={[5, 5, 5]} intensity={0.7} />
+            <Card3DWrapper frontUrl={params.frontUrl} backUrl={params.backUrl} />
+            <OrbitControls enablePan={false} />
+          </Canvas>
+        </div>
       </div>
     </div>
   );
