@@ -180,12 +180,14 @@ function PelacakGPS() {
     if (success) localStorage.removeItem("gps_tracker");
   }
 
-  // Hapus semua data tracker user ini di Firestore
+  // Hapus semua data tracker user ini di Firestore dan simpan ke history
   async function deleteUserTrackFromFirestore() {
     if (!nama) return;
     const q = query(collection(db, "gps_tracker"), where("nama", "==", nama));
     const snap = await getDocs(q);
     for (const docu of snap.docs) {
+      // Simpan ke koleksi history sebelum hapus
+      await addDoc(collection(db, "gps_tracker_history"), docu.data());
       await deleteDoc(docu.ref);
     }
   }
