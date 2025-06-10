@@ -3,15 +3,15 @@ const CACHE_NAME = 'offline-survival-mahapala-v1';
 const OFFLINE_URLS = [
   '/',
   '/offline',
-  '/offline/ppgd',
-  '/offline/navigasi',
-  '/offline/checklist',
-  '/offline/gps',
-  '/favicon.ico',
-  '/android-chrome-192x192.png',
-  '/android-chrome-512x512.png',
-  '/manifest.json',
   '/index.html',
+  '/offline-survival-app.js', // pastikan bundle utama offline
+  '/src/pages/OfflineSurvivalApp.tsx', // untuk dev, abaikan di prod
+  '/favicon.ico',
+  '/manifest.json',
+  '/navigasi-darat.pdf',
+  '/panduan-survival.pdf',
+  '/ppgd.pdf',
+  // tambahkan asset penting lain jika perlu
 ];
 
 self.addEventListener('install', event => {
@@ -34,6 +34,10 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
     caches.match(event.request).then(response => {
+      // Jika request ke /offline, fallback ke /offline (SPA)
+      if (!response && event.request.url.endsWith('/offline')) {
+        return caches.match('/offline');
+      }
       return response || fetch(event.request).catch(() => caches.match('/offline'));
     })
   );
