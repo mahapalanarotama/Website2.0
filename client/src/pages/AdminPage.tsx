@@ -38,6 +38,7 @@ import {   Calendar,
   Image as ImageIcon,
   ImagePlus,
   LogOut,
+  MapPin,
   PencilLine,
   Plus,
   Trash2,
@@ -439,9 +440,10 @@ export default function AdminPage() {
             <Trash2 className="h-4 w-4" />
             Recycle Bin
           </TabsTrigger>
-          <TabsTrigger value="tracker" className="flex items-center gap-2">
-            <span role="img" aria-label="GPS">📍</span> Tracker
-          </TabsTrigger>
+            <TabsTrigger value="tracker" className="flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            Tracker
+            </TabsTrigger>
         </TabsList>
 
         <TabsContent value="activities">
