@@ -4,21 +4,14 @@ const OFFLINE_URLS = [
   '/',
   '/offline',
   '/index.html',
-  '/manifest.json',
+  '/offline-survival-app.js', // pastikan bundle utama offline
+  '/src/pages/OfflineSurvivalApp.tsx', // untuk dev, abaikan di prod
   '/favicon.ico',
+  '/manifest.json',
+  '/navigasi-darat.pdf',
   '/panduan-survival.pdf',
   '/ppgd.pdf',
-  '/navigasi-darat.pdf',
-  // Tambahkan seluruh asset hasil build agar SPA bisa offline
-  '/assets/index-BGOrKOQc.js',
-  '/assets/index-UbqMtLHe.js',
-  '/assets/index-14VCckBn.css',
-  '/assets/index-BJ_22dnw.css',
-  '/assets/index-bWXjXQwU.js',
-  '/assets/index-CfFcCRyT.css',
-  '/assets/index-CVdhqAZu.js',
-  '/assets/index-iazrxU6o.css',
-  // Tambahkan asset lain jika ada
+  // tambahkan asset penting lain jika perlu
 ];
 
 self.addEventListener('install', event => {
@@ -41,12 +34,11 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
     caches.match(event.request).then(response => {
-      if (response) return response;
-      // Fallback ke index.html untuk SPA jika mode navigate
-      if (event.request.mode === 'navigate') {
-        return caches.match('/index.html');
+      // Jika request ke /offline, fallback ke /offline (SPA)
+      if (!response && event.request.url.endsWith('/offline')) {
+        return caches.match('/offline');
       }
-      return fetch(event.request).catch(() => caches.match('/offline'));
+      return response || fetch(event.request).catch(() => caches.match('/offline'));
     })
   );
 });
