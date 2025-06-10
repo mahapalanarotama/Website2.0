@@ -4,19 +4,39 @@ const OFFLINE_URLS = [
   '/',
   '/offline',
   '/index.html',
-  '/offline-survival-app.js', // pastikan bundle utama offline
-  '/src/pages/OfflineSurvivalApp.tsx', // untuk dev, abaikan di prod
-  '/favicon.ico',
   '/manifest.json',
-  '/navigasi-darat.pdf',
+  '/favicon.ico',
   '/panduan-survival.pdf',
   '/ppgd.pdf',
-  // tambahkan asset penting lain jika perlu
+  '/navigasi-darat.pdf',
+  // Semua asset hasil build dari server/public/assets
+  '/assets/backsound-BBcioZr7.mp3',
+  '/assets/index-14VCckBn.css',
+  '/assets/index-BGOrKOQc.js',
+  '/assets/index-BJ_22dnw.css',
+  '/assets/index-bWXjXQwU.js',
+  '/assets/index-CfFcCRyT.css',
+  '/assets/index-CVdhqAZu.js',
+  '/assets/index-iazrxU6o.css',
+  '/assets/index-UbqMtLHe.js',
+  // Tambahkan asset lain jika ada
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(OFFLINE_URLS))
+    caches.open(CACHE_NAME).then(async cache => {
+      await cache.addAll(OFFLINE_URLS);
+      // Cache seluruh file di /assets/ secara dinamis
+      if ('caches' in self && 'fetch' in self) {
+        try {
+          const resp = await fetch('/assets-manifest.json');
+          if (resp.ok) {
+            const assets = await resp.json();
+            await cache.addAll(assets);
+          }
+        } catch (e) { /* abaikan jika manifest tidak ada */ }
+      }
+    })
   );
   self.skipWaiting();
 });
@@ -34,11 +54,13 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
     caches.match(event.request).then(response => {
-      // Jika request ke /offline, fallback ke /offline (SPA)
-      if (!response && event.request.url.endsWith('/offline')) {
-        return caches.match('/offline');
+      if (response) return response;
+      // Fallback ke index.html untuk SPA jika mode navigate
+      if (event.request.mode === 'navigate') {
+        return caches.match('/index.html');
       }
-      return response || fetch(event.request).catch(() => caches.match('/offline'));
+      // Fallback ke /offline jika asset tidak ditemukan
+      return caches.match('/offline');
     })
   );
 });
