@@ -9,3 +9,23 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </QueryClientProvider>
 );
+
+// Service worker auto-reload on update
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js').then(reg => {
+    reg.onupdatefound = () => {
+      const installingWorker = reg.installing;
+      if (installingWorker) {
+        installingWorker.onstatechange = () => {
+          if (
+            installingWorker.state === 'installed' &&
+            navigator.serviceWorker.controller
+          ) {
+            // Service worker baru terinstall, reload otomatis
+            window.location.reload();
+          }
+        };
+      }
+    };
+  });
+}

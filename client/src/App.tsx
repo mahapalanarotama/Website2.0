@@ -25,7 +25,20 @@ function App() {
   React.useEffect(() => {
     // Register service worker untuk PWA offline
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/service-worker.js');
+      navigator.serviceWorker.register('/service-worker.js').then(reg => {
+        // Reload otomatis jika service worker update
+        reg.onupdatefound = () => {
+          const newWorker = reg.installing;
+          if (newWorker) {
+            newWorker.onstatechange = () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Versi baru tersedia, reload otomatis
+                window.location.reload();
+              }
+            };
+          }
+        };
+      });
     }
   }, []);
 

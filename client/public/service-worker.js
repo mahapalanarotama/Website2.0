@@ -1,5 +1,6 @@
 // Service Worker PWA Offline Survival Mahapala Narotama
-const CACHE_NAME = 'offline-survival-mahapala-v1';
+const CACHE_VERSION = Date.now(); // Ganti setiap build/deploy
+const CACHE_NAME = 'offline-survival-mahapala-v' + CACHE_VERSION;
 const OFFLINE_URLS = [
   '/',
   '/offline',
@@ -36,6 +37,10 @@ self.addEventListener('activate', event => {
     ))
   );
   self.clients.claim();
+  // Paksa reload semua client agar cache sinkron
+  self.clients.matchAll({ type: 'window' }).then(clients => {
+    clients.forEach(client => client.navigate(client.url));
+  });
 });
 
 self.addEventListener('fetch', event => {
