@@ -43,12 +43,12 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(response => {
       if (response) return response;
-      // Fallback ke index.html untuk SPA jika mode navigate
+      // Fallback ke index.html hanya untuk SPA (mode navigate)
       if (event.request.mode === 'navigate') {
         return caches.match('/index.html');
       }
-      // Fallback ke /offline jika asset tidak ditemukan
-      return caches.match('/offline');
+      // Untuk asset (js/css/png/dll), jangan fallback ke HTML, return error
+      return Response.error();
     })
   );
 });

@@ -25,14 +25,16 @@ export function Layout({ children }: LayoutProps) {
       // If cookies are blocked, the test cookie won't be set
       const cookies = document.cookie;
       if (!cookies.includes('thirdPartyTest')) {
+        // Hanya tampilkan warning non-intrusive, tidak menyebabkan error/blank
         toast({
           title: "Cookie Settings",
-          description: "Third-party cookies are blocked. Some features may not work properly. Please adjust your browser settings if needed.",
-          duration: 10000,
+          description: "Beberapa fitur mungkin tidak optimal karena cookie pihak ketiga diblokir. Namun, aplikasi tetap dapat digunakan.",
+          duration: 7000,
         });
       }
     } catch (error) {
-      console.error('Error checking third-party cookies:', error);
+      // Jangan menyebabkan error JS, hanya log
+      console.warn('Gagal cek cookie pihak ketiga:', error);
     }
   };
 
