@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { collection, addDoc, getDocs, query, where, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { Helmet } from "react-helmet";
 
 // Helper untuk download buku panduan (dummy PDF)
 function DownloadPanduan({ url, label }: { url: string; label: string }) {
@@ -306,48 +307,58 @@ function PelacakGPS() {
 export default function OfflineSurvivalApp() {
   const [tab, setTab] = useState('survival');
   return (
-    <div className="min-h-screen bg-green-900 text-white flex flex-col font-sans">
-      <header className="bg-green-800 py-4 px-4 text-center shadow-lg">
-        <h1 className="text-2xl font-bold tracking-wide">Offline Survival Mahapala Narotama</h1>
-        <p className="text-sm text-green-200">Panduan survival, PPGD, navigasi, checklist, dan pelacak GPS. Bisa diakses offline!</p>
-      </header>
-      <nav className="flex flex-wrap justify-center gap-3 bg-green-950 py-3 px-2 sticky top-0 z-10">
-        <button className={`btn-nav${tab==='survival'?' bg-green-700':''}`} onClick={()=>setTab('survival')}>Panduan Survival</button>
-        <button className={`btn-nav${tab==='ppgd'?' bg-green-700':''}`} onClick={()=>setTab('ppgd')}>PPGD</button>
-        <button className={`btn-nav${tab==='navigasi'?' bg-green-700':''}`} onClick={()=>setTab('navigasi')}>Navigasi Darat</button>
-        <button className={`btn-nav${tab==='checklist'?' bg-green-700':''}`} onClick={()=>setTab('checklist')}>Checklist Survival</button>
-        <button className={`btn-nav${tab==='gps'?' bg-green-700':''}`} onClick={()=>setTab('gps')}>Pelacak GPS</button>
-      </nav>
-      <main className="flex-1 w-full max-w-2xl mx-auto p-4">
-        {tab==='survival' && <PanduanSurvival />}
-        {tab==='ppgd' && <PPGD />}
-        {tab==='navigasi' && <NavigasiDarat />}
-        {tab==='checklist' && <ChecklistSurvival />}
-        {tab==='gps' && <PelacakGPS />}
-      </main>
-      <footer className="text-center text-green-200 py-3 text-xs bg-green-950">© {new Date().getFullYear()} Mahapala Narotama</footer>
-      <style>{`
-        body { background: #14532d; }
-        .btn-nav {
-          background: #166534;
-          color: #fff;
-          font-size: 1.1rem;
-          border-radius: 0.5rem;
-          padding: 0.7rem 1.2rem;
-          font-weight: bold;
-          box-shadow: 0 2px 8px #0002;
-          border: none;
-          margin: 0.2rem;
-          transition: background 0.2s;
-        }
-        .btn-nav:active, .btn-nav:hover, .btn-nav.bg-green-700 {
-          background: #22c55e;
-          color: #14532d;
-        }
-        input[type=checkbox] {
-          width: 1.3em; height: 1.3em;
-        }
-      `}</style>
-    </div>
+    <>
+      <Helmet>
+        <title>Offline Survival | Mahapala Narotama</title>
+        <meta property="og:title" content="Offline Survival | Mahapala Narotama" />
+        <meta property="og:description" content="Akses panduan survival, navigasi darat, PPGD, checklist, dan pelacak GPS secara offline bersama Mahapala Narotama." />
+        <meta property="og:image" content="/favicon.ico" />
+        <meta name="twitter:image" content="/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" />
+      </Helmet>
+      <div className="min-h-screen bg-green-900 text-white flex flex-col font-sans">
+        <header className="bg-green-800 py-4 px-4 text-center shadow-lg">
+          <h1 className="text-2xl font-bold tracking-wide">Offline Survival Mahapala Narotama</h1>
+          <p className="text-sm text-green-200">Panduan survival, PPGD, navigasi, checklist, dan pelacak GPS. Bisa diakses offline!</p>
+        </header>
+        <nav className="flex flex-wrap justify-center gap-3 bg-green-950 py-3 px-2 sticky top-0 z-10">
+          <button className={`btn-nav${tab==='survival'?' bg-green-700':''}`} onClick={()=>setTab('survival')}>Panduan Survival</button>
+          <button className={`btn-nav${tab==='ppgd'?' bg-green-700':''}`} onClick={()=>setTab('ppgd')}>PPGD</button>
+          <button className={`btn-nav${tab==='navigasi'?' bg-green-700':''}`} onClick={()=>setTab('navigasi')}>Navigasi Darat</button>
+          <button className={`btn-nav${tab==='checklist'?' bg-green-700':''}`} onClick={()=>setTab('checklist')}>Checklist Survival</button>
+          <button className={`btn-nav${tab==='gps'?' bg-green-700':''}`} onClick={()=>setTab('gps')}>Pelacak GPS</button>
+        </nav>
+        <main className="flex-1 w-full max-w-2xl mx-auto p-4">
+          {tab==='survival' && <PanduanSurvival />}
+          {tab==='ppgd' && <PPGD />}
+          {tab==='navigasi' && <NavigasiDarat />}
+          {tab==='checklist' && <ChecklistSurvival />}
+          {tab==='gps' && <PelacakGPS />}
+        </main>
+        <footer className="text-center text-green-200 py-3 text-xs bg-green-950">© {new Date().getFullYear()} Mahapala Narotama</footer>
+        <style>{`
+          body { background: #14532d; }
+          .btn-nav {
+            background: #166534;
+            color: #fff;
+            font-size: 1.1rem;
+            border-radius: 0.5rem;
+            padding: 0.7rem 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px #0002;
+            border: none;
+            margin: 0.2rem;
+            transition: background 0.2s;
+          }
+          .btn-nav:active, .btn-nav:hover, .btn-nav.bg-green-700 {
+            background: #22c55e;
+            color: #14532d;
+          }
+          input[type=checkbox] {
+            width: 1.3em; height: 1.3em;
+          }
+        `}</style>
+      </div>
+    </>
   );
 }
