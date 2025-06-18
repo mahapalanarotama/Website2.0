@@ -155,7 +155,7 @@ function PelacakGPS() {
   });
   const [inputNama, setInputNama] = useState('');
   const [nama, setNama] = useState(() => localStorage.getItem('gps_nama') || '');
-  let watchId: any = React.useRef(null);
+  const intervalRef = React.useRef<any>(null);
 
   // Simpan tracker ke localStorage (array)
   function saveTrackerLocal(data: any) {
@@ -193,15 +193,13 @@ function PelacakGPS() {
 
   function stopTracking() {
     setTracking(false);
-    if (watchId.current) {
-      navigator.geolocation.clearWatch(watchId.current);
-      watchId.current = null;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-    // Hapus data lokal
     setPositions([]);
     localStorage.removeItem("gps_track");
     localStorage.removeItem("gps_tracker");
-    // Hapus data di Firestore
     deleteUserTrackFromFirestore();
     setStatus("Pelacakan dimatikan dan data dihapus.");
   }
@@ -214,30 +212,34 @@ function PelacakGPS() {
     }
     setTracking(true);
     setStatus("Pelacakan aktif...");
-    watchId.current = navigator.geolocation.watchPosition(
-      pos => {
-        const data = {
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude,
-          time: new Date().toISOString(),
-          nama: nama,
-          online: navigator.onLine,
-        };
-        setPositions((prev: any) => {
-          const next = [...prev, data];
-          localStorage.setItem("gps_track", JSON.stringify(next));
-          return next;
-        });
-        saveTrackerLocal(data);
-        if (navigator.onLine) syncTrackerToFirestore();
-      },
-      err => setStatus("Gagal mendapatkan lokasi: " + err.message),
-      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
-    );
+    intervalRef.current = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const data = {
+            lat: pos.coords.latitude,
+            lon: pos.coords.longitude,
+            time: new Date().toISOString(),
+            nama: nama,
+            online: navigator.onLine,
+          };
+          setPositions((prev: any) => {
+            const next = [...prev, data];
+            localStorage.setItem("gps_track", JSON.stringify(next));
+            return next;
+          });
+          saveTrackerLocal(data);
+          if (navigator.onLine) syncTrackerToFirestore();
+        },
+        err => setStatus("Gagal mendapatkan lokasi: " + err.message),
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
+      );
+    }, 10000); // 10 detik
   }
+
   React.useEffect(() => {
-    return () => { if (watchId.current) navigator.geolocation.clearWatch(watchId.current); };
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, []);
+
   function resetTrack() {
     setPositions([]);
     localStorage.removeItem("gps_track");
