@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { collection, addDoc, getDocs, query, where, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, setDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Helmet } from "react-helmet";
+import { format, toZonedTime } from 'date-fns-tz';
 
 // Helper untuk download buku panduan (dummy PDF)
 function DownloadPanduan({ url, label }: { url: string; label: string }) {
@@ -16,6 +17,13 @@ function DownloadPanduan({ url, label }: { url: string; label: string }) {
       {label}
     </a>
   );
+}
+
+// Helper to get WIB time string
+function getWIBTimeString(date: Date) {
+  const timeZone = 'Asia/Jakarta';
+  const zoned = toZonedTime(date, timeZone);
+  return format(zoned, 'yyyy-MM-dd HH:mm:ss', { timeZone }) + ' WIB';
 }
 
 // 1. Panduan Survival
@@ -164,31 +172,38 @@ function PelacakGPS() {
     localStorage.setItem("gps_tracker", JSON.stringify(arr));
   }
 
+  // Simpan tracker ke Firestore history (append-only)
+  async function saveTrackerHistoryFirestore(data: any) {
+    try {
+      await addDoc(collection(db, "gps_history"), data);
+    } catch (e) {
+      // Optional: handle error
+    }
+  }
+
   // Sinkronisasi ke Firestore saat online
+  // Fitur: Data tracker terakhir per nama akan selalu tersimpan di Firestore dan tidak pernah dihapus kecuali diganti data terbaru
   async function syncTrackerToFirestore() {
     if (!navigator.onLine) return;
     const arr = JSON.parse(localStorage.getItem("gps_tracker") || "[]");
     if (!arr.length) return;
     let success = true;
-    for (const data of arr) {
+    // Ambil data terakhir yang sudah ada di Firestore (jika ada)
+    const latest = arr[arr.length - 1];
+    if (latest && nama) {
       try {
-        await addDoc(collection(db, "gps_tracker"), data);
+        // Data terakhir user (by nama) akan selalu di-overwrite, tidak pernah dihapus kecuali diganti data baru
+        await setDoc(doc(db, "gps_tracker", nama), latest, { merge: true });
       } catch (e) {
         success = false;
-        break;
       }
     }
     if (success) localStorage.removeItem("gps_tracker");
   }
 
-  // Hapus semua data tracker user ini di Firestore
+  // Hapus semua data tracker user ini di Firestore, KECUALI data terakhir
   async function deleteUserTrackFromFirestore() {
-    if (!nama) return;
-    const q = query(collection(db, "gps_tracker"), where("nama", "==", nama));
-    const snap = await getDocs(q);
-    for (const docu of snap.docs) {
-      await deleteDoc(docu.ref);
-    }
+    // Do nothing: keep the last tracker in Firestore
   }
 
   function stopTracking() {
@@ -215,10 +230,11 @@ function PelacakGPS() {
     intervalRef.current = setInterval(() => {
       navigator.geolocation.getCurrentPosition(
         pos => {
+          const now = new Date();
           const data = {
             lat: pos.coords.latitude,
             lon: pos.coords.longitude,
-            time: new Date().toISOString(),
+            time: getWIBTimeString(now),
             nama: nama,
             online: navigator.onLine,
           };
@@ -228,6 +244,7 @@ function PelacakGPS() {
             return next;
           });
           saveTrackerLocal(data);
+          saveTrackerHistoryFirestore(data); // <-- simpan ke Firestore history
           if (navigator.onLine) syncTrackerToFirestore();
         },
         err => setStatus("Gagal mendapatkan lokasi: " + err.message),
@@ -244,6 +261,7 @@ function PelacakGPS() {
     setPositions([]);
     localStorage.removeItem("gps_track");
     localStorage.removeItem("gps_tracker");
+    // Do NOT delete the last tracker in Firestore; it is preserved by design
   }
   React.useEffect(() => {
     function updateStatus() {

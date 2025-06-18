@@ -5,6 +5,7 @@ import type { User } from 'firebase/auth';
 import { collection, getDocs, addDoc, doc, deleteDoc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { differenceInDays } from 'date-fns';
+import { format, toZonedTime } from 'date-fns-tz';
 
 // UI Component imports
 import { TabsContent, Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -45,6 +46,7 @@ import {   Calendar,
   UserPlus,
   Users,
 } from 'lucide-react';
+import TrackerMap from '@/components/TrackerMap';
 
 export default function AdminPage() {
   // Authentication state
@@ -58,6 +60,7 @@ export default function AdminPage() {
   const [gallerys, setGallery] = useState<GalleryItem[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [trackers, setTrackers] = useState<any[]>([]);
+  const [trackerHistory, setTrackerHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('activities');
 
   // Dialog states
@@ -71,6 +74,10 @@ export default function AdminPage() {
   const [recycleBin, setRecycleBin] = useState<any[]>([]);
   const [recycleLoading, setRecycleLoading] = useState(false);
   const [deleteChecked, setDeleteChecked] = useState(false);
+
+  // Tracker selection state
+  const [selectedTrackerIds, setSelectedTrackerIds] = useState<string[]>([]);
+  const isAllSelected = trackers.length > 0 && selectedTrackerIds.length === trackers.length;
 
   // Authentication effect
   useEffect(() => {
@@ -167,7 +174,14 @@ export default function AdminPage() {
   // Fetch GPS tracker data
   const fetchTrackers = async () => {
     const snap = await getDocs(collection(db, "gps_tracker"));
+    // Only show the latest tracker per user (doc id = nama)
     setTrackers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
+
+  // Fetch all tracker history for all users
+  const fetchTrackerHistory = async () => {
+    const snap = await getDocs(collection(db, "gps_history"));
+    setTrackerHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   };
 
   // Notifikasi sederhana
@@ -358,8 +372,48 @@ export default function AdminPage() {
       fetchRecycleBin();
     } else if (activeTab === 'tracker') {
       fetchTrackers();
+      fetchTrackerHistory(); // fetch history when tracker tab active
     }
   }, [activeTab]);
+
+  // Helper to get WIB time string
+  function getWIBTimeString(date: Date | string | undefined | null) {
+    if (!date) return '-';
+    const timeZone = 'Asia/Jakarta';
+    let d: Date;
+    if (typeof date === 'string') {
+      d = new Date(date);
+      if (isNaN(d.getTime())) return date; // fallback: show raw string if invalid
+    } else if (date instanceof Date) {
+      d = date;
+    } else {
+      return '-';
+    }
+    const zoned = toZonedTime(d, timeZone);
+    return format(zoned, 'yyyy-MM-dd HH:mm:ss', { timeZone }) + ' WIB';
+  }
+
+  // Select all/none for tracker table
+  function handleSelectAll() {
+    if (isAllSelected) setSelectedTrackerIds([]);
+    else setSelectedTrackerIds(trackers.map(t => t.id));
+  }
+
+  // Select single for tracker table
+  function handleSelectOne(id: string) {
+    setSelectedTrackerIds(ids => ids.includes(id) ? ids.filter(i => i !== id) : [...ids, id]);
+  }
+
+  // Delete selected trackers
+  const handleDeleteSelected = async () => {
+    if (!window.confirm('Yakin ingin menghapus data tracker yang dipilih?')) return;
+    for (const id of selectedTrackerIds) {
+      await deleteDoc(doc(db, 'gps_tracker', id));
+    }
+    setSelectedTrackerIds([]);
+    fetchTrackers();
+    notify('Data tracker terpilih berhasil dihapus!');
+  };
 
   // Login form
   if (!user) {
@@ -813,11 +867,27 @@ export default function AdminPage() {
             <h2 className="text-xl font-semibold">GPS Tracker</h2>
             <Button onClick={fetchTrackers} variant="outline" size="sm">Refresh</Button>
           </div>
+          <div className="mb-6">
+            <TrackerMap 
+              points={trackers.map(t => ({ lat: t.lat, lon: t.lon, nama: t.nama, time: t.time }))}
+              history={trackerHistory.map(t => ({ lat: t.lat, lon: t.lon, nama: t.nama, time: t.time }))}
+            />
+          </div>
           <div className="overflow-x-auto bg-white rounded-lg shadow p-2">
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  <th>Nama</th>
+                  <th>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        onChange={handleSelectAll}
+                        className="accent-primary h-4 w-4"
+                      />
+                      Nama
+                    </div>
+                  </th>
                   <th>Waktu</th>
                   <th>Lat</th>
                   <th>Lon</th>
@@ -828,8 +898,18 @@ export default function AdminPage() {
               <tbody>
                 {trackers.map((t) => (
                   <tr key={t.id}>
-                    <td>{t.nama}</td>
-                    <td>{t.time}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedTrackerIds.includes(t.id)}
+                          onChange={() => handleSelectOne(t.id)}
+                          className="accent-primary h-4 w-4"
+                        />
+                        {t.nama}
+                      </div>
+                    </td>
+                    <td>{getWIBTimeString(t.time)}</td>
                     <td>{t.lat}</td>
                     <td>{t.lon}</td>
                     <td>
@@ -856,6 +936,16 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
+            <div className="mt-2 flex gap-2">
+              <Button
+                variant="destructive"
+                size="sm"
+                disabled={selectedTrackerIds.length === 0}
+                onClick={handleDeleteSelected}
+              >
+                Hapus Data Terpilih
+              </Button>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
