@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { collection, addDoc, setDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Helmet } from "react-helmet";
@@ -326,6 +326,22 @@ function PelacakGPS() {
 // Komponen utama PWA Offline Survival
 export default function OfflineSurvivalApp() {
   const [tab, setTab] = useState('survival');
+
+  // PWA: Register service worker hanya di halaman offline
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js');
+    }
+    // Unregister saat keluar dari halaman offline
+    return () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(reg => reg.unregister());
+        });
+      }
+    };
+  }, []);
+
   return (
     <>
       <Helmet>
