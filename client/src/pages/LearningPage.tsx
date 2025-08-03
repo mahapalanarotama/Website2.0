@@ -3,19 +3,14 @@ import { LearningModule } from "@/components/LearningModule";
 import { useLearningModules } from "@/hooks/use-learning";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { learningModulesFront } from "@/components/externalLearningLinks";
+// import { learningModulesFront } from "@/components/externalLearningLinks"; // dihapus, gunakan Firestore
 
 export default function LearningPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: modules, isLoading } = useLearningModules();
 
   // Gabungkan data dari backend dan eksternal (frontend)
-  const allModules = [
-    ...(modules || []),
-    ...learningModulesFront.filter(
-      (ext) => !modules?.some((m) => m.title === ext.title)
-    ),
-  ];
+  const allModules = modules || [];
 
   // Filter modules berdasarkan search query
   const filteredModules = allModules.filter((module) => {

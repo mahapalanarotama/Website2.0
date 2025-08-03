@@ -84,13 +84,23 @@ export interface MemberFormData {
   customId?: string; // Tambahan agar ID dokumen selalu ada
 }
 
-export type FormData = ActivityFormData | GalleryFormData | MemberFormData;
+
+
+
+export interface LearningFormData {
+  title: string;
+  description: string;
+  icon: string;
+  link: string;
+}
+
+export type FormData = ActivityFormData | GalleryFormData | MemberFormData | LearningFormData;
 
 export interface FormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: FormData) => Promise<void>;
-  type: 'activity' | 'gallery' | 'member';
+  type: 'activity' | 'gallery' | 'member' | 'learning';
   isEditing?: boolean;
   initialData?: Partial<FormData>;
   activities?: Activity[];
@@ -112,6 +122,7 @@ export function AdminFormDialog({
   const activityInitialData = type === 'activity' ? initialData as Partial<ActivityFormData> : null;
   const galleryInitialData = type === 'gallery' ? initialData as Partial<GalleryFormData> : null;
   const memberInitialData = type === 'member' ? initialData as Partial<MemberFormData> : null;
+
 
   // Helper untuk mapping Firestore ke form (Firestore -> camelCase)
   const mapFirestoreToForm = (data: any) => ({
@@ -449,87 +460,145 @@ export function AdminFormDialog({
               </div>
             ) : (
               <>
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    value={type === 'activity' || type === 'gallery' ? formData.title || '' : ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    name="description"
-                    value={type === 'activity' || type === 'gallery' ? formData.description || '' : ''}
-                    onChange={handleChange}
-                    required={type === 'activity'}
-                  />
-                </div>
-
-                {type === 'activity' && (
+                {/* Learning Form */}
+                {type === 'learning' ? (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="date">Date</Label>
+                      <Label htmlFor="title">Title</Label>
                       <Input
-                        id="date"
-                        name="date"
-                        type="date"
-                        value={(formData as ActivityFormData).date || ''}
+                        id="title"
+                        name="title"
+                        value={formData.title || ''}
                         onChange={handleChange}
                         required
                       />
                     </div>
-                    
                     <div className="space-y-2">
-                      <Label htmlFor="category">Category</Label>
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        name="description"
+                        value={formData.description || ''}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="icon">Icon</Label>
                       <Input
-                        id="category"
-                        name="category"
-                        value={(formData as ActivityFormData).category || ''}
+                        id="icon"
+                        name="icon"
+                        value={formData.icon || ''}
+                        onChange={handleChange}
+                        placeholder="Contoh: map-marked-alt"
+                        required
+                      />
+                      <div className="flex items-center gap-2 mt-1">
+                        {formData.icon && (
+                          <span className="inline-flex items-center gap-1 text-lg"><i className={`fa fa-${formData.icon}`}></i> {formData.icon}</span>
+                        )}
+                        <a
+                          href="https://fontawesome.com/v4.7/icons/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline text-xs hover:text-blue-800 ml-2"
+                        >
+                          Panduan icon (FontAwesome v4.7)
+                        </a>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="link">Link</Label>
+                      <Input
+                        id="link"
+                        name="link"
+                        value={formData.link || ''}
+                        onChange={handleChange}
+                        placeholder="https://..."
+                        required
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title</Label>
+                      <Input
+                        id="title"
+                        name="title"
+                        value={type === 'activity' || type === 'gallery' ? formData.title || '' : ''}
+                        onChange={handleChange}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        name="description"
+                        value={type === 'activity' || type === 'gallery' ? formData.description || '' : ''}
+                        onChange={handleChange}
+                        required={type === 'activity'}
+                      />
+                    </div>
+                    {type === 'activity' && (
+                      <>
+                        <div className="space-y-2">
+                          <Label htmlFor="date">Date</Label>
+                          <Input
+                            id="date"
+                            name="date"
+                            type="date"
+                            value={(formData as ActivityFormData).date || ''}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="category">Category</Label>
+                          <Input
+                            id="category"
+                            name="category"
+                            value={(formData as ActivityFormData).category || ''}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                      </>
+                    )}
+                    {type === 'gallery' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="activityId">Related Activity</Label>
+                        <select
+                          id="activityId"
+                          name="activityId"
+                          value={(formData as GalleryFormData).activityId || ''}
+                          onChange={handleChange}
+                          className="w-full rounded-md border p-2"
+                        >
+                          <option value="">None</option>
+                          {activities.map(activity => (
+                            <option key={activity.id} value={activity.id}>
+                              {activity.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <Label htmlFor="imageUrl">Image URL</Label>
+                      <Input
+                        id="imageUrl"
+                        name="imageUrl"
+                        type="url"
+                        placeholder="Enter the URL of the image"
+                        value={type === 'activity' || type === 'gallery' ? formData.imageUrl || '' : ''}
                         onChange={handleChange}
                         required
                       />
                     </div>
                   </>
                 )}
-
-                {type === 'gallery' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="activityId">Related Activity</Label>
-                    <select
-                      id="activityId"
-                      name="activityId"
-                      value={(formData as GalleryFormData).activityId || ''}
-                      onChange={handleChange}
-                      className="w-full rounded-md border p-2"
-                    >
-                      <option value="">None</option>
-                      {activities.map(activity => (
-                        <option key={activity.id} value={activity.id}>
-                          {activity.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="imageUrl">Image URL</Label>
-                  <Input
-                    id="imageUrl"
-                    name="imageUrl"
-                    type="url"
-                    placeholder="Enter the URL of the image"
-                    value={type === 'activity' || type === 'gallery' ? formData.imageUrl || '' : ''}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
               </>
             )}
             {error && <p className="text-sm text-red-500 mt-4">{error}</p>}

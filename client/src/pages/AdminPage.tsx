@@ -59,6 +59,7 @@ export default function AdminPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [gallerys, setGallery] = useState<GalleryItem[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [learnings, setLearnings] = useState<any[]>([]); // Learning state
   const [trackers, setTrackers] = useState<any[]>([]);
   const [trackerHistory, setTrackerHistory] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState('activities');
@@ -67,7 +68,7 @@ export default function AdminPage() {
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [currentItem, setCurrentItem] = useState<any>(null);
-  const [formType, setFormType] = useState<'activity' | 'gallery' | 'member'>('activity');
+  const [formType, setFormType] = useState<'activity' | 'gallery' | 'member' | 'learning'>('activity');
   const [isEditing, setIsEditing] = useState(false);
 
   // Recycle bin states
@@ -111,7 +112,7 @@ export default function AdminPage() {
     try {
       // Fetch recycle bin first
       const recycleSnap = await getDocs(collection(db, 'recycle_bin'));
-      const recycleIds = new Set(recycleSnap.docs.map(doc => doc.id)); // Perbaikan di sini
+      const recycleIds = new Set(recycleSnap.docs.map(doc => doc.id));
       // Fetch activities
       const activitiesSnapshot = await getDocs(collection(db, 'activities'));
       setActivities(
@@ -133,7 +134,23 @@ export default function AdminPage() {
             createdAt: doc.data().createdAt || null,
             updatedAt: doc.data().updatedAt || null,
           }))
-      );      // Fetch members from "anggota" collection
+      );
+      // Fetch learning items
+      const learningSnapshot = await getDocs(collection(db, 'learnings'));
+      setLearnings(
+        learningSnapshot.docs
+          .filter(doc => !recycleIds.has(doc.id))
+          .map(doc => ({
+            id: doc.id,
+            title: doc.data().title || '',
+            description: doc.data().description || '',
+            icon: doc.data().icon || '',
+            link: doc.data().link || '',
+            createdAt: doc.data().createdAt || null,
+            updatedAt: doc.data().updatedAt || null,
+          }))
+      );
+      // Fetch members from "anggota" collection
       const membersSnapshot = await getDocs(collection(db, 'anggota'));
       const updateStatusAktif = ['Caba', 'Cella', 'Ratel', 'Lupus', 'Orca', 'Loni', 'Ola'];
       const batch: Promise<any>[] = [];
@@ -162,7 +179,7 @@ export default function AdminPage() {
               email: data.email || "",
               phone: data.phone || "",
               gender: data.gender || "",
-              statusMahasiswa: data.statusMahasiswa, // Tambahkan mapping untuk statusMahasiswa
+              statusMahasiswa: data.statusMahasiswa,
             };
           })
       );
@@ -190,10 +207,10 @@ export default function AdminPage() {
   // CREATE/EDIT handler
   const handleFormSubmit = async (data: any) => {
     try {
-      let collectionName = formType === 'member' ? 'anggota' : formType + 's';
+      let collectionName = formType === 'member' ? 'anggota' : formType === 'learning' ? 'learnings' : formType + 's';
       // --- AUTO GENERATE DOCUMENT ID FOR NEW MEMBER ---
       if (formType === 'member' && !isEditing) {
-        // Get all member IDs (assume numeric string or fallback to 0)
+        // ...existing code...
         const membersSnapshot = await getDocs(collection(db, 'anggota'));
         const numericIds = membersSnapshot.docs
           .map(doc => parseInt(doc.id, 10))
@@ -211,7 +228,7 @@ export default function AdminPage() {
           email: data.email || '',
           phone: data.phone || '',
           gender: data.gender || '',
-          statusMahasiswa: data.statusMahasiswa, // Perbaikan di sini
+          statusMahasiswa: data.statusMahasiswa,
           url: data.url || '',
           updateat: new Date().toISOString(),
           id: docId,
@@ -223,7 +240,7 @@ export default function AdminPage() {
         return;
       }
       if (formType === 'member' && (data.id || data.customId)) {
-        // Always map to Firestore field names for update
+        // ...existing code...
         const docId = data.customId || data.id;
         const memberData = {
           namalengkap: data.namalengkap || data.fullName || '',
@@ -236,7 +253,7 @@ export default function AdminPage() {
           email: data.email || '',
           phone: data.phone || '',
           gender: data.gender || '',
-          statusMahasiswa: data.statusMahasiswa, // Perbaikan di sini
+          statusMahasiswa: data.statusMahasiswa,
           url: data.url || '',
           updateat: new Date().toISOString(),
           id: docId,
@@ -244,7 +261,7 @@ export default function AdminPage() {
         await setDoc(doc(db, collectionName, docId), memberData);
         notify('Data anggota berhasil diperbarui!');
       } else if (isEditing && formType === 'activity' && data.id) {
-        // Pastikan mapping field activity ke Firestore benar
+        // ...existing code...
         const activityData = {
           title: data.title || '',
           description: data.description || '',
@@ -256,7 +273,7 @@ export default function AdminPage() {
         await setDoc(doc(db, 'activities', data.id), activityData);
         notify('Data kegiatan berhasil diperbarui!');
       } else if (isEditing && formType === 'gallery' && data.id) {
-        // Mapping field galeri ke Firestore harus konsisten
+        // ...existing code...
         const galleryData = {
           title: data.title || '',
           description: data.description || '',
@@ -268,8 +285,20 @@ export default function AdminPage() {
         };
         await setDoc(doc(db, 'gallerys', data.id), galleryData);
         notify('Data galeri berhasil diperbarui!');
+      } else if (isEditing && formType === 'learning' && data.id) {
+        // Update learning
+        const learningData = {
+          title: data.title || '',
+          description: data.description || '',
+          icon: data.icon || '',
+          link: data.link || '',
+          updatedAt: new Date().toISOString(),
+          id: data.id,
+        };
+        await setDoc(doc(db, 'learnings', data.id), learningData);
+        notify('Data pembelajaran berhasil diperbarui!');
       } else if (formType === 'activity' && !isEditing) {
-        // TAMBAH DATA KEGIATAN BARU
+        // ...existing code...
         const activityData = {
           title: data.title || '',
           description: data.description || '',
@@ -281,10 +310,21 @@ export default function AdminPage() {
         };
         await addDoc(collection(db, 'activities'), activityData);
         notify('Data kegiatan berhasil ditambahkan!');
+      } else if (formType === 'learning' && !isEditing) {
+        // Create new learning
+        const learningData = {
+          title: data.title || '',
+          description: data.description || '',
+          icon: data.icon || '',
+          link: data.link || '',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await addDoc(collection(db, 'learnings'), learningData);
+        notify('Data pembelajaran berhasil ditambahkan!');
       } else {
-        // Create
+        // ...existing code...
         if (formType === 'member' && data.customId) {
-          // Use customId as document ID
           const { customId, ...memberData } = data;
           await setDoc(doc(db, 'anggota', customId), memberData);
           notify('Data berhasil ditambahkan dengan ID custom!');
@@ -304,14 +344,15 @@ export default function AdminPage() {
   // DELETE handler (pindah ke recycle bin)
   // Refactor: handleDelete menerima parameter
   // Helper to map formType to Firestore collection name
-  const getCollectionName = (type: 'activity' | 'gallery' | 'member') => {
+  const getCollectionName = (type: 'activity' | 'gallery' | 'member' | 'learning') => {
     if (type === 'activity') return 'activities';
-    if (type === 'gallery') return 'gallerys'; // Firestore collection is 'gallerys'
+    if (type === 'gallery') return 'gallerys';
     if (type === 'member') return 'anggota';
+    if (type === 'learning') return 'learnings';
     return '';
   };
 
-  const handleDelete = async (type?: 'activity' | 'gallery' | 'member', item?: any) => {
+  const handleDelete = async (type?: 'activity' | 'gallery' | 'member' | 'learning', item?: any) => {
     const tipe = type || formType;
     const dataItem = item || currentItem;
     if (!dataItem || !dataItem.id) {
@@ -490,15 +531,99 @@ export default function AdminPage() {
             <Users className="h-4 w-4" />
             Members
           </TabsTrigger>
+          <TabsTrigger value="learning" className="flex items-center gap-2">
+            <ImageIcon className="h-4 w-4" />
+            Learning
+          </TabsTrigger>
           <TabsTrigger value="recycle" className="flex items-center gap-2">
             <Trash2 className="h-4 w-4" />
             Recycle Bin
           </TabsTrigger>
-            <TabsTrigger value="tracker" className="flex items-center gap-2">
+          <TabsTrigger value="tracker" className="flex items-center gap-2">
             <MapPin className="h-4 w-4" />
             Tracker
-            </TabsTrigger>
+          </TabsTrigger>
         </TabsList>
+        <TabsContent value="learning">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Learning Management</h2>
+            <Button
+              onClick={() => {
+                setFormType('learning');
+                setIsEditing(false);
+                setCurrentItem(null);
+                setFormDialogOpen(true);
+              }}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Learning
+            </Button>
+          </div>
+          <div className="bg-white rounded-lg shadow">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Icon</TableHead>
+                  <TableHead>Link</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {learnings.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.title}</TableCell>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell>
+                      {item.icon ? (
+                        <span className="inline-flex items-center gap-1"><i className={`fa fa-${item.icon}`}></i> {item.icon}</span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {item.link ? (
+                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">Lihat</a>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setFormType('learning');
+                            setIsEditing(true);
+                            setCurrentItem(item);
+                            setFormDialogOpen(true);
+                          }}
+                        >
+                          <PencilLine className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-600"
+                          onClick={() => {
+                            setCurrentItem(item);
+                            setFormType('learning');
+                            setDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
 
         <TabsContent value="activities">
           <div className="flex justify-between items-center mb-4">
