@@ -11,6 +11,8 @@ const backsounds = [
   { src: backsound2, label: "Backsound 2" },
 ];
 
+let globalBacksoundInstance: HTMLAudioElement | null = null;
+
 export default function BacksoundPlayer() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -50,6 +52,13 @@ export default function BacksoundPlayer() {
     if (match) {
       setSelected(Number(match[1]));
     }
+    // Cegah suara ganda: hanya satu audio aktif di window
+    if (audioRef.current) {
+      if (globalBacksoundInstance && globalBacksoundInstance !== audioRef.current) {
+        try { globalBacksoundInstance.pause(); } catch {}
+      }
+      globalBacksoundInstance = audioRef.current;
+    }
     // Otomatis play backsound saat awal masuk jika belum play
     if (audioRef.current && !playing) {
       const playPromise = audioRef.current.play();
@@ -62,6 +71,10 @@ export default function BacksoundPlayer() {
     return () => {
       if (audioRef.current) audioRef.current.pause();
       if (hideTimeout.current) clearTimeout(hideTimeout.current);
+      // Hapus global instance jika unmount
+      if (globalBacksoundInstance === audioRef.current) {
+        globalBacksoundInstance = null;
+      }
     };
   }, []);
 
