@@ -20,6 +20,7 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import { useLeafCursor } from "@/components/CursorLeafTrail";
 import OfflineSurvivalApp from "@/pages/OfflineSurvivalApp";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import SejarahPage from "@/pages/SejarahPage";
 
 function App() {
   useLeafCursor();
@@ -99,6 +100,7 @@ function App() {
             <Route path="/developer" component={DeveloperPage} />
             <Route path="/kartu-anggota-detail" component={MemberCardDetailPage} />
             <Route path="/member-card-3d" component={MemberCard3DPage} />
+            <Route path="/sejarah" component={SejarahPage} />
             <Route component={NotFound} />
           </Switch>
         </Layout>
