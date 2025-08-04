@@ -415,7 +415,6 @@ export default function HomePage() {
         </Dialog>
       </motion.section>
 
-      <BacksoundPlayer />
     </>
   );
 }
