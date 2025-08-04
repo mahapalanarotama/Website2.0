@@ -13,6 +13,7 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel";
 import { getCarouselContent, CarouselContentItem } from "@/lib/homepage";
+import { DEFAULT_CAROUSEL } from "../shared/carouselDefault";
 import Autoplay from "embla-carousel-autoplay";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Instagram, Mail, Phone } from "lucide-react";
@@ -115,27 +116,7 @@ export default function HomePage() {
                 plugins={[Autoplay({ delay: 5000 })]}
               >
                 <CarouselContent>
-                  {(carousel && carousel.length > 0 ? carousel : [
-                    // fallback static if no data
-                    {
-                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/anggota%20mahapala%20narotama.jpg",
-                      alt: "Anggota Mahapala Narotama",
-                      title: "Kebersamaan adalah simbol Kekuatan",
-                      description: "Bergabunglah dalam misi kami untuk melindungi lingkungan dan eksplorasi alam."
-                    },
-                    {
-                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/eksplorasi%20alam.jpg",
-                      alt: "Pendidikan Rimba Gunung Mahapala Narotama",
-                      title: "Petualangan Tanpa Batas",
-                      description: "Eksplorasi keindahan alam Indonesia bersama Mahapala Narotama."
-                    },
-                    {
-                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/panjat%20tebing.png",
-                      alt: "Pendidikan Panjat Tebing Mahapala Narotama",
-                      title: "Keseruan dalam Berpetualang",
-                      description: "Kami berkomitmen untuk pendidikan lingkungan dan pelestarian alam."
-                    }
-                  ]).map((item, idx) => (
+                  {((carousel && carousel.length > 0) ? carousel : DEFAULT_CAROUSEL).map((item, idx) => (
                     <CarouselItem key={idx}>
                       <div className="relative h-96">
                         <img 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getMeta, setMeta as saveMeta, MetaData } from "@/lib/meta";
 import { getCarouselContent, setCarouselContent, CarouselContentItem } from "@/lib/homepage";
+import { DEFAULT_CAROUSEL } from "../shared/carouselDefault";
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { getDevLogs, addDevLog, DevLog } from "@/lib/devlog";
@@ -40,7 +41,9 @@ export default function DeveloperPage() {
     if (tab === 'homepage' && user) {
       setCarouselLoading(true);
       getCarouselContent().then(data => {
-        setCarousel(data || []);
+        // Always merge default with custom (no duplicate by title)
+        const custom = (data || []).filter(c => !DEFAULT_CAROUSEL.some(d => d.title === c.title));
+        setCarousel([...DEFAULT_CAROUSEL, ...custom]);
         setCarouselLoading(false);
       });
     }
@@ -58,20 +61,25 @@ export default function DeveloperPage() {
   };
   const handleCarouselDelete = (idx: number) => {
     if (window.confirm('Hapus slide ini?')) {
-      const next = [...carousel];
+      let next = [...carousel];
       next.splice(idx, 1);
+      // Always keep at least the default slides
+      if (next.length < DEFAULT_CAROUSEL.length) next = [...DEFAULT_CAROUSEL];
       setCarousel(next);
       setCarouselContent(next);
     }
   };
   const handleCarouselDialogSave = () => {
     if (!carouselEdit) return;
-    const next = [...carousel];
+    let next = [...carousel];
     if (carouselEditIdx === null) {
       next.push(carouselEdit);
     } else {
       next[carouselEditIdx] = carouselEdit;
     }
+    // Always keep default slides at the start, then custom
+    const custom = next.filter(c => !DEFAULT_CAROUSEL.some(d => d.title === c.title));
+    next = [...DEFAULT_CAROUSEL, ...custom];
     setCarousel(next);
     setCarouselContent(next);
     setCarouselDialog(false);
