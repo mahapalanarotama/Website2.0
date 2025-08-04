@@ -111,7 +111,7 @@ export default function PendaftaranPage() {
                   </motion.li>
                   <motion.li variants={item} className="flex items-start">
                     <CheckCircle className="text-primary min-w-5 h-5 mr-2 mt-0.5" />
-                    <span>Mempelajari keterampilan survival, navigasi, dan pertolongan pertama</span>
+                    <span>Mempelajari keterampilan survival, navigasi, pertolongan pertama, panjat tebing</span>
                   </motion.li>
                   <motion.li variants={item} className="flex items-start">
                     <CheckCircle className="text-primary min-w-5 h-5 mr-2 mt-0.5" />
@@ -158,7 +158,7 @@ export default function PendaftaranPage() {
                   <h4 className="font-medium text-lg mb-2">Persyaratan Umum</h4>
                   <ul className="space-y-2 pl-6 list-disc text-gray-700">
                     <li>Mahasiswa aktif Universitas Narotama (dibuktikan dengan kartu mahasiswa)</li>
-                    <li>Minimal semester 1 dan maksimal semester 4</li>
+                    <li>Minimal semester 1 dan maksimal semester 5</li>
                     <li>Sehat jasmani dan rohani (dibuktikan dengan surat keterangan sehat)</li>
                     <li>Memiliki minat dalam kegiatan alam terbuka</li>
                     <li>Bersedia mengikuti seluruh rangkaian proses seleksi</li>
@@ -170,7 +170,7 @@ export default function PendaftaranPage() {
                   <h4 className="font-medium text-lg mb-2">Dokumen Pendaftaran</h4>
                   <ul className="space-y-2 pl-6 list-disc text-gray-700">
                     <li>Formulir pendaftaran yang telah diisi lengkap</li>
-                    <li>Pas foto berwarna ukuran 3x4 (3 lembar)</li>
+                    <li>Pas foto berwarna ukuran 3x4 (1 lembar)</li>
                     <li>Fotokopi Kartu Mahasiswa</li>
                     <li>Surat keterangan sehat dari dokter</li>
                     <li>Surat pernyataan kesediaan mengikuti seleksi</li>
@@ -190,7 +190,7 @@ export default function PendaftaranPage() {
                   <ul className="space-y-1 pl-6 list-disc text-gray-700">
                     <li>Administrasi pendaftaran</li>
                     <li>Kit pendaftaran (formulir, modul, dan atribut)</li>
-                    <li>Konsumsi selama proses seleksi</li>
+                    <li>Biaya Transportasi dan Tiket masuk</li>
                     <li>Biaya operasional diklat dasar</li>
                   </ul>
                   <p className="text-sm text-gray-500 mt-2">
@@ -205,7 +205,7 @@ export default function PendaftaranPage() {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm text-green-700">
-                        Semua dokumen persyaratan dikumpulkan dalam bentuk hardcopy pada saat pendaftaran dan softcopy dikirim ke email ukm.mahapala@narotama.ac.id dengan subjek "PENDAFTARAN2025_[NAMA]_[NIM]"
+                        Semua dokumen persyaratan dikumpulkan dalam bentuk hardcopy pada saat pendaftaran dan softcopy dikirim ke email ukm.mahapala@narotama.ac.id dengan subjek "PENDAFTARANCAANG2025_[NAMA]_[NIM]"
                       </p>
                     </div>
                   </div>
@@ -227,8 +227,8 @@ export default function PendaftaranPage() {
                   <div className="relative">
                     <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
                     <div>
-                      <span className="text-sm text-gray-500">15 - 30 Agustus 2025</span>
-                      <h4 className="font-medium text-gray-800">Pendaftaran Online</h4>
+                      <span className="text-sm text-gray-500">15 Agustus - 30 September 2025</span>
+                      <h4 className="font-medium text-gray-800">Pendaftaran Online dan Offline</h4>
                       <p className="text-gray-600 text-sm">Pengisian formulir pendaftaran dan pengumpulan berkas persyaratan</p>
                     </div>
                   </div>
@@ -236,16 +236,34 @@ export default function PendaftaranPage() {
                   <div className="relative">
                     <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
                     <div>
-                      <span className="text-sm text-gray-500">5 - 10 September 2025</span>
+                      <span className="text-sm text-gray-500">05 - 07 Oktober 2025</span>
                       <h4 className="font-medium text-gray-800">Tes Tertulis & Wawancara</h4>
                       <p className="text-gray-600 text-sm">Tes pengetahuan umum dan wawancara motivasi</p>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">07 Oktober 2025</span>
+                      <h4 className="font-medium text-gray-800">Pengumuman Hasil Seleksi</h4>
+                      <p className="text-gray-600 text-sm">Pengumuman calon anggota yang lolos seleksi</p>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+                    <div>
+                      <span className="text-sm text-gray-500">08 Oktober - 13 November 2025</span>
+                      <h4 className="font-medium text-gray-800">Pra Diklat</h4>
+                      <p className="text-gray-600 text-sm">Pelatihan dan Pembekalan Materi serta fisik</p>
                     </div>
                   </div>
                   
                   <div className="relative">
                     <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
                     <div>
-                      <span className="text-sm text-gray-500">15 - 20 September 2025</span>
+                      <span className="text-sm text-gray-500">15 - 17 November 2025</span>
                       <h4 className="font-medium text-gray-800">Diklat Dasar</h4>
                       <p className="text-gray-600 text-sm">Pelatihan dasar kepencintaalaman dan team building</p>
                     </div>
@@ -254,18 +272,9 @@ export default function PendaftaranPage() {
                   <div className="relative">
                     <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
                     <div>
-                      <span className="text-sm text-gray-500">25 September 2025</span>
-                      <h4 className="font-medium text-gray-800">Pengumuman Hasil Seleksi</h4>
-                      <p className="text-gray-600 text-sm">Pengumuman calon anggota yang lolos seleksi</p>
-                    </div>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">30 September 2025</span>
+                      <span className="text-sm text-gray-500">17 November 2025</span>
                       <h4 className="font-medium text-gray-800">Pelantikan Anggota Baru</h4>
-                      <p className="text-gray-600 text-sm">Upacara pelantikan dan penerimaan anggota baru</p>
+                      <p className="text-gray-600 text-sm">Upacara pelantikan dan penyematan Scraft Kuning anggota baru</p>
                     </div>
                   </div>
                 </div>
@@ -321,7 +330,7 @@ export default function PendaftaranPage() {
                   <div>
                     <h4 className="font-medium text-lg text-primary">Apakah saya bisa mengikuti kegiatan Mahapala sambil aktif di organisasi lain?</h4>
                     <p className="text-gray-700 mt-2">
-                      Ya, Anda tetap bisa aktif di organisasi lain. Namun, perlu diingat bahwa sebagai anggota Mahapala, Anda diharapkan dapat berkomitmen untuk berpartisipasi dalam kegiatan-kegiatan penting dan memenuhi tanggung jawab sebagai anggota.
+                      Tidak disarankan, Tetapi Anda tetap bisa aktif di organisasi lain. Namun, perlu diingat bahwa sebagai anggota Mahapala, Anda diharapkan dapat berkomitmen untuk berpartisipasi dalam kegiatan-kegiatan penting dan memenuhi tanggung jawab sebagai anggota.
                     </p>
                   </div>
                 </div>
