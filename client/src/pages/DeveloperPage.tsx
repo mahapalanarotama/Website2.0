@@ -402,27 +402,35 @@ export default function DeveloperPage() {
             ) : logs.length === 0 ? (
               <div className="text-center py-10 text-gray-400">Belum ada aktivitas.</div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="overflow-x-auto overflow-y-auto max-h-96 scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-blue-50 rounded-lg">
+                <table className="w-full min-w-[700px] text-sm font-mono bg-[#181c20] text-[#e0e6ef] rounded-lg shadow-lg">
                   <thead>
-                    <tr className="bg-blue-100 text-blue-900">
-                      <th className="p-2 text-left">Waktu</th>
-                      <th className="p-2 text-left">User</th>
-                      <th className="p-2 text-left">Aksi</th>
-                      <th className="p-2 text-left">Detail</th>
+                    <tr className="bg-[#23272e] text-[#7dd3fc]">
+                      <th className="p-2 text-left font-mono">Waktu</th>
+                      <th className="p-2 text-left font-mono">User</th>
+                      <th className="p-2 text-left font-mono">Aksi</th>
+                      <th className="p-2 text-left font-mono">Detail</th>
                     </tr>
                   </thead>
                   <tbody>
                     {logs.map((log, i) => (
-                      <tr key={i} className="border-b last:border-b-0">
-                        <td className="p-2 whitespace-nowrap">{log.createdAt.toLocaleString()}</td>
-                        <td className="p-2 whitespace-nowrap">{log.user}</td>
-                        <td className="p-2 whitespace-nowrap">{log.action}</td>
-                        <td className="p-2">{log.detail}</td>
+                      <tr key={i} className="border-b border-[#23272e] last:border-b-0 hover:bg-[#23272e] transition">
+                        <td className="p-2 whitespace-nowrap text-[#a3e635]">{log.createdAt.toLocaleString()}</td>
+                        <td className="p-2 whitespace-nowrap text-[#38bdf8]">{log.user}</td>
+                        <td className={"p-2 whitespace-nowrap font-bold " +
+                          (log.action.toLowerCase().includes('edit') ? 'text-yellow-400' :
+                          log.action.toLowerCase().includes('hapus') ? 'text-red-400' :
+                          log.action.toLowerCase().includes('tambah') ? 'text-green-400' :
+                          'text-[#e0e6ef]')
+                        }>{log.action}</td>
+                        <td className="p-2 text-[#e0e6ef]">{log.detail}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                <div className="flex items-center justify-center mt-2">
+                  <span className="text-xs text-blue-300 font-mono">Geser ke kanan &rarr; untuk melihat detail log &gt;&gt;</span>
+                </div>
               </div>
             )}
           </>
