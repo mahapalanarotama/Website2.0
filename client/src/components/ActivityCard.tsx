@@ -60,10 +60,8 @@ export function ActivityCard({ activity }: ActivityCardProps) {
         <p className="text-gray-600 mb-4 line-clamp-2">{activity.description}</p>
       </CardContent>
       <CardFooter className="pt-0 px-5 pb-5">
-        <Link href={`/kegiatan/${activity.id}`}>
-          <a className="text-primary font-medium hover:text-secondary transition">
-            Selengkapnya →
-          </a>
+        <Link href={`/kegiatan/${activity.id}`} className="text-primary font-medium hover:text-secondary transition">
+          Selengkapnya →
         </Link>
       </CardFooter>
     </Card>
