@@ -464,7 +464,7 @@ export function AdminFormDialog({
                 {type === 'learning' ? (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="title">Title</Label>
+                      <Label htmlFor="title">Judul Pembelajaran</Label>
                       <Input
                         id="title"
                         name="title"
@@ -474,7 +474,7 @@ export function AdminFormDialog({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
+                      <Label htmlFor="description">Deskripsi Pembelajaran</Label>
                       <Textarea
                         id="description"
                         name="description"
@@ -484,13 +484,13 @@ export function AdminFormDialog({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="icon">Icon</Label>
+                      <Label htmlFor="icon">Icon (misal: book, graduation-cap, dsb)</Label>
                       <Input
                         id="icon"
                         name="icon"
                         value={formData.icon || ''}
                         onChange={handleChange}
-                        placeholder="Contoh: map-marked-alt"
+                        placeholder="Contoh: book"
                         required
                       />
                       <div className="flex items-center gap-2 mt-1">
@@ -508,7 +508,7 @@ export function AdminFormDialog({
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="link">Link</Label>
+                      <Label htmlFor="link">Link Pembelajaran</Label>
                       <Input
                         id="link"
                         name="link"

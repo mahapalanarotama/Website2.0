@@ -37,6 +37,7 @@ import type {
 // Icons
 import {   Calendar,
   Image as ImageIcon,
+  Book,
   ImagePlus,
   LogOut,
   MapPin,
@@ -47,6 +48,7 @@ import {   Calendar,
   Users,
 } from 'lucide-react';
 import TrackerMap from '@/components/TrackerMap';
+import { addDevLog } from '@/lib/devlog';
 
 export default function AdminPage() {
   // Authentication state
@@ -102,6 +104,17 @@ export default function AdminPage() {
     setAuthError('');
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      if (email) {
+        try {
+          await addDevLog({
+            action: 'Login',
+            detail: 'Login ke halaman admin',
+            user: email,
+          });
+        } catch (logErr: any) {
+          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        }
+      }
     } catch (error: any) {
       setAuthError('Login failed: ' + error.message);
     }
@@ -234,6 +247,15 @@ export default function AdminPage() {
           id: docId,
         };
         await setDoc(doc(db, 'anggota', docId), memberData);
+        try {
+          await addDevLog({
+            action: 'Tambah Member',
+            detail: `Tambah member baru: ${memberData.namalengkap} (${docId})`,
+            user: user?.email || 'unknown',
+          });
+        } catch (logErr: any) {
+          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        }
         notify('Data anggota berhasil ditambahkan dengan ID otomatis!');
         setFormDialogOpen(false);
         await fetchData();
@@ -259,6 +281,15 @@ export default function AdminPage() {
           id: docId,
         };
         await setDoc(doc(db, collectionName, docId), memberData);
+        try {
+          await addDevLog({
+            action: 'Edit Member',
+            detail: `Edit member: ${memberData.namalengkap} (${docId})`,
+            user: user?.email || 'unknown',
+          });
+        } catch (logErr: any) {
+          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        }
         notify('Data anggota berhasil diperbarui!');
       } else if (isEditing && formType === 'activity' && data.id) {
         // ...existing code...
@@ -271,6 +302,15 @@ export default function AdminPage() {
           id: data.id,
         };
         await setDoc(doc(db, 'activities', data.id), activityData);
+        try {
+          await addDevLog({
+            action: 'Edit Activity',
+            detail: `Edit activity: ${activityData.title} (${data.id})`,
+            user: user?.email || 'unknown',
+          });
+        } catch (logErr: any) {
+          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        }
         notify('Data kegiatan berhasil diperbarui!');
       } else if (isEditing && formType === 'gallery' && data.id) {
         // ...existing code...
@@ -284,6 +324,15 @@ export default function AdminPage() {
           id: data.id,
         };
         await setDoc(doc(db, 'gallerys', data.id), galleryData);
+        try {
+          await addDevLog({
+            action: 'Edit Gallery',
+            detail: `Edit gallery: ${galleryData.title} (${data.id})`,
+            user: user?.email || 'unknown',
+          });
+        } catch (logErr: any) {
+          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        }
         notify('Data galeri berhasil diperbarui!');
       } else if (isEditing && formType === 'learning' && data.id) {
         // Update learning
@@ -296,6 +345,15 @@ export default function AdminPage() {
           id: data.id,
         };
         await setDoc(doc(db, 'learnings', data.id), learningData);
+        try {
+          await addDevLog({
+            action: 'Edit Learning',
+            detail: `Edit learning: ${learningData.title} (${data.id})`,
+            user: user?.email || 'unknown',
+          });
+        } catch (logErr: any) {
+          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        }
         notify('Data pembelajaran berhasil diperbarui!');
       } else if (formType === 'activity' && !isEditing) {
         // ...existing code...
@@ -309,6 +367,15 @@ export default function AdminPage() {
           updatedAt: new Date().toISOString(),
         };
         await addDoc(collection(db, 'activities'), activityData);
+        try {
+          await addDevLog({
+            action: 'Tambah Activity',
+            detail: `Tambah activity: ${activityData.title}`,
+            user: user?.email || 'unknown',
+          });
+        } catch (logErr: any) {
+          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        }
         notify('Data kegiatan berhasil ditambahkan!');
       } else if (formType === 'learning' && !isEditing) {
         // Create new learning
@@ -321,15 +388,42 @@ export default function AdminPage() {
           updatedAt: new Date().toISOString(),
         };
         await addDoc(collection(db, 'learnings'), learningData);
+        try {
+          await addDevLog({
+            action: 'Tambah Learning',
+            detail: `Tambah learning: ${learningData.title}`,
+            user: user?.email || 'unknown',
+          });
+        } catch (logErr: any) {
+          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        }
         notify('Data pembelajaran berhasil ditambahkan!');
       } else {
         // ...existing code...
         if (formType === 'member' && data.customId) {
           const { customId, ...memberData } = data;
           await setDoc(doc(db, 'anggota', customId), memberData);
+          try {
+            await addDevLog({
+              action: 'Tambah Member (Custom ID)',
+              detail: `Tambah member custom: ${memberData.namalengkap} (${customId})`,
+              user: user?.email || 'unknown',
+            });
+          } catch (logErr: any) {
+            window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+          }
           notify('Data berhasil ditambahkan dengan ID custom!');
         } else {
           await addDoc(collection(db, collectionName), data);
+          try {
+            await addDevLog({
+              action: 'Tambah Data',
+              detail: `Tambah data ke ${collectionName}`,
+              user: user?.email || 'unknown',
+            });
+          } catch (logErr: any) {
+            window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+          }
           notify('Data berhasil ditambahkan!');
         }
       }
@@ -373,6 +467,15 @@ export default function AdminPage() {
       const dataToDelete = { ...dataAsli, originalType, deletedAt: new Date().toISOString() };
       await setDoc(doc(db, 'recycle_bin', itemId), dataToDelete);
       await deleteDoc(doc(db, collectionName, itemId));
+      try {
+        await addDevLog({
+          action: 'Hapus Data',
+          detail: `Hapus data ${originalType} (${itemId})`,
+          user: user?.email || 'unknown',
+        });
+      } catch (logErr: any) {
+        window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+      }
       setDeleteDialogOpen(false);
       setDeleteChecked(false);
       setCurrentItem(null);
@@ -532,8 +635,8 @@ export default function AdminPage() {
             Members
           </TabsTrigger>
           <TabsTrigger value="learning" className="flex items-center gap-2">
-            <ImageIcon className="h-4 w-4" />
-            Learning
+            <Book className="h-4 w-4" />
+            Learnings
           </TabsTrigger>
           <TabsTrigger value="recycle" className="flex items-center gap-2">
             <Trash2 className="h-4 w-4" />
