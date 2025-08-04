@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getMeta, setMeta as saveMeta, MetaData } from "@/lib/meta";
+import { getCarouselContent, setCarouselContent, CarouselContentItem } from "@/lib/homepage";
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { getDevLogs, addDevLog, DevLog } from "@/lib/devlog";
@@ -27,7 +28,56 @@ export default function DeveloperPage() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'meta' | 'logadmin'>('meta');
+  const [tab, setTab] = useState<'meta' | 'logadmin' | 'homepage'>('meta');
+  // Homepage Carousel State
+  const [carousel, setCarousel] = useState<CarouselContentItem[]>([]);
+  const [carouselLoading, setCarouselLoading] = useState(false);
+  const [carouselEdit, setCarouselEdit] = useState<CarouselContentItem | null>(null);
+  const [carouselEditIdx, setCarouselEditIdx] = useState<number | null>(null);
+  const [carouselDialog, setCarouselDialog] = useState(false);
+  // Load carousel content when tab is homepage
+  useEffect(() => {
+    if (tab === 'homepage' && user) {
+      setCarouselLoading(true);
+      getCarouselContent().then(data => {
+        setCarousel(data || []);
+        setCarouselLoading(false);
+      });
+    }
+  }, [tab, user]);
+  // Carousel CRUD handlers
+  const handleCarouselEdit = (item: CarouselContentItem, idx: number) => {
+    setCarouselEdit(item);
+    setCarouselEditIdx(idx);
+    setCarouselDialog(true);
+  };
+  const handleCarouselAdd = () => {
+    setCarouselEdit({ imageUrl: '', alt: '', title: '', description: '' });
+    setCarouselEditIdx(null);
+    setCarouselDialog(true);
+  };
+  const handleCarouselDelete = (idx: number) => {
+    if (window.confirm('Hapus slide ini?')) {
+      const next = [...carousel];
+      next.splice(idx, 1);
+      setCarousel(next);
+      setCarouselContent(next);
+    }
+  };
+  const handleCarouselDialogSave = () => {
+    if (!carouselEdit) return;
+    const next = [...carousel];
+    if (carouselEditIdx === null) {
+      next.push(carouselEdit);
+    } else {
+      next[carouselEditIdx] = carouselEdit;
+    }
+    setCarousel(next);
+    setCarouselContent(next);
+    setCarouselDialog(false);
+    setCarouselEdit(null);
+    setCarouselEditIdx(null);
+  };
   const [logs, setLogs] = useState<DevLog[]>([]);
   const [logsLoading, setLogsLoading] = useState(false);
 
@@ -138,8 +188,92 @@ export default function DeveloperPage() {
         >
           Log Admin
         </button>
+        <button
+          className={`px-4 py-2 font-semibold rounded-t-lg ${tab === 'homepage' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          onClick={() => setTab('homepage')}
+        >
+          Homepage
+        </button>
       </div>
       <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
+        {tab === 'homepage' && (
+          <>
+            <h2 className="font-bold text-xl mb-4 text-blue-900 flex items-center gap-2">
+              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              Homepage Carousel Editor
+            </h2>
+            {carouselLoading ? (
+              <div className="text-center py-10 text-gray-500">Memuat data carousel...</div>
+            ) : (
+              <>
+                <div className="flex justify-end mb-4">
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow" onClick={handleCarouselAdd}>Tambah Slide</button>
+                </div>
+                {carousel.length === 0 ? (
+                  <div className="text-center text-gray-400 py-10">Belum ada data carousel.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-blue-100 text-blue-900">
+                          <th className="p-2">Gambar</th>
+                          <th className="p-2">Alt</th>
+                          <th className="p-2">Judul</th>
+                          <th className="p-2">Deskripsi</th>
+                          <th className="p-2">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {carousel.map((item, idx) => (
+                          <tr key={idx} className="border-b last:border-b-0">
+                            <td className="p-2"><img src={item.imageUrl} alt={item.alt} className="h-16 w-28 object-cover rounded" /></td>
+                            <td className="p-2 max-w-xs truncate">{item.alt}</td>
+                            <td className="p-2 max-w-xs truncate">{item.title}</td>
+                            <td className="p-2 max-w-xs truncate">{item.description}</td>
+                            <td className="p-2 flex gap-2">
+                              <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded" onClick={() => handleCarouselEdit(item, idx)}>Edit</button>
+                              <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handleCarouselDelete(idx)}>Hapus</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {/* Dialog for add/edit */}
+                {carouselDialog && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+                      <h3 className="font-bold text-lg mb-4">{carouselEditIdx === null ? 'Tambah' : 'Edit'} Slide Carousel</h3>
+                      <div className="grid gap-3 mb-4">
+                        <div>
+                          <label className="block font-medium mb-1">Gambar (URL)</label>
+                          <input className="w-full border rounded p-2" value={carouselEdit?.imageUrl || ''} onChange={e => setCarouselEdit({ ...carouselEdit!, imageUrl: e.target.value })} placeholder="https://..." />
+                        </div>
+                        <div>
+                          <label className="block font-medium mb-1">Alt</label>
+                          <input className="w-full border rounded p-2" value={carouselEdit?.alt || ''} onChange={e => setCarouselEdit({ ...carouselEdit!, alt: e.target.value })} />
+                        </div>
+                        <div>
+                          <label className="block font-medium mb-1">Judul</label>
+                          <input className="w-full border rounded p-2" value={carouselEdit?.title || ''} onChange={e => setCarouselEdit({ ...carouselEdit!, title: e.target.value })} />
+                        </div>
+                        <div>
+                          <label className="block font-medium mb-1">Deskripsi</label>
+                          <textarea className="w-full border rounded p-2" value={carouselEdit?.description || ''} onChange={e => setCarouselEdit({ ...carouselEdit!, description: e.target.value })} />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 justify-end">
+                        <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onClick={handleCarouselDialogSave}>Simpan</button>
+                        <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded" onClick={() => { setCarouselDialog(false); setCarouselEdit(null); setCarouselEditIdx(null); }}>Batal</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
         {tab === 'meta' && (
           <>
             <h2 className="font-bold text-xl mb-4 text-blue-900 flex items-center gap-2">

@@ -12,6 +12,7 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from "@/components/ui/carousel";
+import { getCarouselContent, CarouselContentItem } from "@/lib/homepage";
 import Autoplay from "embla-carousel-autoplay";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Instagram, Mail, Phone } from "lucide-react";
@@ -29,6 +30,21 @@ export default function HomePage() {
   const [showContact, setShowContact] = useState(false);
   // Birthday popup state
   const [showBirthdayPopup, setShowBirthdayPopup] = useState(false);
+
+  // Carousel state
+  const [carousel, setCarousel] = useState<CarouselContentItem[] | null>(null);
+  const [carouselLoading, setCarouselLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    getCarouselContent().then(data => {
+      if (mounted) {
+        setCarousel(data);
+        setCarouselLoading(false);
+      }
+    });
+    return () => { mounted = false; };
+  }, []);
 
   useEffect(() => {
     // Cek apakah ulang tahun kurang dari 1 bulan (31 hari)
@@ -90,76 +106,59 @@ export default function HomePage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.7 }}
           >
-            <Carousel 
-              opts={{ 
-                align: "start",
-                loop: true,
-              }}
-              className="w-full"
-              plugins={[
-                Autoplay({
-                  delay: 5000,
-                }),
-              ]}
-            >
-              <CarouselContent>
-                {/* Slide 1 */}
-                <CarouselItem>
-                  <div className="relative h-96">
-                    <img 
-                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/anggota%20mahapala%20narotama.jpg?token=BLQPXT5IJXO2HT4FXTVJIBDISCTDO" 
-                      alt="Anggota Mahapala Narotama" 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                      <div className="p-6 text-white">
-                        <h2 className="font-heading text-2xl font-bold mb-2">Kebersamaan adalah simbol Kekuatan</h2>
-                        <p className="text-gray-200">Bergabunglah dalam misi kami untuk melindungi lingkungan dan eksplorasi alam.</p>
+            {carouselLoading ? (
+              <div className="h-96 flex items-center justify-center text-gray-400">Memuat carousel...</div>
+            ) : (
+              <Carousel 
+                opts={{ align: "start", loop: true }}
+                className="w-full"
+                plugins={[Autoplay({ delay: 5000 })]}
+              >
+                <CarouselContent>
+                  {(carousel && carousel.length > 0 ? carousel : [
+                    // fallback static if no data
+                    {
+                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/anggota%20mahapala%20narotama.jpg",
+                      alt: "Anggota Mahapala Narotama",
+                      title: "Kebersamaan adalah simbol Kekuatan",
+                      description: "Bergabunglah dalam misi kami untuk melindungi lingkungan dan eksplorasi alam."
+                    },
+                    {
+                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/eksplorasi%20alam.jpg",
+                      alt: "Pendidikan Rimba Gunung Mahapala Narotama",
+                      title: "Petualangan Tanpa Batas",
+                      description: "Eksplorasi keindahan alam Indonesia bersama Mahapala Narotama."
+                    },
+                    {
+                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/panjat%20tebing.png",
+                      alt: "Pendidikan Panjat Tebing Mahapala Narotama",
+                      title: "Keseruan dalam Berpetualang",
+                      description: "Kami berkomitmen untuk pendidikan lingkungan dan pelestarian alam."
+                    }
+                  ]).map((item, idx) => (
+                    <CarouselItem key={idx}>
+                      <div className="relative h-96">
+                        <img 
+                          src={item.imageUrl} 
+                          alt={item.alt} 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
+                          <div className="p-6 text-white">
+                            <h2 className="font-heading text-2xl font-bold mb-2">{item.title}</h2>
+                            <p className="text-gray-200">{item.description}</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-                
-                {/* Slide 2 */}
-                <CarouselItem>
-                  <div className="relative h-96">
-                    <img 
-                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/eksplorasi%20alam.jpg?token=BLQPXT5534GYGBVGNVOOUVDISCTDO" 
-                      alt="Pendidikan Rimba Gunung Mahapala Narotama" 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                      <div className="p-6 text-white">
-                        <h2 className="font-heading text-2xl font-bold mb-2">Petualangan Tanpa Batas</h2>
-                        <p className="text-gray-200">Eksplorasi keindahan alam Indonesia bersama Mahapala Narotama.</p>
-                      </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-                
-                {/* Slide 3 */}
-                <CarouselItem>
-                  <div className="relative h-96">
-                    <img 
-                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/panjat%20tebing.png?token=BLQPXT2HDQM5ECFAINCCRGTISCTDO" 
-                      alt="Pendidikan Panjat Tebing Mahapala Narotama" 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-                      <div className="p-6 text-white">
-                        <h2 className="font-heading text-2xl font-bold mb-2">Keseruan dalam Berpetualang</h2>
-                        <p className="text-gray-200">Kami berkomitmen untuk pendidikan lingkungan dan pelestarian alam.</p>
-                      </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-              </CarouselContent>
-              
-              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-                <CarouselPrevious className="relative -left-0 translate-y-0 bg-white/20 hover:bg-white/40" />
-                <CarouselNext className="relative -right-0 translate-y-0 bg-white/20 hover:bg-white/40" />
-              </div>
-            </Carousel>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+                  <CarouselPrevious className="relative -left-0 translate-y-0 bg-white/20 hover:bg-white/40" />
+                  <CarouselNext className="relative -right-0 translate-y-0 bg-white/20 hover:bg-white/40" />
+                </div>
+              </Carousel>
+            )}
           </motion.div>
         </div>
       </motion.section>
