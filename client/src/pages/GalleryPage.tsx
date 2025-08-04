@@ -5,10 +5,12 @@ import { Instagram, Mail, Phone } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import ImagePreviewDialog from "@/components/ImagePreviewDialog";
 
 export default function GalleryPage() {
   const { data: gallery, isLoading } = useGallery();
   const [showContact, setShowContact] = useState(false);
+  const [previewImg, setPreviewImg] = useState<string | null>(null);
 
   return (
     <section className="py-10 sm:py-16 bg-gradient-to-br from-white via-blue-50 to-blue-100 min-h-screen">
@@ -45,39 +47,47 @@ export default function GalleryPage() {
             ))}
           </div>
         ) : gallery && gallery.length > 0 ? (
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6 auto-rows-[160px] xs:auto-rows-[180px] sm:auto-rows-[220px] md:auto-rows-[250px]">
+          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-[120px] xs:auto-rows-[140px] sm:auto-rows-[180px] md:auto-rows-[220px]">
             {gallery.map((item, idx) => (
               <div
                 key={item.id}
-                className={`relative overflow-hidden rounded-xl shadow-lg group border border-gray-100 bg-white hover:shadow-2xl transition-all duration-300 ${
+                className={`relative overflow-hidden rounded-xl shadow-lg group border border-gray-100 bg-white hover:shadow-2xl transition-all duration-300 flex flex-col justify-end ${
                   idx % 7 === 0
-                    ? 'md:row-span-2 md:col-span-2 h-[320px] md:h-[520px]'
+                    ? 'md:row-span-2 md:col-span-2 h-[180px] md:h-[320px]'
                     : idx % 5 === 0
-                    ? 'md:row-span-2 h-[320px] md:h-[520px]'
+                    ? 'md:row-span-2 h-[180px] md:h-[320px]'
                     : 'h-full'
                 }`}
+                style={{ minHeight: 120, cursor: item.imageUrl ? 'pointer' : 'default' }}
+                onClick={() => item.imageUrl && setPreviewImg(item.imageUrl)}
               >
                 {item.imageUrl ? (
                   <img
                     src={item.imageUrl}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
                     Tidak ada gambar
                   </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center">
-                  <div className="w-full p-4 pb-6 text-white text-center bg-gradient-to-t from-black/60 to-transparent rounded-b-xl">
-                    <h3 className="font-bold text-lg mb-1 drop-shadow-lg">{item.title}</h3>
-                    {item.description && <p className="text-sm line-clamp-3 drop-shadow">{item.description}</p>}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end justify-center pointer-events-none">
+                  <div className="w-full p-2 pb-4 text-white text-center bg-gradient-to-t from-black/60 to-transparent rounded-b-xl">
+                    <h3 className="font-bold text-base mb-1 drop-shadow-lg line-clamp-1">{item.title}</h3>
+                    {item.description && <p className="text-xs line-clamp-2 drop-shadow">{item.description}</p>}
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
+      <ImagePreviewDialog
+        open={!!previewImg}
+        onOpenChange={open => setPreviewImg(open ? previewImg : null)}
+        imageUrl={previewImg || ""}
+      />
           <div className="text-center text-gray-500 py-20">Tidak ada data galeri.</div>
         )}
         <Dialog open={showContact} onOpenChange={setShowContact}>
