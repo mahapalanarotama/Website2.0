@@ -47,18 +47,21 @@ export default function GalleryPage() {
             ))}
           </div>
         ) : gallery && gallery.length > 0 ? (
-          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-[120px] xs:auto-rows-[140px] sm:auto-rows-[180px] md:auto-rows-[220px]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-[120px] sm:auto-rows-[180px] md:auto-rows-[220px]">
             {gallery.map((item, idx) => (
               <div
                 key={item.id}
-                className={`relative overflow-hidden rounded-xl shadow-lg group border border-gray-100 bg-white hover:shadow-2xl transition-all duration-300 flex flex-col justify-end ${
-                  idx % 7 === 0
-                    ? 'md:row-span-2 md:col-span-2 h-[180px] md:h-[320px]'
-                    : idx % 5 === 0
-                    ? 'md:row-span-2 h-[180px] md:h-[320px]'
-                    : 'h-full'
-                }`}
-                style={{ minHeight: 120, cursor: item.imageUrl ? 'pointer' : 'default' }}
+                className={
+                  `relative overflow-hidden rounded-xl shadow-lg group border border-gray-100 bg-white hover:shadow-2xl transition-all duration-300 flex flex-col justify-end ` +
+                  (
+                    idx % 7 === 0
+                      ? 'md:row-span-2 md:col-span-2 h-[120px] md:h-[320px]'
+                      : idx % 5 === 0
+                      ? 'md:row-span-2 h-[120px] md:h-[320px]'
+                      : 'h-[120px] md:h-full'
+                  )
+                }
+                style={{ cursor: item.imageUrl ? 'pointer' : 'default' }}
                 onClick={() => item.imageUrl && setPreviewImg(item.imageUrl)}
               >
                 {item.imageUrl ? (
@@ -89,7 +92,7 @@ export default function GalleryPage() {
               onOpenChange={open => setPreviewImg(open ? previewImg : null)}
               imageUrl={previewImg || ""}
             />
-            <div className="text-center text-gray-500 py-20">Tidak ada data galeri.</div>
+            <div className="text-center text-gray-500 py-20">{gallery && gallery.length === 0 ? "Tidak ada data galeri." : null}</div>
           </>
         )}
         <Dialog open={showContact} onOpenChange={setShowContact}>
