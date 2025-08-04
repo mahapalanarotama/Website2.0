@@ -11,7 +11,8 @@ const defaultMeta: MetaData = {
   image: "https://opengraph.b-cdn.net/production/images/e0842583-257e-46c1-9055-1c49ee456d3f.jpg?token=p3fN6dOPVL12p7_4AZrWfifa4bvHLMnndwMwNRQCpwg&height=900&width=1200&expires=33285527673",
   favicon: "/favicon.ico",
   faviconFallback: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.ico",
-  faviconPng: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.png"
+  faviconPng: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.png",
+  googleFormUrl: "",
 };
 
 export default function DeveloperPage() {
@@ -154,6 +155,7 @@ export default function DeveloperPage() {
                   <div className="truncate max-w-full"><span className="font-semibold">Favicon:</span> <a href={meta.favicon} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">{meta.favicon}</a></div>
                   <div className="truncate max-w-full"><span className="font-semibold">Favicon Fallback:</span> <a href={meta.faviconFallback} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">{meta.faviconFallback}</a></div>
                   <div className="truncate max-w-full"><span className="font-semibold">Favicon PNG:</span> <a href={meta.faviconPng} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">{meta.faviconPng}</a></div>
+                  <div className="truncate max-w-full"><span className="font-semibold">Link Google Formulir Pendaftaran:</span> <a href={meta.googleFormUrl} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">{meta.googleFormUrl}</a></div>
                 </div>
                 <div className="flex gap-2">
                   <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow" onClick={handleEdit}>Edit</button>
@@ -197,6 +199,10 @@ export default function DeveloperPage() {
                   <div>
                     <label className="block font-medium mb-1">Favicon PNG</label>
                     <input className="w-full border rounded p-2" name="faviconPng" value={pendingMeta.faviconPng} onChange={handleChange} />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-1">Link Google Formulir Pendaftaran</label>
+                    <input className="w-full border rounded p-2" name="googleFormUrl" value={pendingMeta.googleFormUrl || ''} onChange={handleChange} placeholder="https://docs.google.com/forms/..." />
                   </div>
                 </div>
                 <div className="flex gap-2">

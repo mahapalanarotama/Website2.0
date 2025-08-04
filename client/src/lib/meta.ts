@@ -9,6 +9,7 @@ export type MetaData = {
   favicon: string;
   faviconFallback: string;
   faviconPng: string;
+  googleFormUrl?: string;
 };
 
 const META_DOC_ID = 'main';
