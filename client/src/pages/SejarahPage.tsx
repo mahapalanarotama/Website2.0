@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 
@@ -56,27 +57,7 @@ export default function SejarahPage() {
     return () => cancelAnimationFrame(frame);
   }, [isAuto]);
 
-  // Pause auto-scroll saat slider digerakkan, lanjut 5 detik setelah idle
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsAuto(false);
-    setMarqueePos(Number(e.target.value));
-    if (idleTimeout.current) clearTimeout(idleTimeout.current);
-    idleTimeout.current = setTimeout(() => {
-      setIsAuto(true);
-    }, 5000);
-  };
-
-  // Pause auto-scroll saat slider di-drag
-  const handleSliderStart = () => {
-    setIsAuto(false);
-    if (idleTimeout.current) clearTimeout(idleTimeout.current);
-  };
-  const handleSliderEnd = () => {
-    if (idleTimeout.current) clearTimeout(idleTimeout.current);
-    idleTimeout.current = setTimeout(() => {
-      setIsAuto(true);
-    }, 5000);
-  };
+  // (fungsi slider tidak dipakai, logika langsung di onChange/onMouseDown/onMouseUp/onTouchStart/onTouchEnd input)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-green-50 py-10">
@@ -93,72 +74,79 @@ export default function SejarahPage() {
         {/* Mantan Ketua Umum */}
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}
           className="text-2xl font-bold text-blue-800 mb-4 text-center">Mantan Ketua Umum</motion.h2>
-        <div className="relative w-full overflow-hidden py-4">
-          <div
-            ref={marqueeRef}
-            className="flex gap-6 min-w-[700px] pb-2 px-2"
-            style={{
-              width: 'max-content',
-              transform: `translateX(-${marqueePos * 100}%)`,
-              transition: isAuto ? 'none' : 'transform 0.2s',
-              willChange: 'transform',
-            }}
-          >
-            {(() => {
-              // Duplikasi 3x agar infinite loop benar-benar seamless
-              const cards = [...ketuaList, ...ketuaList, ...ketuaList];
-              const nowIdx = ketuaList.length - 1;
-              return cards.map((k, i) => {
-                // Garis pemisah antara ketua pertama dan ketua sekarang (hanya pada duplikasi pertama)
-                let separator = null;
-                if (i === ketuaList.length - 1) {
-                  separator = <div key={"sep-"+i} className="flex items-center mx-2 text-3xl font-bold text-gray-400 select-none">|</div>;
-                }
-                // Efek spesial untuk ketua sekarang (asumsi data terakhir)
-                const isNow = (i % ketuaList.length) === nowIdx;
-                return <>
-                  <motion.div key={i}
-                    initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * (i % ketuaList.length) }}
-                    className={
-                      "bg-white rounded-xl shadow-lg p-4 flex flex-col items-center min-w-[180px] hover:scale-105 transition-transform duration-300 border " +
-                      (isNow ? "border-yellow-400 ring-4 ring-yellow-300 animate-glow shadow-yellow-200" : "border-blue-100")
-                    }
-                  >
-                    <img src={k.foto} alt={k.nama} className={
-                      "w-20 h-20 rounded-full object-cover mb-2 " +
-                      (isNow ? "border-4 border-yellow-400 shadow-lg" : "border-4 border-blue-200")
-                    } />
-                    <div className={
-                      "font-bold text-lg text-center " +
-                      (isNow ? "text-yellow-700" : "text-blue-700")
-                    }>{k.nama}</div>
-                    <div className={
-                      "text-xs text-center " +
-                      (isNow ? "text-yellow-600 font-bold" : "text-gray-500")
-                    }>Periode {k.periode}</div>
-                    {isNow && <div className="mt-1 px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs font-semibold animate-pulse">Ketua Umum Sekarang</div>}
-                  </motion.div>
-                  {separator}
-                </>;
-              });
-            })()}
-          </div>
-          {/* Slider */}
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.001}
-            value={marqueePos}
-            onChange={handleSliderChange}
-            onMouseDown={handleSliderStart}
-            onMouseUp={handleSliderEnd}
-            onTouchStart={handleSliderStart}
-            onTouchEnd={handleSliderEnd}
-            className="w-full mt-4 accent-yellow-500"
-            aria-label="Scroll mantan ketua umum"
-          />
-        </div>
+<div className="relative w-full overflow-hidden py-4">
+  <div
+    ref={marqueeRef}
+    className="flex gap-6 min-w-[700px] pb-2 px-2"
+    style={{
+      width: 'max-content',
+      transform: `translateX(-${marqueePos * (ketuaList.length * 190 + 32)}px)`,
+      transition: isAuto ? 'none' : 'transform 0.2s',
+      willChange: 'transform',
+    }}
+  >
+    {(() => {
+      // Duplikasi 2x agar infinite loop benar-benar seamless
+      const cards = [...ketuaList, ...ketuaList];
+      const nowIdx = ketuaList.length - 1;
+      return cards.map((k, i) => {
+        // Separator di antara ketua terakhir dan pertama
+        let separator = null;
+        if ((i + 1) % ketuaList.length === 0) {
+          separator = <div key={"sep-"+i} className="flex items-center mx-2 text-3xl font-bold text-gray-400 select-none">|</div>;
+        }
+        const isNow = (i % ketuaList.length) === nowIdx;
+        return (
+          <React.Fragment key={i}>
+            <motion.div
+              initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * (i % ketuaList.length) }}
+              className={
+                "bg-white rounded-xl shadow-lg p-4 flex flex-col items-center min-w-[180px] hover:scale-105 transition-transform duration-300 border " +
+                (isNow ? "border-yellow-400 ring-4 ring-yellow-300 animate-glow shadow-yellow-200" : "border-blue-100")
+              }
+            >
+              <img src={k.foto} alt={k.nama} className={
+                "w-20 h-20 rounded-full object-cover mb-2 " +
+                (isNow ? "border-4 border-yellow-400 shadow-lg" : "border-4 border-blue-200")
+              } />
+              <div className={
+                "font-bold text-lg text-center " +
+                (isNow ? "text-yellow-700" : "text-blue-700")
+              }>{k.nama}</div>
+              <div className={
+                "text-xs text-center " +
+                (isNow ? "text-yellow-600 font-bold" : "text-gray-500")
+              }>Periode {k.periode}</div>
+              {isNow && <div className="mt-1 px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-xs font-semibold animate-pulse">Ketua Umum Sekarang</div>}
+            </motion.div>
+            {separator}
+          </React.Fragment>
+        );
+      });
+    })()}
+  </div>
+  {/* Slider */}
+  <input
+    type="range"
+    min={0}
+    max={ketuaList.length - 1}
+    step={1}
+    value={Math.round(marqueePos * (ketuaList.length - 1))}
+    onChange={e => {
+      setIsAuto(false);
+      setMarqueePos(Number(e.target.value) / (ketuaList.length - 1));
+      if (idleTimeout.current) clearTimeout(idleTimeout.current);
+      idleTimeout.current = setTimeout(() => setIsAuto(true), 5000);
+    }}
+    onMouseDown={() => { setIsAuto(false); if (idleTimeout.current) clearTimeout(idleTimeout.current); }}
+    onMouseUp={() => { if (idleTimeout.current) clearTimeout(idleTimeout.current); idleTimeout.current = setTimeout(() => setIsAuto(true), 5000); }}
+    onTouchStart={() => { setIsAuto(false); if (idleTimeout.current) clearTimeout(idleTimeout.current); }}
+    onTouchEnd={() => { if (idleTimeout.current) clearTimeout(idleTimeout.current); idleTimeout.current = setTimeout(() => setIsAuto(true), 5000); }}
+    className="w-full mt-4 accent-yellow-500"
+    aria-label="Scroll mantan ketua umum"
+  />
+</div>
+
         <style>{`
           @keyframes animate-glow {
             0% { box-shadow: 0 0 0 0 #fde68a, 0 0 10px 2px #fde68a44; }
