@@ -16,7 +16,6 @@ import Autoplay from "embla-carousel-autoplay";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Instagram, Mail, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
-import BacksoundPlayer from "@/components/BacksoundPlayer";
 
 import BirthdayCountdownHome from "@/components/BirthdayCountdownHome";
 import TypewriterText from "@/components/TypewriterText";

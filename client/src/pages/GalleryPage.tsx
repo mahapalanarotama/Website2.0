@@ -83,12 +83,14 @@ export default function GalleryPage() {
             ))}
           </div>
         ) : (
-      <ImagePreviewDialog
-        open={!!previewImg}
-        onOpenChange={open => setPreviewImg(open ? previewImg : null)}
-        imageUrl={previewImg || ""}
-      />
-          <div className="text-center text-gray-500 py-20">Tidak ada data galeri.</div>
+          <>
+            <ImagePreviewDialog
+              open={!!previewImg}
+              onOpenChange={open => setPreviewImg(open ? previewImg : null)}
+              imageUrl={previewImg || ""}
+            />
+            <div className="text-center text-gray-500 py-20">Tidak ada data galeri.</div>
+          </>
         )}
         <Dialog open={showContact} onOpenChange={setShowContact}>
           <DialogContent className="max-w-xs w-full p-0 rounded-xl">
