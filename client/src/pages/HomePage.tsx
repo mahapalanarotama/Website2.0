@@ -18,7 +18,7 @@ import { Instagram, Mail, Phone } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 // @ts-ignore
 import backsound from "../assets/backsound.mp3";
-import { learningModulesFront } from "@/components/externalLearningLinks";
+
 import BirthdayCountdownHome from "@/components/BirthdayCountdownHome";
 import TypewriterText from "@/components/TypewriterText";
 import { motion } from "framer-motion";
@@ -123,13 +123,8 @@ export default function HomePage() {
     sessionStorage.setItem('hideBirthdayPopup', '1');
   };
 
-  // Gabungkan 3 terbaru dari backend dan eksternal (tanpa duplikasi judul)
-  const combinedModules = [
-    ...(learningModules || []),
-    ...learningModulesFront.filter(
-      (ext) => !learningModules?.some((m) => m.title === ext.title)
-    ),
-  ].slice(0, 3);
+  // Hanya tampilkan data pembelajaran dari Firestore
+  const combinedModules = (learningModules || []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
