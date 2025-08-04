@@ -118,19 +118,19 @@ export default function HomePage() {
                   {(carousel && carousel.length > 0 ? carousel : [
                     // fallback static if no data
                     {
-                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/anggota%20mahapala%20narotama.jpg",
+                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/anggota%20mahapala%20narotama.jpg?token=GHSAT0AAAAAADIRKMDDV3CPDHQMBNZM5BU22EQVRUQ",
                       alt: "Anggota Mahapala Narotama",
                       title: "Kebersamaan adalah simbol Kekuatan",
                       description: "Bergabunglah dalam misi kami untuk melindungi lingkungan dan eksplorasi alam."
                     },
                     {
-                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/eksplorasi%20alam.jpg",
+                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/eksplorasi%20alam.jpg?token=GHSAT0AAAAAADIRKMDD2PEG65BJJB6PALOS2EQVR5Q",
                       alt: "Pendidikan Rimba Gunung Mahapala Narotama",
                       title: "Petualangan Tanpa Batas",
                       description: "Eksplorasi keindahan alam Indonesia bersama Mahapala Narotama."
                     },
                     {
-                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/panjat%20tebing.png",
+                      imageUrl: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/panjat%20tebing.png?token=GHSAT0AAAAAADIRKMDC42PP6NL5I57XAYPG2EQVSDA",
                       alt: "Pendidikan Panjat Tebing Mahapala Narotama",
                       title: "Keseruan dalam Berpetualang",
                       description: "Kami berkomitmen untuk pendidikan lingkungan dan pelestarian alam."
