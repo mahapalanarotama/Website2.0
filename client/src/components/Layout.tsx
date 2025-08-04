@@ -1,4 +1,6 @@
 import React, { useEffect } from "react";
+import { useLocation } from "wouter";
+import BacksoundPlayer from "@/components/BacksoundPlayer";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { CookieConsent } from "./ui/cookie-consent";
@@ -38,12 +40,16 @@ export function Layout({ children }: LayoutProps) {
     }
   };
 
+  const [location] = useLocation();
+  // Cek path untuk pengecualian backsound
+  const hideBacksound = ["/admin", "/developer", "/offline"].some((p) => location.startsWith(p));
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">{children}</main>
       <Footer />
       <CookieConsent />
+      {!hideBacksound && <BacksoundPlayer />}
     </div>
   );
 }
