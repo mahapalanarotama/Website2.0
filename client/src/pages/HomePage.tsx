@@ -107,7 +107,7 @@ export default function HomePage() {
                 <CarouselItem>
                   <div className="relative h-96">
                     <img 
-                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/anggota%20mahapala%20narotama.jpg" 
+                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/anggota%20mahapala%20narotama.jpg?token=BLQPXT5IJXO2HT4FXTVJIBDISCTDO" 
                       alt="Anggota Mahapala Narotama" 
                       className="w-full h-full object-cover"
                     />
@@ -124,7 +124,7 @@ export default function HomePage() {
                 <CarouselItem>
                   <div className="relative h-96">
                     <img 
-                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/eksplorasi%20alam.jpg" 
+                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/eksplorasi%20alam.jpg?token=BLQPXT5534GYGBVGNVOOUVDISCTDO" 
                       alt="Pendidikan Rimba Gunung Mahapala Narotama" 
                       className="w-full h-full object-cover"
                     />
@@ -141,7 +141,7 @@ export default function HomePage() {
                 <CarouselItem>
                   <div className="relative h-96">
                     <img 
-                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/panjat%20tebing.png" 
+                      src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/panjat%20tebing.png?token=BLQPXT2HDQM5ECFAINCCRGTISCTDO" 
                       alt="Pendidikan Panjat Tebing Mahapala Narotama" 
                       className="w-full h-full object-cover"
                     />
