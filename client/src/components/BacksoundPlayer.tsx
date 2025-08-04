@@ -86,7 +86,6 @@ export default function BacksoundPlayer() {
         className={`w-16 h-16 rounded-full bg-gradient-to-tr from-green-300 to-green-700 shadow-lg flex items-center justify-center border-4 border-white transition-transform duration-700 ${playing ? "animate-spin-slow" : ""}`}
         style={{ boxShadow: '0 4px 24px 0 rgba(34,139,34,0.15)' }}
         onClick={() => {
-          handleToggle();
           setShowSelect(true);
           if (hideTimeout.current) clearTimeout(hideTimeout.current);
           hideTimeout.current = setTimeout(() => setShowSelect(false), 5000);
@@ -121,7 +120,18 @@ export default function BacksoundPlayer() {
         onPause={() => setPlaying(false)}
         style={{ display: "none" }}
         onLoadedMetadata={() => {
-          if (audioRef.current) audioRef.current.volume = 0.6;
+          if (audioRef.current) {
+            audioRef.current.volume = 0.6;
+            // Otomatis play jika belum playing
+            if (!playing) {
+              const playPromise = audioRef.current.play();
+              if (playPromise !== undefined) {
+                playPromise.then(() => setPlaying(true)).catch(() => {
+                  // Autoplay might be blocked
+                });
+              }
+            }
+          }
         }}
       />
       <span className="mt-2 text-xs text-green-900 bg-white/80 px-2 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition">{playing ? "Sedang diputar" : "Klik untuk backsound"}</span>
