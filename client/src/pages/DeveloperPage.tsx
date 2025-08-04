@@ -13,6 +13,7 @@ const defaultMeta: MetaData = {
   faviconFallback: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.ico",
   faviconPng: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.png",
   googleFormUrl: "",
+  googleFormDownloadUrl: "",
 };
 
 export default function DeveloperPage() {
@@ -203,6 +204,10 @@ export default function DeveloperPage() {
                   <div>
                     <label className="block font-medium mb-1">Link Google Formulir Pendaftaran</label>
                     <input className="w-full border rounded p-2" name="googleFormUrl" value={pendingMeta.googleFormUrl || ''} onChange={handleChange} placeholder="https://docs.google.com/forms/..." />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-1">Link Download Formulir (editable)</label>
+                    <input className="w-full border rounded p-2" name="googleFormDownloadUrl" value={pendingMeta.googleFormDownloadUrl || ''} onChange={handleChange} placeholder="https://.../formulir.docx" />
                   </div>
                 </div>
                 <div className="flex gap-2">

@@ -10,6 +10,7 @@ export type MetaData = {
   faviconFallback: string;
   faviconPng: string;
   googleFormUrl?: string;
+  googleFormDownloadUrl?: string;
 };
 
 const META_DOC_ID = 'main';

@@ -10,10 +10,12 @@ export default function PendaftaranPage() {
   const [activeTab, setActiveTab] = useState<"general" | "requirements" | "timeline" | "faq">("general");
   // Hapus showForm, tidak perlu popup
   const [googleFormUrl, setGoogleFormUrl] = useState<string>("");
-  // Ambil link Google Formulir dari meta
+  // Ambil link Google Formulir dan link download dari meta
+  const [googleFormDownloadUrl, setGoogleFormDownloadUrl] = useState<string>("");
   useEffect(() => {
     getMeta().then((meta) => {
       if (meta?.googleFormUrl) setGoogleFormUrl(meta.googleFormUrl);
+      if (meta?.googleFormDownloadUrl) setGoogleFormDownloadUrl(meta.googleFormDownloadUrl);
     });
   }, []);
   const [showContact, setShowContact] = useState(false);
@@ -375,15 +377,15 @@ export default function PendaftaranPage() {
                 </div>
                 <div>
                   <a
-                  href="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/assets/form%20pendaftaran%20anggota.docx"
-                  download="formulir_pendaftaran_anggota.docx"
+                    href={googleFormDownloadUrl || "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/assets/form%20pendaftaran%20anggota.docx"}
+                    download="formulir_pendaftaran_ukm_mahapala_narotama_2025.docx"
                   >
-                  <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
-                    <span>
-                    <Download size={16} />
-                    Unduh Formulir
-                    </span>
-                  </Button>
+                    <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
+                      <span>
+                        <Download size={16} />
+                        Unduh Formulir
+                      </span>
+                    </Button>
                   </a>
                 </div>
               </div>
