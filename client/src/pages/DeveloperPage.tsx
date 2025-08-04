@@ -127,6 +127,11 @@ export default function DeveloperPage() {
           </>
         ) : (
           <>
+            <div className="flex justify-end mb-2">
+              <button className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded shadow border border-gray-300" type="button" onClick={() => setPendingMeta(defaultMeta)}>
+                Kembalikan ke Default
+              </button>
+            </div>
             <div className="grid grid-cols-1 gap-4 mb-4">
               <div>
                 <label className="block font-medium mb-1">Title</label>
