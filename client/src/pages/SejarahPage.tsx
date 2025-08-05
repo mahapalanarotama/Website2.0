@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 
-const sejarahNarasi = `Mahapala Narotama didirikan pada tahun 2016 sebagai wadah mahasiswa Universitas Narotama yang peduli pada alam dan petualangan. Sejak awal, organisasi ini aktif dalam kegiatan pendakian, ekspedisi, konservasi, dan pengabdian masyarakat. Setiap periode, Mahapala Narotama terus berkembang, melahirkan pemimpin-pemimpin baru, dan mencatat berbagai prestasi serta momen bersejarah. Kini, Mahapala Narotama menjadi salah satu UKM yang solid, aktif, dan berprestasi di lingkungan kampus.`;
+const sejarahNarasi = `Mahapala Narotama adalah Unit Kegiatan Mahasiswa (UKM) di Universitas Narotama Surabaya yang bergerak di bidang pecinta alam dan petualangan. Berdiri pada tahun 2016, Mahapala Narotama aktif dalam kegiatan pendidikan dasar, ekspedisi gunung, penjelajahan, konservasi alam, bakti sosial, serta pengembangan karakter dan kepemimpinan mahasiswa. Dengan semangat kekeluargaan dan jiwa petualang, Mahapala Narotama telah melahirkan banyak kader yang berkontribusi dalam pelestarian alam dan pengabdian masyarakat, serta menjadi wadah pengembangan minat dan bakat mahasiswa di bidang alam bebas.`;
 
 const ketuaList = [
   { nama: "Roro Christiatirani Suwoto", periode: "2016-2017", foto: "https://randomuser.me/api/portraits/men/32.jpg" },
@@ -16,16 +16,22 @@ const ketuaList = [
 ];
 
 const kilasBalik = [
-  { tahun: "2016", momen: "Pendirian Mahapala Narotama dan ekspedisi" },
+  { tahun: "2016", momen: "Pendirian Mahapala Narotama dan Pendidikan Dasar Angkatan I (DIKLATSAR I)." },
+  { tahun: "2017", momen: "Ekspedisi Gunung Lawu dan kegiatan bakti sosial di lereng gunung." },
+  { tahun: "2018", momen: "DIKLATSAR II dan ekspedisi Gunung Semeru." },
+  { tahun: "2019", momen: "Pendidikan Lanjut Rimba Gunung I dan penanaman pohon di kawasan konservasi." },
   { tahun: "2020", momen: "Aksi peduli lingkungan: penanaman 1000 pohon di Surabaya Timur." },
-  { tahun: "2022", momen: "Ekspedisi lintas pulau dan pelatihan SAR Mahasiswa." },
+  { tahun: "2021", momen: "DIKLATSAR III (Sendang Banthak) dan pelatihan SAR Mahasiswa." },
+  { tahun: "2022", momen: "Ekspedisi Gunung Arjuno-Welirang dan bakti sosial di desa binaan." },
+  { tahun: "2023", momen: "DIKLATSAR IV (Panca Laksamana) dan kegiatan bakti sosial serta buka bersama." },
   { tahun: "2024", momen: "Penyelenggaraan seminar nasional konservasi dan pelantikan anggota terbanyak." },
 ];
 
 const videoMomentum = [
-  { title: "Ekspedisi Gunung Semeru", url: "https://www.youtube.com/embed/6v2L2UGZJAM" },
-  { title: "Aksi Lingkungan Mahapala", url: "https://www.youtube.com/embed/ysz5S6PUM-U" },
-  { title: "Pelantikan Anggota Baru", url: "https://www.youtube.com/embed/jNQXAC9IVRw" },
+  { title: "Bakti sosial & Buka Bersama 2025", url: "https://www.youtube.com/embed/hTP4gwO7X80" },
+  { title: "DIKLATSAR ANGKATAN KE IV (PANCA LAKSMANA) MAHAPALA NAROTAMA", url: "https://www.youtube.com/embed/A3rabYoh5v0" },
+  { title: "PENDIDIKAN LANJUT RIMBA GUNUNG III MAHAPALA NAROTAMA", url: "https://www.youtube.com/embed/PXqneMBAOoU" },
+  { title: "DIKLATSAR ANGKATAN KE III (SENDANG BANTHAK) MAHAPALA NAROTAMA", url: "https://www.youtube.com/embed/IIi19T-bt70" },
 ];
 
 export default function SejarahPage() {
