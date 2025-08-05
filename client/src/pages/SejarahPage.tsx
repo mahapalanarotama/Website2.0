@@ -79,7 +79,7 @@ export default function SejarahPage() {
 
         {/* Mantan Ketua Umum */}
         <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.7 }}
-          className="text-2xl font-bold text-blue-800 mb-4 text-center">Mantan Ketua Umum</motion.h2>
+          className="text-2xl font-bold text-blue-800 mb-4 text-center">Jejak Ketua Umum</motion.h2>
 <div className="relative w-full overflow-hidden py-4">
   <div
     ref={marqueeRef}
