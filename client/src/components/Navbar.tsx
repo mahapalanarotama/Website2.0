@@ -18,6 +18,7 @@ export function Navbar() {
     { href: "/", label: "Beranda" },
     { href: "/kegiatan", label: "Kegiatan" },
     { href: "/pembelajaran", label: "Pembelajaran" },
+    { href: "/sejarah", label: "Sejarah" },
     { href: "/pendaftaran", label: "Informasi Pendaftaran" },
   ];
 
