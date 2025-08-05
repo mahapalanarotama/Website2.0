@@ -165,8 +165,8 @@ export default function SejarahAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-green-50 py-10">
-      <div className="container mx-auto px-4 max-w-3xl">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-green-50 py-4 flex justify-center items-start overflow-x-hidden">
+      <div className="w-full max-w-lg sm:max-w-3xl px-2 sm:px-4 rounded-xl shadow-xl bg-white/90 py-4 sm:py-6 border border-blue-100">
         <motion.h1 initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="text-3xl md:text-4xl font-extrabold text-center text-blue-900 mb-8">
           Admin Edit Sejarah Mahapala Narotama
@@ -202,8 +202,10 @@ export default function SejarahAdminPage() {
               <label className="block font-bold mb-2 text-purple-800">Video Momentum</label>
               {data.videoMomentum.map((v: any, i: number) => (
                 <div key={i} className="flex gap-2 mb-2 items-center">
-                  <div className="flex-1 text-gray-800">{v.title}</div>
-                  <div className="flex-1 text-blue-700 underline">{v.url}</div>
+                  <div className="flex-1 text-gray-800 truncate" title={v.title}>
+                    {v.title.length > 32 ? v.title.slice(0, 32) + '...' : v.title}
+                  </div>
+                  <div className="flex-1 text-blue-700 underline break-all">{v.url}</div>
                 </div>
               ))}
             </div>
@@ -214,30 +216,32 @@ export default function SejarahAdminPage() {
           <>
             <div className="mb-8">
               <label className="block font-bold mb-2 text-yellow-800">Daftar Ketua Umum</label>
-              {pendingData.ketuaList.map((k: any, i: number) => (
-                <React.Fragment key={i}>
-                <KetuaEditRow ketua={k} onChange={(newK: any) => {
-                    setPendingData({
-                      ...pendingData,
-                      ketuaList: pendingData.ketuaList.map((item: any, idx: number) => idx === i ? newK : item)
-                    });
-                  }} onRemove={() => {
-                    setPendingData({
-                      ...pendingData,
-                      ketuaList: pendingData.ketuaList.filter((_: any, idx: number) => idx !== i)
-                    });
-                  }} />
-                </React.Fragment>
-              ))}
+              <div className="space-y-2">
+                {pendingData.ketuaList.map((k: any, i: number) => (
+                  <React.Fragment key={i}>
+                    <KetuaEditRow ketua={k} onChange={(newK: any) => {
+                      setPendingData({
+                        ...pendingData,
+                        ketuaList: pendingData.ketuaList.map((item: any, idx: number) => idx === i ? newK : item)
+                      });
+                    }} onRemove={() => {
+                      setPendingData({
+                        ...pendingData,
+                        ketuaList: pendingData.ketuaList.filter((_: any, idx: number) => idx !== i)
+                      });
+                    }} />
+                  </React.Fragment>
+                ))}
+              </div>
               <Button onClick={() => setPendingData({
                 ...pendingData,
                 ketuaList: [...pendingData.ketuaList, { nama: "", periode: "", foto: "", locked: false }]
-              })} className="mt-2 px-3 py-1 bg-yellow-600 text-white rounded">Tambah Ketua Umum</Button>
+              })} className="mt-2 px-3 py-1 bg-yellow-600 text-white rounded w-full sm:w-auto">Tambah Ketua Umum</Button>
             </div>
 
             <div className="mb-8">
               <label className="block font-bold mb-2 text-blue-800">Narasi Sejarah</label>
-              <textarea value={pendingData.sejarahNarasi} onChange={handleChangeNarasi} rows={5} className="w-full rounded border border-blue-300 p-2 text-gray-800" />
+              <textarea value={pendingData.sejarahNarasi} onChange={handleChangeNarasi} rows={5} className="w-full rounded border border-blue-300 p-2 text-gray-800 text-sm sm:text-base" />
             </div>
             <div className="mb-8">
               <label className="block font-bold mb-2 text-green-800">Kilas Balik</label>
@@ -245,30 +249,32 @@ export default function SejarahAdminPage() {
                 items={pendingData.kilasBalik}
                 onChange={newList => setPendingData({ ...pendingData, kilasBalik: newList })}
                 renderItem={(k, i) => (
-                  <div className="flex gap-2 mb-2 items-center bg-green-50 rounded p-1" style={{border: '1px dashed #6ee7b7'}}>
+                  <div className="flex flex-wrap gap-2 mb-2 items-center bg-green-50 rounded p-1 sm:p-2" style={{border: '1px dashed #6ee7b7'}}>
                     <span className="cursor-move text-green-600 font-bold px-2">≡</span>
-                    <input value={k.tahun} onChange={e => handleChangeKilas(i, "tahun", e.target.value)} placeholder="Tahun" className="w-20 rounded border border-green-300 p-1 text-gray-800" />
-                    <input value={k.momen} onChange={e => handleChangeKilas(i, "momen", e.target.value)} placeholder="Momen" className="flex-1 rounded border border-green-300 p-1 text-gray-800" />
-                    <button onClick={() => removeKilas(i)} className="text-red-600 font-bold px-2">Hapus</button>
+                    <input value={k.tahun} onChange={e => handleChangeKilas(i, "tahun", e.target.value)} placeholder="Tahun" className="w-16 sm:w-20 rounded border border-green-300 p-1 text-gray-800 text-xs sm:text-base" />
+                    <input value={k.momen} onChange={e => handleChangeKilas(i, "momen", e.target.value)} placeholder="Momen" className="flex-1 min-w-[120px] rounded border border-green-300 p-1 text-gray-800 text-xs sm:text-base" />
+                    <button onClick={() => removeKilas(i)} className="text-red-600 font-bold px-2 py-1 text-xs sm:text-base">Hapus</button>
                   </div>
                 )}
               />
-              <Button onClick={addKilas} className="mt-2 px-3 py-1 bg-green-600 text-white rounded">Tambah Kilas Balik</Button>
+              <Button onClick={addKilas} className="mt-2 px-3 py-1 bg-green-600 text-white rounded w-full sm:w-auto">Tambah Kilas Balik</Button>
             </div>
             <div className="mb-8">
               <label className="block font-bold mb-2 text-purple-800">Video Momentum</label>
-              {pendingData.videoMomentum.map((v: any, i: number) => (
-                <div key={i} className="flex gap-2 mb-2 items-center">
-                  <input value={v.title} onChange={e => handleChangeVideo(i, "title", e.target.value)} placeholder="Judul Video" className="flex-1 rounded border border-purple-300 p-1 text-gray-800" />
-                  <input value={v.url} onChange={e => handleChangeVideo(i, "url", e.target.value)} placeholder="URL Embed Youtube" className="flex-1 rounded border border-purple-300 p-1 text-gray-800" />
-                  <button onClick={() => removeVideo(i)} className="text-red-600 font-bold px-2">Hapus</button>
-                </div>
-              ))}
-              <Button onClick={addVideo} className="mt-2 px-3 py-1 bg-purple-600 text-white rounded">Tambah Video</Button>
+              <div className="space-y-2">
+                {pendingData.videoMomentum.map((v: any, i: number) => (
+                  <div key={i} className="flex flex-wrap gap-2 mb-2 items-center bg-purple-50 rounded p-1 sm:p-2" style={{border: '1px dashed #a78bfa'}}>
+                    <input value={v.title} onChange={e => handleChangeVideo(i, "title", e.target.value)} placeholder="Judul Video" className="flex-1 min-w-[120px] rounded border border-purple-300 p-1 text-gray-800 text-xs sm:text-base" />
+                    <input value={v.url} onChange={e => handleChangeVideo(i, "url", e.target.value)} placeholder="URL Embed Youtube" className="flex-1 min-w-[120px] rounded border border-purple-300 p-1 text-gray-800 text-xs sm:text-base" />
+                    <button onClick={() => removeVideo(i)} className="text-red-600 font-bold px-2 py-1 text-xs sm:text-base">Hapus</button>
+                  </div>
+                ))}
+              </div>
+              <Button onClick={addVideo} className="mt-2 px-3 py-1 bg-purple-600 text-white rounded w-full sm:w-auto">Tambah Video</Button>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={cancelEdit} className="bg-gray-400 text-white">Batal</Button>
-              <Button onClick={() => setConfirmOpen(true)} className="bg-blue-700 text-white">Simpan</Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button onClick={cancelEdit} className="bg-gray-400 text-white w-full sm:w-auto">Batal</Button>
+              <Button onClick={() => setConfirmOpen(true)} className="bg-blue-700 text-white w-full sm:w-auto">Simpan</Button>
             </div>
             {saveStatus && <div className="mt-4 text-green-700 font-bold">{saveStatus}</div>}
             {/* Konfirmasi dialog */}
