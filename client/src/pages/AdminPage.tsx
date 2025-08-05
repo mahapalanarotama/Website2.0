@@ -621,7 +621,7 @@ export default function AdminPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-8">
+        <TabsList className="mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full">
           <TabsTrigger value="activities" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             Activities
