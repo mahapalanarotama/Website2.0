@@ -5,13 +5,13 @@ import { useRef, useEffect, useState } from "react";
 const sejarahNarasi = `Mahapala Narotama adalah Unit Kegiatan Mahasiswa (UKM) di Universitas Narotama Surabaya yang bergerak di bidang pecinta alam dan petualangan. Berdiri pada tahun 2016, Mahapala Narotama aktif dalam kegiatan pendidikan dasar, ekspedisi gunung, penjelajahan, konservasi alam, bakti sosial, serta pengembangan karakter dan kepemimpinan mahasiswa. Dengan semangat kekeluargaan dan jiwa petualang, Mahapala Narotama telah melahirkan banyak kader yang berkontribusi dalam pelestarian alam dan pengabdian masyarakat, serta menjadi wadah pengembangan minat dan bakat mahasiswa di bidang alam bebas.`;
 
 const ketuaList = [
-  { nama: "Roro Christiatirani Suwoto", periode: "2016-2017", foto: "https://randomuser.me/api/portraits/men/32.jpg" },
-  { nama: "Arif Muhammad Rizal", periode: "2017-2018", foto: "https://randomuser.me/api/portraits/men/33.jpg" },
-  { nama: "Ayu Wulandari Narhendra", periode: "2018-2019", foto: "https://randomuser.me/api/portraits/women/44.jpg" },
-  { nama: "Moch. Fakhrul Islam", periode: "2019-2021", foto: "https://randomuser.me/api/portraits/men/34.jpg" },
-  { nama: "Agna Mahireksha", periode: "2021-2022", foto: "https://randomuser.me/api/portraits/women/45.jpg" },
-  { nama: "Robiatul Adawiyah", periode: "2023-2024", foto: "https://randomuser.me/api/portraits/men/35.jpg" },
-  { nama: "Muhammad Fairus Fawas Afanza", periode: "2024-sekarang", foto: "https://randomuser.me/api/portraits/women/46.jpg" },
+  { nama: "Roro Christiatirani Suwoto", periode: "2016-2017", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084125.jpg" },
+  { nama: "Arif Muhammad Rizal", periode: "2017-2018", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084151.jpg" },
+  { nama: "Ayu Wulandari Narhendra", periode: "2018-2019", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084234.jpg" },
+  { nama: "Moch. Fakhrul Islam", periode: "2019-2021", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084327.jpg" },
+  { nama: "Agna Mahireksha", periode: "2021-2022", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084401.jpg" },
+  { nama: "Robiatul Adawiyah", periode: "2023-2024", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084425.jpg" },
+  { nama: "Muhammad Fairus Fawas Afanza", periode: "2024-sekarang", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084448.png" },
   // { nama: "Hadi Saputra", periode: "2023-2024", foto: "https://randomuser.me/api/portraits/men/36.jpg" },
 ];
 
