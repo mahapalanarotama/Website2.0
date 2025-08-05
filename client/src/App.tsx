@@ -18,7 +18,7 @@ import MemberCardDetailPage from "@/pages/MemberCardDetailPage";
 import MemberCard3DPage from "@/pages/MemberCard3DPage";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useLeafCursor } from "@/components/CursorLeafTrail";
-import OfflineSurvivalApp from "@/pages/OfflineSurvivalApp";
+import OfflinePage from "@/pages/OfflinePage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SejarahPage from "@/pages/SejarahPage";
 
@@ -88,7 +88,7 @@ function App() {
         <ScrollToTop />
         <Layout>
           <Switch>
-            <Route path="/offline" component={OfflineSurvivalApp} />
+            <Route path="/offline" component={OfflinePage} />
             <Route path="/" component={HomePage} />
             <Route path="/kegiatan" component={ActivitiesPage} />
             <Route path="/pembelajaran" component={LearningPage} />
