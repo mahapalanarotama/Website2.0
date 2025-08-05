@@ -4,17 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 
-// Data default
-// Fallback dihapus, hanya untuk typing
-const ketuaList = [
-  { nama: "Roro Christiatirani Suwoto", periode: "2016-2017", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084125.jpg" },
-  { nama: "Arif Muhammad Rizal", periode: "2017-2018", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084151.jpg" },
-  { nama: "Ayu Wulandari Narhendra", periode: "2018-2019", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084234.jpg" },
-  { nama: "Moch. Fakhrul Islam", periode: "2019-2021", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084327.jpg" },
-  { nama: "Agna Mahireksha", periode: "2021-2022", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084401.jpg" },
-  { nama: "Robiatul Adawiyah", periode: "2023-2024", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084425.jpg" },
-  { nama: "Muhammad Fairus Fawas Afanza", periode: "2024-sekarang", foto: "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/main/Img/Mantum/20250805_084448.png" },
-];
+
 
 
 type KilasBalik = { tahun: string; momen: string };
@@ -24,6 +14,7 @@ export default function SejarahPage() {
   const [sejarahNarasi, setSejarahNarasi] = useState<string|null>(null);
   const [kilasBalik, setKilasBalik] = useState<KilasBalik[]|null>(null);
   const [videoMomentum, setVideoMomentum] = useState<VideoMomentum[]|null>(null);
+  const [ketuaList, setKetuaList] = useState<any[]|null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,10 +28,12 @@ export default function SejarahPage() {
           setSejarahNarasi(typeof d.sejarahNarasi === 'string' ? d.sejarahNarasi : null);
           setKilasBalik(Array.isArray(d.kilasBalik) ? d.kilasBalik : null);
           setVideoMomentum(Array.isArray(d.videoMomentum) ? d.videoMomentum : null);
+          setKetuaList(Array.isArray(d.ketuaList) ? d.ketuaList : null);
         } else {
           setSejarahNarasi(null);
           setKilasBalik(null);
           setVideoMomentum(null);
+          setKetuaList(null);
         }
       } catch {
         setSejarahNarasi(null);
@@ -80,7 +73,7 @@ export default function SejarahPage() {
       </div>
     );
   }
-  if (!sejarahNarasi || !kilasBalik || !videoMomentum) {
+  if (!sejarahNarasi || !kilasBalik || !videoMomentum || !ketuaList) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-50 to-green-50">
         <div className="text-lg text-red-600">Data sejarah belum tersedia.</div>
@@ -212,6 +205,7 @@ export default function SejarahPage() {
             </motion.div>
           ))}
         </div>
+
       </div>
     </div>
   );

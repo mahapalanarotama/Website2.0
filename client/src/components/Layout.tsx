@@ -42,7 +42,7 @@ export function Layout({ children }: LayoutProps) {
 
   const [location] = useLocation();
   // Cek path untuk pengecualian backsound
-  const hideBacksound = ["/admin", "/developer", "/offline"].some((p) => location.startsWith(p));
+  const hideBacksound = ["/admin", "/developer", "/offline", "/sejarahAdmin"].some((p) => location.startsWith(p));
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
