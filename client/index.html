@@ -106,6 +106,88 @@
         ]
       }
     </script>
+
+    <!-- BreadcrumbList Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Pendaftaran",
+            "item": "https://mahapalanarotama.web.id/pendaftaran"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Beranda",
+            "item": "https://mahapalanarotama.web.id/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Kegiatan",
+            "item": "https://mahapalanarotama.web.id/activities"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Galeri",
+            "item": "https://mahapalanarotama.web.id/gallery"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "Sejarah",
+            "item": "https://mahapalanarotama.web.id/sejarah"
+          }
+        ]
+      }
+    </script>
+
+    <!-- Knowledge Graph Organization Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Mahapala Narotama",
+        "alternateName": ["MPN", "Mahapala", "Mahapala Narotama Surabaya", "UKM Mahapala Narotama"],
+        "url": "https://mahapalanarotama.web.id",
+        "logo": "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.ico",
+        "description": "Mahapala Narotama adalah Unit Kegiatan Mahasiswa Pecinta Alam di Universitas Narotama, Surabaya yang aktif di bidang lingkungan, konservasi, dan petualangan.",
+        "email": "ukm.mahapala@narotama.ac.id",
+        "contactPoint": [{
+          "@type": "ContactPoint",
+          "telephone": "+62-812-3456-7890",
+          "contactType": "customer service",
+          "areaServed": "ID",
+          "availableLanguage": ["Indonesian", "English"]
+        }],
+        "founder": {
+          "@type": "Person",
+          "name": "Belum Tersedia"
+        },
+        "foundingDate": "2016-01-01",
+        "foundingLocation": {
+          "@type": "Place",
+          "name": "Universitas Narotama Surabaya"
+        },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Jl. Arief Rachman Hakim No.51, Surabaya",
+          "addressLocality": "Surabaya",
+          "addressRegion": "Jawa Timur",
+          "postalCode": "60117",
+          "addressCountry": "ID"
+        },
+        "sameAs": [
+          "https://www.instagram.com/mahapalanarotama",
+          "https://www.youtube.com/@mahapalanarotama1216",
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
