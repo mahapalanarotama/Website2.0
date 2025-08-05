@@ -1,6 +1,6 @@
 // Interface untuk props komponen edit ketua umum
 import React, { useState, useEffect } from "react";
-import { KetuaEditRow } from "@/components/KetuaEditRow";
+import KetuaEditRow from "@/components/KetuaEditRow";
 import { DraggableList } from "@/components/DraggableList";
 import { motion } from "framer-motion";
 import { auth, db } from "@/lib/firebase";
