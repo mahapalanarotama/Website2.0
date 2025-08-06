@@ -323,12 +323,7 @@ export default function HomePage() {
       </motion.section>
 
       {/* CTA Section */}
-      <motion.section className="py-8 sm:py-16 bg-primary text-white"
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-      >
+      <section className="py-8 sm:py-16 bg-primary text-white">
         <div className="container mx-auto px-2 sm:px-4 text-center">
           <h2 className="font-heading text-3xl font-bold mb-4">Bergabung dengan Mahapala Narotama</h2>
           <p className="text-lg mb-8 max-w-2xl mx-auto">
@@ -392,7 +387,7 @@ export default function HomePage() {
             </div>
           </DialogContent>
         </Dialog>
-      </motion.section>
+      </section>
 
     </>
   );

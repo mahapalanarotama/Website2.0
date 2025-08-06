@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Users } from "lucide-react";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +21,7 @@ export function Navbar() {
     { href: "/pembelajaran", label: "Pembelajaran" },
     { href: "/sejarah", label: "Sejarah" },
     { href: "/pendaftaran", label: "Informasi Pendaftaran" },
+    { href: "/scan-anggota", label: <span className="flex items-center gap-2"><Users className="w-5 h-5" /> Anggota</span> },
   ];
 
   return (

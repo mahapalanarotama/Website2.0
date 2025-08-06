@@ -16,6 +16,7 @@ import AdminPage from "@/pages/AdminPage";
 import DetailActivityPage from "@/pages/DetailActivityPage";
 import MemberCardDetailPage from "@/pages/MemberCardDetailPage";
 import MemberCard3DPage from "@/pages/MemberCard3DPage";
+import MemberCardScanPage from "@/pages/MemberCardScanPage";
 import { ScrollToTop } from "@/components/ScrollToTop";
 import { useLeafCursor } from "@/components/CursorLeafTrail";
 import OfflinePage from "@/pages/OfflinePage";
@@ -103,6 +104,7 @@ function App() {
             <Route path="/member-card-3d" component={MemberCard3DPage} />
             <Route path="/sejarah" component={SejarahPage} />
             <Route path="/sejarahAdmin" component={SejarahAdminPage} />
+            <Route path="/scan-anggota" component={MemberCardScanPage} />
             <Route component={NotFound} />
           </Switch>
         </Layout>
