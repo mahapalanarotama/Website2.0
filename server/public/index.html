@@ -69,8 +69,11 @@
       }
     </script>
 
-    <!-- Favicon Lokal untuk tab browser -->
-    <link rel="icon" href="/assets/favicon-DD4OmkEs.ico" type="image/x-icon" />
+    <!-- Favicon Lokal dan Fallback Eksternal untuk tab browser -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="192x192" href="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.png" />
 
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -103,12 +106,52 @@
         ]
       }
     </script>
-    <script type="module" crossorigin src="/assets/index-Diwfkj4a.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DaforahE.css">
+
+    <!-- BreadcrumbList Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Pendaftaran",
+            "item": "https://mahapalanarotama.web.id/pendaftaran"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Beranda",
+            "item": "https://mahapalanarotama.web.id/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Kegiatan",
+            "item": "https://mahapalanarotama.web.id/activities"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Galeri",
+            "item": "https://mahapalanarotama.web.id/gallery"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "Sejarah",
+            "item": "https://mahapalanarotama.web.id/sejarah"
+          }
+        ]
+      }
+    </script>
+
+    <script type="module" crossorigin src="/assets/index-DhCVV5LU.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-yP_vx29r.css">
   </head>
   <body>
-    <div id="root"></div>
-
+    <div id="root"></div>
     <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
     <h1 style="display:none">Mahapala Narotama (MPN) - UKM Pecinta Alam Universitas Narotama Surabaya</h1>
     <p style="display:none">Website resmi Mahapala Narotama (MPN), organisasi pecinta alam, UKM Narotama, info kegiatan, anggota, dan pembelajaran mapala Surabaya.</p>

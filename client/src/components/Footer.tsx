@@ -50,7 +50,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <a 
-                  href="https://narotama.ac.id" 
+                  href="https://narotama.ac.id/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition"
@@ -60,10 +60,10 @@ export function Footer() {
               </li>
               <li>
                 <a 
-                  href="#" 
+                  href="https://wartapalaindonesia.com/" 
                   className="text-gray-300 hover:text-white transition"
                 >
-                  MAPALA Indonesia
+                  WARTAPALA Indonesia
                 </a>
               </li>
               <li>
@@ -72,7 +72,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/kegiatan" className="text-gray-300 hover:text-white transition">
+                <Link href="/galeri" className="text-gray-300 hover:text-white transition">
                   Galeri Foto
                 </Link>
               </li>
