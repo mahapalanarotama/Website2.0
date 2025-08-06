@@ -46,9 +46,27 @@ export default function MemberCardScanPage() {
     <div className="max-w-5xl mx-auto py-10 p-2 sm:p-4">
       <h1 className="text-2xl font-bold mb-6 text-center">Scan Barcode Kartu Anggota</h1>
       <div className="flex justify-center mb-8">
-        <div className="w-full sm:w-96 h-64 border rounded flex items-center justify-center bg-black">
+        <div className="relative w-full sm:w-96 h-64 border rounded flex items-center justify-center bg-black overflow-hidden">
           <video ref={videoRef} className="w-full h-full object-cover" />
+          {/* Efek scanner dan garis merah */}
+          <div className="absolute top-0 left-0 w-full h-full pointer-events-none flex flex-col justify-center items-center">
+            {/* Garis merah di tengah */}
+            <div className="w-3/4 h-0.5 bg-red-500 rounded-full shadow-lg animate-pulse" style={{ boxShadow: '0 0 8px 2px #ef4444' }}></div>
+            {/* Efek scanner animasi */}
+            <div className="absolute left-0 w-full h-1 bg-red-400 opacity-60 animate-scanner" style={{ top: '50%' }}></div>
+          </div>
         </div>
+        {/* Tambahkan animasi scanner di tailwind.config jika belum ada */}
+        <style>{`
+          @keyframes scanner {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+          }
+          .animate-scanner {
+            animation: scanner 2s infinite;
+          }
+        `}</style>
       </div>
       {regNum && (
         <div className="mt-4 text-center">
