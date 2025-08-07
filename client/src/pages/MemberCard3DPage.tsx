@@ -83,7 +83,7 @@ export default function MemberCard3DPage() {
         const urlBack = window.URL.createObjectURL(blobBack);
         const linkBack = document.createElement("a");
         linkBack.href = urlBack;
-        linkBack.download = `kartu-anggota-${params.fullName || "belakang"}-belakang.png`;
+        linkBack.download = `kartu-anggota-belakang.png`;
         document.body.appendChild(linkBack);
         linkBack.click();
         document.body.removeChild(linkBack);

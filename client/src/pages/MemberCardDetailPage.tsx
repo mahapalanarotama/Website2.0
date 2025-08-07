@@ -70,7 +70,7 @@ export default function MemberCardDetailPage() {
       const urlBack = window.URL.createObjectURL(blobBack);
       const linkBack = document.createElement("a");
       linkBack.href = urlBack;
-      linkBack.download = `kartu-anggota-${member.registrationNumber || member.fieldName}-belakang.png`;
+      linkBack.download = `kartu-anggota-belakang.png`;
       document.body.appendChild(linkBack);
       linkBack.click();
       document.body.removeChild(linkBack);
