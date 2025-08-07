@@ -24,6 +24,7 @@ import OfflinePage from "@/pages/OfflinePage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SejarahPage from "@/pages/SejarahPage";
 import SejarahAdminPage from "@/pages/SejarahAdminPage";
+import { EduHubPage } from "@/eduhub";
 
 function App() {
   useLeafCursor();
@@ -107,6 +108,7 @@ function App() {
             <Route path="/sejarah" component={SejarahPage} />
             <Route path="/sejarahAdmin" component={SejarahAdminPage} />
             <Route path="/scan-anggota" component={MemberCardScanPage} />
+            <Route path="/eduhub" component={EduHubPage} />
             <Route component={NotFound} />
           </Switch>
         </Layout>
