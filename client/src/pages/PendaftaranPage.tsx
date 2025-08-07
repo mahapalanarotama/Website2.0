@@ -3,10 +3,69 @@ import { getMeta } from "@/lib/meta";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { useRef } from "react";
+import { useInView } from "framer-motion";
 import { AlertCircle, CheckCircle, ArrowRight, Download, Calendar, Users, FileText, Mail, Instagram, Phone } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function PendaftaranPage() {
+  // Timeline data dan animasi scroll
+  const timelineItems = [
+    {
+      date: "15 Agustus - 30 September 2025",
+      title: "Pendaftaran Online dan Offline",
+      desc: "Pengisian formulir pendaftaran dan pengumpulan berkas persyaratan"
+    },
+    {
+      date: "05 - 07 Oktober 2025",
+      title: "Tes Tertulis & Wawancara",
+      desc: "Tes pengetahuan umum dan wawancara motivasi"
+    },
+    {
+      date: "07 Oktober 2025",
+      title: "Pengumuman Hasil Seleksi",
+      desc: "Pengumuman calon anggota yang lolos seleksi"
+    },
+    {
+      date: "08 Oktober - 13 November 2025",
+      title: "Pra Diklat",
+      desc: "Pelatihan dan Pembekalan Materi serta fisik"
+    },
+    {
+      date: "15 - 17 November 2025",
+      title: "Diklat Dasar",
+      desc: "Pelatihan dasar kepencintaalaman dan team building"
+    },
+    {
+      date: "17 November 2025",
+      title: "Pelantikan Anggota Baru",
+      desc: "Upacara pelantikan dan penyematan Scraft Kuning anggota baru"
+    }
+  ];
+
+  // TimelineItem component for animasi scroll
+  function TimelineItem({ item, delay }: { item: { date: string; title: string; desc: string }; delay: number }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const inView = useInView(ref, { once: true, margin: "-50px" });
+    return (
+      <motion.div
+        ref={ref}
+        className="relative"
+        initial={{ opacity: 0, y: -30 }}
+        animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: -30 }}
+        transition={{ duration: 0.5, delay }}
+      >
+        <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
+        <div>
+          <span className="text-sm text-gray-500">{item.date}</span>
+          <h4 className="font-medium text-gray-800">{item.title}</h4>
+          <p className="text-gray-600 text-sm">{item.desc}</p>
+        </div>
+      </motion.div>
+    );
+  }
+  // FAQ accordion state
+  const [openIdx, setOpenIdx] = useState<number>(-1);
   const [activeTab, setActiveTab] = useState<"general" | "requirements" | "timeline" | "faq">("general");
   // Hapus showForm, tidak perlu popup
   const [googleFormUrl, setGoogleFormUrl] = useState<string>("");
@@ -235,60 +294,9 @@ export default function PendaftaranPage() {
               >
                 <h3 className="font-heading text-xl font-semibold mb-4">Timeline Pendaftaran & Seleksi</h3>
                 <div className="relative ml-6 pl-8 border-l-2 border-primary/30 space-y-10">
-                  {/* Timeline items */}
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">15 Agustus - 30 September 2025</span>
-                      <h4 className="font-medium text-gray-800">Pendaftaran Online dan Offline</h4>
-                      <p className="text-gray-600 text-sm">Pengisian formulir pendaftaran dan pengumpulan berkas persyaratan</p>
-                    </div>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">05 - 07 Oktober 2025</span>
-                      <h4 className="font-medium text-gray-800">Tes Tertulis & Wawancara</h4>
-                      <p className="text-gray-600 text-sm">Tes pengetahuan umum dan wawancara motivasi</p>
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">07 Oktober 2025</span>
-                      <h4 className="font-medium text-gray-800">Pengumuman Hasil Seleksi</h4>
-                      <p className="text-gray-600 text-sm">Pengumuman calon anggota yang lolos seleksi</p>
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">08 Oktober - 13 November 2025</span>
-                      <h4 className="font-medium text-gray-800">Pra Diklat</h4>
-                      <p className="text-gray-600 text-sm">Pelatihan dan Pembekalan Materi serta fisik</p>
-                    </div>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">15 - 17 November 2025</span>
-                      <h4 className="font-medium text-gray-800">Diklat Dasar</h4>
-                      <p className="text-gray-600 text-sm">Pelatihan dasar kepencintaalaman dan team building</p>
-                    </div>
-                  </div>
-                  
-                  <div className="relative">
-                    <div className="absolute -left-[41px] border-4 border-white rounded-full bg-primary h-6 w-6"></div>
-                    <div>
-                      <span className="text-sm text-gray-500">17 November 2025</span>
-                      <h4 className="font-medium text-gray-800">Pelantikan Anggota Baru</h4>
-                      <p className="text-gray-600 text-sm">Upacara pelantikan dan penyematan Scraft Kuning anggota baru</p>
-                    </div>
-                  </div>
+                  {timelineItems.map((item, idx) => (
+                    <TimelineItem key={idx} item={item} delay={idx * 0.15} />
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -302,50 +310,56 @@ export default function PendaftaranPage() {
                 className="bg-white p-6 rounded-lg shadow-md"
               >
                 <h3 className="font-heading text-xl font-semibold mb-6">Pertanyaan Umum (FAQ)</h3>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-medium text-lg text-primary">Apakah harus memiliki pengalaman kegiatan outdoor sebelumnya?</h4>
-                    <p className="text-gray-700 mt-2">
-                      Tidak, Anda tidak harus memiliki pengalaman kegiatan outdoor sebelumnya. Mahapala Narotama akan memberikan pelatihan dasar untuk semua anggota baru. Yang terpenting adalah minat dan komitmen untuk belajar.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-lg text-primary">Apakah ada persyaratan fisik tertentu?</h4>
-                    <p className="text-gray-700 mt-2">
-                      Tidak ada persyaratan fisik khusus, namun Anda diharapkan dalam kondisi sehat dan siap mengikuti rangkaian kegiatan outdoor yang mungkin membutuhkan stamina dan ketahanan fisik. Latihan fisik dasar akan diberikan selama proses seleksi.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-lg text-primary">Berapa banyak waktu yang perlu diluangkan jika menjadi anggota Mahapala?</h4>
-                    <p className="text-gray-700 mt-2">
-                      Sebagai anggota Mahapala, Anda diharapkan dapat menghadiri pertemuan rutin mingguan (2-3 jam) dan berpartisipasi dalam kegiatan bulanan (biasanya pada akhir pekan). Kegiatan ekspedisi atau pendakian biasanya dilakukan pada masa liburan semester.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-lg text-primary">Berapa biaya yang diperlukan setelah menjadi anggota?</h4>
-                    <p className="text-gray-700 mt-2">
-                      Anggota Mahapala akan dikenakan iuran bulanan sebesar Rp 25.000,- yang digunakan untuk operasional organisasi. Untuk kegiatan-kegiatan tertentu seperti ekspedisi atau pendakian, akan ada biaya tambahan yang besarnya tergantung pada jenis dan lokasi kegiatan.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-lg text-primary">Apakah perlu memiliki perlengkapan outdoor sendiri?</h4>
-                    <p className="text-gray-700 mt-2">
-                      Untuk tahap awal, Anda tidak perlu memiliki semua perlengkapan outdoor. Mahapala memiliki beberapa perlengkapan yang dapat dipinjam oleh anggota. Seiring berjalannya waktu, Anda dapat secara bertahap melengkapi perlengkapan pribadi.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="font-medium text-lg text-primary">Apakah saya bisa mengikuti kegiatan Mahapala sambil aktif di organisasi lain?</h4>
-                    <p className="text-gray-700 mt-2">
-                      Tidak disarankan, Tetapi Anda tetap bisa aktif di organisasi lain. Namun, perlu diingat bahwa sebagai anggota Mahapala, Anda diharapkan dapat berkomitmen untuk berpartisipasi dalam kegiatan-kegiatan penting dan memenuhi tanggung jawab sebagai anggota.
-                    </p>
-                  </div>
-                </div>
+                {/* Accordion FAQ - use openIdx from component state */}
+                {(() => {
+                  const faqs = [
+                    {
+                      q: "Apakah harus memiliki pengalaman kegiatan outdoor sebelumnya?",
+                      a: "Tidak, Anda tidak harus memiliki pengalaman kegiatan outdoor sebelumnya. Mahapala Narotama akan memberikan pelatihan dasar untuk semua anggota baru. Yang terpenting adalah minat dan komitmen untuk belajar."
+                    },
+                    {
+                      q: "Apakah ada persyaratan fisik tertentu?",
+                      a: "Tidak ada persyaratan fisik khusus, namun Anda diharapkan dalam kondisi sehat dan siap mengikuti rangkaian kegiatan outdoor yang mungkin membutuhkan stamina dan ketahanan fisik. Latihan fisik dasar akan diberikan selama proses seleksi."
+                    },
+                    {
+                      q: "Berapa banyak waktu yang perlu diluangkan jika menjadi anggota Mahapala?",
+                      a: "Sebagai anggota Mahapala, Anda diharapkan dapat menghadiri pertemuan rutin mingguan (2-3 jam) dan berpartisipasi dalam kegiatan bulanan (biasanya pada akhir pekan). Kegiatan ekspedisi atau pendakian biasanya dilakukan pada masa liburan semester."
+                    },
+                    {
+                      q: "Berapa biaya yang diperlukan setelah menjadi anggota?",
+                      a: "Anggota Mahapala akan dikenakan iuran bulanan sebesar Rp 25.000,- yang digunakan untuk operasional organisasi. Untuk kegiatan-kegiatan tertentu seperti ekspedisi atau pendakian, akan ada biaya tambahan yang besarnya tergantung pada jenis dan lokasi kegiatan."
+                    },
+                    {
+                      q: "Apakah perlu memiliki perlengkapan outdoor sendiri?",
+                      a: "Untuk tahap awal, Anda tidak perlu memiliki semua perlengkapan outdoor. Mahapala memiliki beberapa perlengkapan yang dapat dipinjam oleh anggota. Seiring berjalannya waktu, Anda dapat secara bertahap melengkapi perlengkapan pribadi."
+                    },
+                    {
+                      q: "Apakah saya bisa mengikuti kegiatan Mahapala sambil aktif di organisasi lain?",
+                      a: "Tidak disarankan, Tetapi Anda tetap bisa aktif di organisasi lain. Namun, perlu diingat bahwa sebagai anggota Mahapala, Anda diharapkan dapat berkomitmen untuk berpartisipasi dalam kegiatan-kegiatan penting dan memenuhi tanggung jawab sebagai anggota."
+                    }
+                  ];
+                  return (
+                    <div className="space-y-2">
+                      {faqs.map((faq, idx) => (
+                        <div key={idx} className="border-b">
+                          <button
+                            className={`w-full text-left py-3 font-medium text-lg text-primary flex items-center justify-between focus:outline-none`}
+                            onClick={() => setOpenIdx(openIdx === idx ? -1 : idx)}
+                            aria-expanded={openIdx === idx}
+                          >
+                            {faq.q}
+                            <span className={`ml-2 transition-transform ${openIdx === idx ? 'rotate-90' : ''}`}>▶</span>
+                          </button>
+                          {openIdx === idx && (
+                            <div className="text-gray-700 mt-2 pb-3">
+                              {faq.a}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
                 
                 <div className="mt-8 p-4 bg-gray-50 rounded-lg">
                   <h4 className="font-medium text-center mb-3">Masih punya pertanyaan lain?</h4>
