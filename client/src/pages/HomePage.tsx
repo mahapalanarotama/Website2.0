@@ -244,7 +244,14 @@ export default function HomePage() {
           {activitiesLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="bg-white rounded-lg overflow-hidden shadow-md animate-pulse">
+                <motion.div
+                  key={i}
+                  className="bg-white rounded-lg overflow-hidden shadow-md animate-pulse"
+                  initial={{ opacity: 0, y: 60, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, type: 'spring' }}
+                >
                   <div className="w-full h-48 bg-gray-300"></div>
                   <div className="p-5">
                     <div className="flex justify-between items-center mb-3">
@@ -255,19 +262,26 @@ export default function HomePage() {
                     <div className="h-4 bg-gray-300 rounded w-full mb-4"></div>
                     <div className="h-4 bg-gray-300 rounded w-1/3"></div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {activities?.map((activity) => (
-                <ActivityCard
+              {activities?.map((activity, idx) => (
+                <motion.div
                   key={activity.id}
-                  activity={{
-                    ...activity,
-                    date: typeof activity.date === "string" ? activity.date : activity.date.toISOString(),
-                  }}
-                />
+                  initial={{ opacity: 0, y: 60, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, type: 'spring', delay: idx * 0.1 }}
+                >
+                  <ActivityCard
+                    activity={{
+                      ...activity,
+                      date: typeof activity.date === "string" ? activity.date : activity.date.toISOString(),
+                    }}
+                  />
+                </motion.div>
               ))}
             </div>
           )}
@@ -295,8 +309,16 @@ export default function HomePage() {
             Materi dan panduan kegiatan alam bebas yang dapat diakses oleh seluruh anggota Mahapala Narotama.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {combinedModules.map((module) => (
-              <LearningModule key={module.id + module.title} module={module} />
+            {combinedModules.map((module, idx) => (
+              <motion.div
+                key={module.id + module.title}
+                initial={{ opacity: 0, y: 60, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.7, type: 'spring', delay: idx * 0.1 }}
+              >
+                <LearningModule module={module} />
+              </motion.div>
             ))}
           </div>
           <div className="text-center mt-10">
@@ -324,13 +346,27 @@ export default function HomePage() {
           {galleryLoading ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[1,2,3,4].map(i => (
-                <div key={i} className="bg-gray-200 h-48 rounded-lg animate-pulse" />
+                <motion.div
+                  key={i}
+                  className="bg-gray-200 h-48 rounded-lg animate-pulse"
+                  initial={{ opacity: 0, y: 60, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, type: 'spring' }}
+                />
               ))}
             </div>
           ) : gallery && gallery.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {gallery.slice(0,4).map(item => (
-                <div key={item.id} className="relative group overflow-hidden rounded-lg">
+              {gallery.slice(0,4).map((item, idx) => (
+                <motion.div
+                  key={item.id}
+                  className="relative group overflow-hidden rounded-lg"
+                  initial={{ opacity: 0, y: 60, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.7, type: 'spring', delay: idx * 0.1 }}
+                >
                   <img 
                     src={item.imageUrl}
                     alt={item.title}
@@ -342,7 +378,7 @@ export default function HomePage() {
                       {item.description && <p className="text-white text-xs text-center p-1">{item.description}</p>}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           ) : (
