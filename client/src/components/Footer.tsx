@@ -83,8 +83,10 @@ export function Footer() {
             <h3 className="font-heading text-xl font-bold mb-4">Hubungi Kami</h3>
             <address className="not-italic text-gray-300">
               <p className="mb-2 flex items-center">
-              <MapPin className="h-5 w-5 mr-2" strokeWidth={2} />
-              <span>Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</span>
+                <span className="flex items-center justify-center h-7 w-7 mr-2">
+                  <MapPin className="h-6 w-6" strokeWidth={2} />
+                </span>
+                <span>Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</span>
               </p>
               <p className="mb-2 flex items-center">
               <Phone className="h-5 w-5 mr-2" strokeWidth={2} /> 
