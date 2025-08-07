@@ -104,41 +104,6 @@ export default function MemberCardScanPage() {
                     alt="Kartu Anggota"
                     className="rounded-lg shadow-lg max-w-full h-auto"
                   />
-                  <button
-                    className="mt-4 px-4 py-2 bg-primary text-white rounded shadow flex items-center gap-2"
-                    onClick={async () => {
-                      // Download depan
-                      try {
-                        const response = await fetch(member.photoUrl);
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const link = document.createElement("a");
-                        link.href = url;
-                        link.download = `kartu-anggota-${member.nomorregistrasi || member.registrationNumber || member.fieldName}.png`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(url);
-                        // Download belakang
-                        const backUrl = "https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/back.png";
-                        const responseBack = await fetch(backUrl);
-                        const blobBack = await responseBack.blob();
-                        const urlBack = window.URL.createObjectURL(blobBack);
-                        const linkBack = document.createElement("a");
-                        linkBack.href = urlBack;
-                        linkBack.download = `kartu-anggota-${member.nomorregistrasi || member.registrationNumber || member.fieldName}-belakang.png`;
-                        document.body.appendChild(linkBack);
-                        linkBack.click();
-                        document.body.removeChild(linkBack);
-                        window.URL.revokeObjectURL(urlBack);
-                      } catch (e) {
-                        alert("Gagal mengunduh kartu. Silakan coba lagi.");
-                      }
-                    }}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 17v-1a4 4 0 00-8 0v1m8 0a4 4 0 01-8 0m8 0v1a4 4 0 01-8 0v-1m8 0a4 4 0 00-8 0" /></svg>
-                    Unduh Kartu Anggota Untuk Print
-                  </button>
                 </div>
               ) : (
                 <div className="p-2 border-2 border-gray-400 rounded-lg w-full flex items-center justify-center min-h-[275px]">
