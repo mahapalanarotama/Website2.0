@@ -1,3 +1,52 @@
+// Komponen VisiMisiFirestore di luar HomePage
+function VisiMisiFirestore() {
+  const [visi, setVisi] = useState("");
+  const [misi, setMisi] = useState("");
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let unsub = () => {};
+    async function fetchVisiMisi() {
+      const { db } = await import("@/lib/firebase");
+      const { doc, getDoc } = await import("firebase/firestore");
+      const snap = await getDoc(doc(db, "homepage", "visimisi"));
+      if (snap.exists()) {
+        setVisi(snap.data().visi || "");
+        setMisi(snap.data().misi || "");
+      }
+      setLoading(false);
+    }
+    fetchVisiMisi();
+    const handler = () => fetchVisiMisi();
+    window.addEventListener("visimisi-updated", handler);
+    return () => {
+      window.removeEventListener("visimisi-updated", handler);
+      unsub();
+    };
+  }, []);
+  if (loading) return <div className="text-gray-400">Memuat visi & misi...</div>;
+  // Render misi as <li> if multiline
+  const misiLines = misi.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+  return (
+    <>
+      <div className="mb-4">
+        <h4 className="font-heading font-medium mb-2">Visi:</h4>
+        <p className="text-gray-700 text-justify whitespace-pre-line">{visi}</p>
+      </div>
+      <div>
+        <h4 className="font-heading font-medium mb-2">Misi:</h4>
+        {misiLines.length > 1 ? (
+          <ul className="text-gray-700 list-disc pl-5 space-y-1">
+            {misiLines.map((line, idx) => (
+              <li key={idx}>{line}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-700 text-justify whitespace-pre-line">{misi}</p>
+        )}
+      </div>
+    </>
+  );
+}
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ActivityCard } from "@/components/ActivityCard";
@@ -173,20 +222,7 @@ export default function HomePage() {
             
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="font-heading text-xl font-semibold text-primary mb-4">Visi & Misi</h3>
-              <div className="mb-4">
-                <h4 className="font-heading font-medium mb-2">Visi:</h4>
-                <p className="text-gray-700 text-justify">Membangun kembali semangat kebersamaan dan keaktifan anggota untuk menjadikan organisasi Mahapala sebagai wadah yang solid, aktif, dan berprestasi di bidang kepecintaalaman.</p>
-              </div>
-              <div>
-                <h4 className="font-heading font-medium mb-2">Misi:</h4>
-                <ul className="text-gray-700 list-disc pl-5 space-y-1">
-                  <li>Membangun dan memperkuat ikatan antaranggota dalam organisasi mahasiswa pecinta alam,</li>
-                  <li>Meningkatkan keterlibatan anggota melalui kegiatan berbasis kolaborasi,</li>
-                  <li>Menghidupkan kembali program kerja yang relevan dan inovatif,</li>
-                  <li>Melakukan rekrutmen anggota baru secara masif dan strategis,</li>
-                  <li>Membangun budaya komunikasi yang transparan dan terbuka.</li>
-                </ul>
-              </div>
+              <VisiMisiFirestore />
             </div>
           </div>
         </div>

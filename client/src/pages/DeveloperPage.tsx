@@ -29,13 +29,61 @@ export default function DeveloperPage() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'meta' | 'logadmin' | 'homepage'>('meta');
-  // Homepage Carousel State
+  const [tab, setTab] = useState<'meta' | 'logadmin' | 'homepage' | 'visimisi'>('meta');
+  const [visi, setVisi] = useState('');
+  const [misi, setMisi] = useState('');
+  const [visiEdit, setVisiEdit] = useState('');
+  const [misiEdit, setMisiEdit] = useState('');
+  const [loadingVisiMisi, setLoadingVisiMisi] = useState(false);
+  const [visiMisiEditMode, setVisiMisiEditMode] = useState(false);
+  const [visiMisiConfirmOpen, setVisiMisiConfirmOpen] = useState(false);
+  const [visiMisiConfirmed, setVisiMisiConfirmed] = useState(false);
   const [carousel, setCarousel] = useState<CarouselContentItem[]>([]);
   const [carouselLoading, setCarouselLoading] = useState(false);
   const [carouselEdit, setCarouselEdit] = useState<CarouselContentItem | null>(null);
   const [carouselEditIdx, setCarouselEditIdx] = useState<number | null>(null);
   const [carouselDialog, setCarouselDialog] = useState(false);
+  const [logs, setLogs] = useState<DevLog[]>([]);
+  const [logsLoading, setLogsLoading] = useState(false);
+  const [globalConfirmOpen, setGlobalConfirmOpen] = useState(false);
+  const [globalConfirmed, setGlobalConfirmed] = useState(false);
+  const [pendingSaveType, setPendingSaveType] = useState<'meta' | 'carousel' | 'visimisi' | null>(null);
+  const [pendingCarousel, setPendingCarousel] = useState<CarouselContentItem | null>(null);
+
+  // Load visi misi dari Firestore saat tab visimisi dibuka
+  useEffect(() => {
+    if (tab === 'visimisi') {
+      setLoadingVisiMisi(true);
+      // Ganti dengan query Firestore asli
+      import('@/lib/firebase').then(({ db }) => {
+        import('firebase/firestore').then(({ doc, getDoc }) => {
+          getDoc(doc(db, 'homepage', 'visimisi')).then((snap) => {
+            if (snap.exists()) {
+              setVisi(snap.data().visi || '');
+              setMisi(snap.data().misi || '');
+              setVisiEdit(snap.data().visi || '');
+              setMisiEdit(snap.data().misi || '');
+              setVisiMisiEditMode(false);
+            }
+            setLoadingVisiMisi(false);
+          });
+        });
+      });
+    }
+  }, [tab]);
+
+  const handleSaveVisiMisi = async () => {
+    setLoadingVisiMisi(true);
+    // Ganti dengan update Firestore asli
+    const { db } = await import('@/lib/firebase');
+    const { doc, setDoc } = await import('firebase/firestore');
+    await setDoc(doc(db, 'homepage', 'visimisi'), { visi: visiEdit, misi: misiEdit }, { merge: true });
+    setVisi(visiEdit);
+    setMisi(misiEdit);
+    setLoadingVisiMisi(false);
+    setVisiMisiEditMode(false);
+  };
+
   // Load carousel content when tab is homepage
   useEffect(() => {
     if (tab === 'homepage' && user) {
@@ -48,6 +96,7 @@ export default function DeveloperPage() {
       });
     }
   }, [tab, user]);
+
   // Carousel CRUD handlers
   const handleCarouselEdit = (item: CarouselContentItem, idx: number) => {
     setCarouselEdit(item);
@@ -69,25 +118,6 @@ export default function DeveloperPage() {
       setCarouselContent(next);
     }
   };
-  const handleCarouselDialogSave = () => {
-    if (!carouselEdit) return;
-    let next = [...carousel];
-    if (carouselEditIdx === null) {
-      next.push(carouselEdit);
-    } else {
-      next[carouselEditIdx] = carouselEdit;
-    }
-    // Always keep default slides at the start, then custom
-    const custom = next.filter(c => !DEFAULT_CAROUSEL.some(d => d.title === c.title));
-    next = [...DEFAULT_CAROUSEL, ...custom];
-    setCarousel(next);
-    setCarouselContent(next);
-    setCarouselDialog(false);
-    setCarouselEdit(null);
-    setCarouselEditIdx(null);
-  };
-  const [logs, setLogs] = useState<DevLog[]>([]);
-  const [logsLoading, setLogsLoading] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
@@ -125,10 +155,6 @@ export default function DeveloperPage() {
   const handleEdit = () => {
     setEditMode(true);
     setPendingMeta(meta);
-  };
-
-  const handleSave = () => {
-    setConfirmOpen(true);
   };
 
   const handleConfirm = async () => {
@@ -185,25 +211,133 @@ export default function DeveloperPage() {
       <h1 className="text-3xl font-extrabold mb-8 text-center text-primary">Developer Tools</h1>
       <div className="mb-6 flex gap-2 border-b border-blue-200">
         <button
-          className={`px-4 py-2 font-semibold rounded-t-lg ${tab === 'meta' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          className={`px-4 py-2 font-semibold rounded-t-lg flex items-center gap-2 ${tab === 'meta' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
           onClick={() => setTab('meta')}
         >
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M16 18v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Meta
         </button>
         <button
-          className={`px-4 py-2 font-semibold rounded-t-lg ${tab === 'logadmin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          className={`px-4 py-2 font-semibold rounded-t-lg flex items-center gap-2 ${tab === 'logadmin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
           onClick={() => setTab('logadmin')}
         >
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
           Log Admin
         </button>
         <button
-          className={`px-4 py-2 font-semibold rounded-t-lg ${tab === 'homepage' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          className={`px-4 py-2 font-semibold rounded-t-lg flex items-center gap-2 ${tab === 'homepage' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
           onClick={() => setTab('homepage')}
         >
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 8h14"/><path d="M8 17V8"/></svg>
           Homepage
+        </button>
+        <button
+          className={`px-4 py-2 font-semibold rounded-t-lg flex items-center gap-2 ${tab === 'visimisi' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          onClick={() => setTab('visimisi')}
+        >
+          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M4 17v-5a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v5"/><circle cx="12" cy="7" r="4"/></svg>
+          Visi & Misi
         </button>
       </div>
       <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
+        {tab === 'visimisi' && (
+          <>
+            <h2 className="font-bold text-xl mb-4 text-green-900 flex items-center gap-2">
+              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M4 17v-5a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v5"/><circle cx="12" cy="7" r="4"/></svg>
+              Visi & Misi Homepage
+            </h2>
+            {loadingVisiMisi ? (
+              <div className="text-center text-gray-500">Memuat data...</div>
+            ) : (
+              <>
+                {!visiMisiEditMode ? (
+                  <>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block font-semibold mb-2 text-blue-700">Visi (Tampil di Homepage):</label>
+                        <div className="mb-2 p-2 border rounded text-gray-700 whitespace-pre-line bg-transparent">{visi}</div>
+                      </div>
+                      <div>
+                        <label className="block font-semibold mb-2 text-green-700">Misi (Tampil di Homepage):</label>
+                        <div className="mb-2 p-2 border rounded text-gray-700 bg-transparent">
+                          {misi.split(/\r?\n/).filter(Boolean).length > 1 ? (
+                            <ul className="list-disc pl-5 space-y-1">
+                              {misi.split(/\r?\n/).filter(Boolean).map((line, idx) => (
+                                <li key={idx}>{line}</li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <span className="whitespace-pre-line">{misi}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end mt-6">
+                      <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow" onClick={() => { setVisiMisiEditMode(true); setVisiEdit(visi); setMisiEdit(misi); }}>Edit</button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block font-semibold mb-2 text-blue-700">Edit Visi:</label>
+                      <textarea className="w-full border rounded p-2 bg-white" rows={2} value={visiEdit} onChange={e => setVisiEdit(e.target.value)} placeholder="Masukkan visi organisasi..." />
+                    </div>
+                    <div>
+                      <label className="block font-semibold mb-2 text-green-700">Edit Misi:</label>
+                      <textarea className="w-full border rounded p-2 bg-white" rows={4} value={misiEdit} onChange={e => setMisiEdit(e.target.value)} placeholder="Masukkan misi organisasi..." />
+                      <div className="text-xs text-gray-500 mt-1 mb-2">Tekan <b>Enter</b> untuk membuat misi dalam bentuk list/poin.</div>
+                      <div className="mt-3">
+                        <span className="block font-semibold mb-1 text-green-700">Preview Misi:</span>
+                        {misiEdit.split(/\r?\n/).filter(Boolean).length > 1 ? (
+                          <ul className="text-gray-700 list-disc pl-5 space-y-1">
+                            {misiEdit.split(/\r?\n/).filter(Boolean).map((line, idx) => (
+                              <li key={idx}>{line}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-gray-700 text-justify whitespace-pre-line">{misiEdit}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-4 justify-end mt-2">
+                      <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow" onClick={() => setVisiMisiConfirmOpen(true)} disabled={loadingVisiMisi}>Simpan</button>
+                      <button className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded" onClick={() => { setVisiEdit(visi); setMisiEdit(misi); setVisiMisiEditMode(false); }}>Batal</button>
+                    </div>
+                    {visiMisiConfirmOpen && (
+                      <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+                        <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+                          <h3 className="font-bold text-lg mb-2">Konfirmasi Simpan Visi & Misi</h3>
+                          <p className="mb-4">Pastikan data sudah benar sebelum disimpan ke homepage.</p>
+                          <label className="flex items-center gap-2 mb-4">
+                            <input type="checkbox" checked={visiMisiConfirmed} onChange={e => setVisiMisiConfirmed(e.target.checked)} />
+                            <span className="text-sm">Saya sudah memeriksa dan data visi & misi sudah benar.</span>
+                          </label>
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              className={`px-4 py-2 rounded text-white transition ${(!visiMisiConfirmed || loadingVisiMisi)
+                                ? 'bg-green-300 cursor-not-allowed opacity-60'
+                                : 'bg-green-600 hover:bg-green-700 shadow'}`}
+                              disabled={!visiMisiConfirmed || loadingVisiMisi}
+                              onClick={async () => {
+                                await handleSaveVisiMisi();
+                                window.dispatchEvent(new Event('visimisi-updated'));
+                                setVisiMisiConfirmOpen(false);
+                                setVisiMisiConfirmed(false);
+                              }}
+                            >
+                              Ya, Simpan
+                            </button>
+                            <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded" onClick={() => { setVisiMisiConfirmOpen(false); setVisiMisiConfirmed(false); }}>Batal</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
         {tab === 'homepage' && (
           <>
             <h2 className="font-bold text-xl mb-4 text-blue-900 flex items-center gap-2">
@@ -272,7 +406,7 @@ export default function DeveloperPage() {
                         </div>
                       </div>
                       <div className="flex gap-2 justify-end">
-                        <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onClick={handleCarouselDialogSave}>Simpan</button>
+                        <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onClick={() => { setPendingSaveType('carousel'); setPendingCarousel(carouselEdit); setGlobalConfirmOpen(true); }}>Simpan</button>
                         <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded" onClick={() => { setCarouselDialog(false); setCarouselEdit(null); setCarouselEditIdx(null); }}>Batal</button>
                       </div>
                     </div>
@@ -353,7 +487,7 @@ export default function DeveloperPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow" onClick={handleSave} type="button">Simpan</button>
+                  <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow" onClick={() => { setPendingSaveType('meta'); setGlobalConfirmOpen(true); }} type="button">Simpan</button>
                   <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded" onClick={() => setEditMode(false)} type="button">Batal</button>
                 </div>
                 {/* Konfirmasi dialog */}
@@ -373,16 +507,16 @@ export default function DeveloperPage() {
                   <div className="mt-6 bg-gray-50 p-4 rounded border text-xs overflow-x-auto">
                     <code>
                       {`
-<!-- Meta Preview -->
-<title>${meta.title}</title>
-<meta name="description" content="${meta.description}" />
-<meta name="keywords" content="${meta.keywords}" />
-<meta property="og:title" content="${meta.title}" />
-<meta property="og:description" content="${meta.description}" />
-<meta property="og:image" content="${meta.image}" />
-<link rel="icon" href="${meta.favicon}" type="image/x-icon" />
-<link rel="icon" type="image/x-icon" href="${meta.faviconFallback}" />
-<link rel="icon" type="image/png" href="${meta.faviconPng}" />
+                        <!-- Meta Preview -->
+                        <title>${meta.title}</title>
+                        <meta name="description" content="${meta.description}" />
+                        <meta name="keywords" content="${meta.keywords}" />
+                        <meta property="og:title" content="${meta.title}" />
+                        <meta property="og:description" content="${meta.description}" />
+                        <meta property="og:image" content="${meta.image}" />
+                        <link rel="icon" href="${meta.favicon}" type="image/x-icon" />
+                        <link rel="icon" type="image/x-icon" href="${meta.faviconFallback}" />
+                        <link rel="icon" type="image/png" href="${meta.faviconPng}" />
                       `}
                     </code>
                   </div>
@@ -436,6 +570,62 @@ export default function DeveloperPage() {
           </>
         )}
       </div>
+      {/* Global confirm dialog for all save actions */}
+      {globalConfirmOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+            <h3 className="font-bold text-lg mb-2">Konfirmasi Simpan Data</h3>
+            <p className="mb-4">Pastikan data sudah benar sebelum disimpan ke homepage.</p>
+            <label className="flex items-center gap-2 mb-4">
+              <input type="checkbox" checked={globalConfirmed} onChange={e => setGlobalConfirmed(e.target.checked)} />
+              <span className="text-sm">Saya sudah memeriksa dan data sudah benar.</span>
+            </label>
+            <div className="flex gap-2 justify-end">
+              <button
+                className={`px-4 py-2 rounded text-white transition ${(!globalConfirmed)
+                  ? 'bg-green-300 cursor-not-allowed opacity-60'
+                  : 'bg-green-600 hover:bg-green-700 shadow'}`}
+                disabled={!globalConfirmed}
+                onClick={async () => {
+                  if (pendingSaveType === 'meta') {
+                    await handleConfirm();
+                  } else if (pendingSaveType === 'carousel') {
+                    let next = [...carousel];
+                    if (carouselEditIdx === null) {
+                      next.push(pendingCarousel!);
+                    } else {
+                      next[carouselEditIdx!] = pendingCarousel!;
+                    }
+                    const custom = next.filter(c => !DEFAULT_CAROUSEL.some(d => d.title === c.title));
+                    next = [...DEFAULT_CAROUSEL, ...custom];
+                    setCarousel(next);
+                    setCarouselContent(next);
+                    setCarouselDialog(false);
+                    setCarouselEdit(null);
+                    setCarouselEditIdx(null);
+                  } else if (pendingSaveType === 'visimisi') {
+                    await handleSaveVisiMisi();
+                    window.dispatchEvent(new Event('visimisi-updated'));
+                    setVisiMisiEditMode(false);
+                  }
+                  setGlobalConfirmOpen(false);
+                  setGlobalConfirmed(false);
+                  setPendingSaveType(null);
+                  setPendingCarousel(null);
+                }}
+              >
+                Ya, Simpan
+              </button>
+              <button className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded" onClick={() => {
+                setGlobalConfirmOpen(false);
+                setGlobalConfirmed(false);
+                setPendingSaveType(null);
+                setPendingCarousel(null);
+              }}>Batal</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
