@@ -18,6 +18,7 @@ import MemberCardDetailPage from "@/pages/MemberCardDetailPage";
 import MemberCard3DPage from "@/pages/MemberCard3DPage";
 import MemberCardScanPage from "@/pages/MemberCardScanPage";
 import { ScrollToTop } from "@/components/ScrollToTop";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useLeafCursor } from "@/components/CursorLeafTrail";
 import OfflinePage from "@/pages/OfflinePage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -88,6 +89,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <ScrollToTop />
+        <ScrollToTopButton />
         <Layout>
           <Switch>
             <Route path="/offline" component={OfflinePage} />
