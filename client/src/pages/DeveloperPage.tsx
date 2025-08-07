@@ -482,7 +482,7 @@ export default function DeveloperPage() {
                     <input className="w-full border rounded p-2" name="googleFormUrl" value={pendingMeta.googleFormUrl || ''} onChange={handleChange} placeholder="https://docs.google.com/forms/..." />
                   </div>
                   <div>
-                    <label className="block font-medium mb-1">Link Download Formulir (editable)</label>
+                    <label className="block font-medium mb-1">Link Download Formulir</label>
                     <input className="w-full border rounded p-2" name="googleFormDownloadUrl" value={pendingMeta.googleFormDownloadUrl || ''} onChange={handleChange} placeholder="https://.../formulir.docx" />
                   </div>
                 </div>
