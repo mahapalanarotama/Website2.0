@@ -376,30 +376,24 @@ export default function PendaftaranPage() {
                   <p className="text-gray-600">Pendaftaran anggota baru Mahapala tahun 2025</p>
                 </div>
                 <div>
-                  <Button
-                    className="gap-2 bg-primary hover:bg-primary/90"
-                    disabled={!googleFormDownloadUrl}
-                    onClick={async () => {
-                      if (!googleFormDownloadUrl) return;
-                      try {
-                        const response = await fetch(googleFormDownloadUrl);
-                        const blob = await response.blob();
-                        const url = window.URL.createObjectURL(blob);
-                        const link = document.createElement("a");
-                        link.href = url;
-                        link.download = "formulir_pendaftaran_ukm_mahapala_narotama_2025.docx";
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        window.URL.revokeObjectURL(url);
-                      } catch (e) {
-                        alert("Gagal mengunduh formulir. Silakan coba lagi.");
-                      }
-                    }}
-                  >
-                    <Download size={16} />
-                    Unduh Formulir
-                  </Button>
+                  {googleFormDownloadUrl ? (
+                    <a
+                      href={googleFormDownloadUrl}
+                      download="formulir_pendaftaran_ukm_mahapala_narotama_2025.docx"
+                    >
+                      <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
+                        <span>
+                          <Download size={16} />
+                          Unduh Formulir
+                        </span>
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button className="gap-2 bg-primary opacity-50 cursor-not-allowed" disabled>
+                      <Download size={16} />
+                      Unduh Formulir
+                    </Button>
+                  )}
                 </div>
               </div>
               
