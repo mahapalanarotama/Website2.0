@@ -25,6 +25,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SejarahPage from "@/pages/SejarahPage";
 import SejarahAdminPage from "@/pages/SejarahAdminPage";
 import { EduHubPage } from "@/eduhub";
+import GithubOAuthCallback from "@/pages/GithubOAuthCallback";
 
 function App() {
   useLeafCursor();
@@ -93,6 +94,7 @@ function App() {
         <ScrollToTopButton />
         <Layout>
           <Switch>
+            <Route path="/github-oauth-callback" component={GithubOAuthCallback} />
             <Route path="/offline" component={OfflinePage} />
             <Route path="/" component={HomePage} />
             <Route path="/kegiatan" component={ActivitiesPage} />

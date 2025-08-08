@@ -4,6 +4,7 @@ import { Input } from './input';
 import { Label } from './label';
 import { Textarea } from './textarea';
 import { Loader2 } from 'lucide-react';
+import ImageInputWithMode from '../ImageInputWithMode';
 import {
   Dialog,
   DialogContent,
@@ -586,15 +587,16 @@ export function AdminFormDialog({
                       </div>
                     )}
                     <div className="space-y-2">
-                      <Label htmlFor="imageUrl">Image URL</Label>
-                      <Input
-                        id="imageUrl"
-                        name="imageUrl"
-                        type="url"
-                        placeholder="Enter the URL of the image"
-                        value={type === 'activity' || type === 'gallery' ? formData.imageUrl || '' : ''}
-                        onChange={handleChange}
-                        required
+                      <Label htmlFor="imageUrl">Image</Label>
+                      <ImageInputWithMode
+                        value={formData.imageUrl || ''}
+                        onChange={url => {
+                          const e = { target: { name: 'imageUrl', value: url } } as React.ChangeEvent<HTMLInputElement>;
+                          handleChange(e);
+                        }}
+                        repo="mahapalanarotama/OfficialWebsite"
+                        branch="main"
+                        path={type === 'activity' ? 'Img/activities' : 'Img/gallery'}
                       />
                     </div>
                   </>

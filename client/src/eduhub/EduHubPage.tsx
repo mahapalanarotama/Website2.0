@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { modules } from "./modules";
 import ReactMarkdown from "react-markdown";
 import { BadgeCheck } from "lucide-react";
@@ -36,7 +36,7 @@ export default function EduHubPage() {
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Daftar Modul</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {modules.map((mod, idx) => (
+          {modules.map((mod) => (
             <button
               key={mod.id}
               className={`border rounded-lg p-4 text-left shadow hover:shadow-lg transition bg-white hover:bg-green-50 ${selected===mod.id?"border-green-600":"border-gray-300"}`}
