@@ -27,7 +27,7 @@ function setCookie(name: string, value: string, days = 7) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
 }
 export async function exchangeCodeForToken(code: string) {
-  // Gunakan Netlify Function sebagai proxy
+  // Hanya request ke Netlify Function, bukan ke GitHub langsung
   const res = await fetch('/.netlify/functions/github-oauth', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
