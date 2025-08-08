@@ -27,13 +27,29 @@ function setCookie(name: string, value: string, days = 7) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
 }
 export async function exchangeCodeForToken(code: string) {
-  // Hanya request ke Netlify Function, bukan ke GitHub langsung
-  const res = await fetch('/.netlify/functions/github-oauth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code })
-  });
-  const data = await res.json();
+  // Request ke Netlify Function, jika gagal fallback ke Vercel
+  let data;
+  try {
+    const res = await fetch('/.netlify/functions/github-oauth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    if (res.ok) {
+      data = await res.json();
+    } else {
+      throw new Error('Netlify Function not found');
+    }
+  } catch (e) {
+    // Fallback ke Vercel
+    const vercelUrl = 'https://website2-0-client.vercel.app/api/github-oauth'; // Ganti dengan URL Vercel Anda
+    const res = await fetch(vercelUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    data = await res.json();
+  }
   // Redirect ke halaman sebelumnya setelah token didapat
   if (data.access_token) {
     // Simpan token ke cookie agar lebih aman dan bisa diakses cross-tab
