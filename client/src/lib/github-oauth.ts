@@ -33,7 +33,6 @@ export async function exchangeCodeForToken(code: string): Promise<string | null>
     });
 
     console.log('Response status:', response.status);
-    console.log('Response headers:', response.headers);
 
     if (!response.ok) {
       const errorText = await response.text();

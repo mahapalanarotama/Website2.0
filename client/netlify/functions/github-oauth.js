@@ -41,18 +41,19 @@ exports.handler = async function(event, context) {
 
     console.log('Exchanging code for token...');
 
-    // Use native fetch (Node 18+ on Netlify)
+    // Use fetch with proper headers
     const response = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Netlify-Function'
       },
       body: new URLSearchParams({
         client_id: CLIENT_ID,
         client_secret: CLIENT_SECRET,
         code: code
-      })
+      }).toString()
     });
 
     const data = await response.json();
@@ -84,7 +85,10 @@ exports.handler = async function(event, context) {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
-      body: JSON.stringify({ error: 'Internal server error' })
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      })
     };
   }
 };
