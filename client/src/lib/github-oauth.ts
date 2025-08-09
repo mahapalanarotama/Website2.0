@@ -2,7 +2,7 @@
 // You must register an OAuth App at https://github.com/settings/developers
 // Set callback URL to your site (e.g. http://localhost:5173 or your deployed site)
 
-const CLIENT_ID = "Ov23lisoZfewJvG9HtHK"; // Ganti dengan client_id OAuth App Anda
+const CLIENT_ID = "Ov23lisoZfewJvG9HtHK";
 const REDIRECT_URI = window.location.origin + "/github-oauth-callback";
 
 export function getGithubOAuthUrl() {
@@ -20,74 +20,57 @@ export function getCodeFromCallbackUrl() {
   return params.get("code");
 }
 
-// Exchange code for access_token (client-side only, not recommended for production)
-// Helper cookie
-function setCookie(name: string, value: string, days = 7) {
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
-}
-export async function exchangeCodeForToken(code: string) {
-  let token = null;
-  let lastError = null;
-  
-  // Try multiple endpoints (fallback strategy)
-  const endpoints = [
-    '/api/github-oauth', // Local/current domain
-    'https://mahapalanarotama.web.id/api/github-oauth', // Production domain
-    '/.netlify/functions/github-oauth', // Netlify fallback
-  ];
-  
-  for (const endpoint of endpoints) {
-    try {
-      console.log(`Trying endpoint: ${endpoint}`);
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ code })
-      });
-      
-      console.log(`Response status from ${endpoint}:`, res.status);
-      
-      if (res.ok) {
-        const data = await res.json();
-        console.log(`Response data from ${endpoint}:`, data);
-        
-        if (data.access_token) {
-          token = data.access_token;
-          console.log('Successfully got token');
-          break;
-        } else if (data.error) {
-          lastError = data.error;
-          console.log(`Error from ${endpoint}:`, data.error);
-        }
-      } else {
-        const errorText = await res.text();
-        lastError = `HTTP ${res.status}: ${errorText}`;
-        console.log(`HTTP error from ${endpoint}:`, lastError);
-      }
-    } catch (err) {
-      lastError = err.message;
-      console.log(`Network error with ${endpoint}:`, err);
-      continue;
+export async function exchangeCodeForToken(code: string): Promise<string | null> {
+  try {
+    console.log('Exchanging code for token...');
+
+    const response = await fetch('/api/github-oauth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-  }
-  
-  // Redirect ke halaman sebelumnya setelah token didapat
-  const redirectUrl = localStorage.getItem('github_oauth_redirect') || '/admin';
-  localStorage.removeItem('github_oauth_redirect');
-  
-  if (token) {
-    setCookie('github_token', token, 7);
-    window.location.replace(redirectUrl);
-    return token;
-  } else {
-    const errorMsg = lastError ? `Gagal mendapatkan token GitHub: ${lastError}` : 'Gagal mendapatkan token GitHub. Silakan coba lagi.';
-    console.error('Final error:', errorMsg);
-    alert(errorMsg);
-    window.location.replace('/admin');
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    if (!data.access_token) {
+      throw new Error('No access token received');
+    }
+
+    // Store token in cookie
+    setCookie('github_token', data.access_token, 7);
+
+    console.log('Token received successfully');
+    return data.access_token;
+
+  } catch (error) {
+    console.error('Token exchange failed:', error);
+    alert(`GitHub authentication failed: ${error.message}`);
     return null;
   }
+}
+
+function setCookie(name: string, value: string, days: number = 7) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+export function getCookie(name: string): string {
+  return document.cookie.split('; ').reduce((r, v) => {
+    const parts = v.split('=');
+    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+  }, '');
+}
+
+export function deleteCookie(name: string) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 }
