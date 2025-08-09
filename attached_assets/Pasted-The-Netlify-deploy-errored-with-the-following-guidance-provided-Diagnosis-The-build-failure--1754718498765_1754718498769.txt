@@ -1,0 +1,68 @@
+The Netlify deploy errored, with the following guidance provided:
+
+**Diagnosis:**
+The build failure is due to TypeScript configuration errors in the Vite project.
+
+**Solution:**
+1. Open the `tsconfig.json` file in the repository.
+2. In the `tsconfig.json` file, ensure that the `moduleResolution` option is set to either `'node'`, `'classic'`, `'node16'`, or `'nodenext'`.
+3. Specifically, at line 11 in the `tsconfig.json` file, the error mentions that the argument for `--moduleResolution` must be set correctly.
+4. Update the `moduleResolution` option to one of the valid values: `'node'`, `'classic'`, `'node16'`, or `'nodenext'`.
+5. After fixing the TypeScript configuration, commit the changes to the repository and trigger a new build.
+
+If the issue persists, verify the package is in `package.json` and the necessary files were committed to the repository.
+
+The relevant error logs are:
+
+Line 180: [96m[1mbuild.command from netlify.toml                               [22m[39m
+Line 181: [96m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 182: ​
+Line 183: [36m$ npm run build[39m
+Line 184: npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+Line 185: npm warn config `--include=optional` to include them.
+Line 186: npm warn config
+Line 187: npm warn config       Default value does install optional deps unless otherwise omitted.
+Line 188: > client@1.0.0 build
+Line 189: > tsc && vite build
+Line 190: Failed during stage 'building site': Build script returned non-zero exit code: 2
+Line 191: error TS5070: Option '--resolveJsonModule' cannot be specified without 'node' module resolution strategy.
+Line 192: ../tsconfig.json(11,25): error TS6046: Argument for '--moduleResolution' option must be: 'node', 'classic', 'node16', 'nodenext'
+Line 193: npm error Lifecycle script `build` failed with error:
+Line 194: npm error code 2
+Line 195: npm error path /opt/build/repo/client
+Line 196: npm error workspace client@1.0.0
+Line 197: npm error location /opt/build/repo/client
+Line 198: npm error command failed
+Line 199: npm error command sh -c tsc && vite build
+Line 200: [91m[1m​[22m[39m
+Line 201: [91m[1m"build.command" failed                                        [22m[39m
+Line 202: [91m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 203: ​
+Line 204:   [31m[1mError message[22m[39m
+Line 205:   Command failed with exit code 2: npm run build
+Line 206: ​
+Line 207:   [31m[1mError location[22m[39m
+Line 208:   In build.command from netlify.toml:
+Line 209:   npm run build
+Line 210: ​
+Line 211:   [31m[1mResolved config[22m[39m
+Line 212:   build:
+Line 213:     base: /opt/build/repo/client
+Line 214:     command: npm run build
+Line 215:     commandOrigin: config
+Line 216:     environment:
+Line 217:       - GITHUB_CLIENT_ID
+Line 218:       - GITHUB_CLIENT_SECRET
+Line 219:       - NPM_CONFIG_OPTIONAL
+Line 220:       - VITE_API_URL
+Line 221:     publish: /opt/build/repo/client/dist
+Line 222:     publishOrigin: config
+Line 223:   functionsDirectory: /opt/build/repo/client/netlify/functions
+Line 224:   headers:
+Line 225:     - for: /.netlify/functions/*
+      values:
+        Access-Control-Allow-Headers: Content-Type, Authorization
+        Access-
+Line 226: Build failed due to a user error: Build script returned non-zero exit code: 2
+Line 227: Failing build: Failed to build site
+Line 228: Finished processing build request in 48.945s
