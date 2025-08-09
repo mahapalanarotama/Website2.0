@@ -11,6 +11,13 @@ interface GithubImageUploaderProps {
 export default function GithubImageUploader({ onUpload, repo, branch = "main", path }: GithubImageUploaderProps) {
   const [file, setFile] = useState<File | null>(null);
   const [token, setToken] = useState("");
+  // Helper ambil token dari cookie
+  function getCookie(name: string) {
+    return document.cookie.split('; ').reduce((r, v) => {
+      const parts = v.split('=');
+      return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+    }, '');
+  }
   const [authStep, setAuthStep] = useState<'idle'|'authing'|'done'>('idle');
   // Simpan halaman asal sebelum login OAuth
   React.useEffect(() => {
@@ -65,16 +72,23 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
 
   // OAuth flow
   React.useEffect(() => {
-    const code = getCodeFromCallbackUrl();
-    if (code && !token) {
-      setAuthStep('authing');
-      exchangeCodeForToken(code).then(t => {
-        setToken(t);
-        setAuthStep('done');
-        // Redirect ke halaman asal setelah auth
-        const redirectUrl = localStorage.getItem('github_oauth_redirect') || '/admin';
-        window.location.replace(redirectUrl);
-      });
+    // Cek token di cookie setelah redirect
+    const cookieToken = getCookie('github_token');
+    if (cookieToken && !token) {
+      setToken(cookieToken);
+      setAuthStep('done');
+    } else {
+      const code = getCodeFromCallbackUrl();
+      if (code && !token) {
+        setAuthStep('authing');
+        exchangeCodeForToken(code).then(t => {
+          setToken(t);
+          setAuthStep('done');
+          // Redirect ke halaman asal setelah auth
+          const redirectUrl = localStorage.getItem('github_oauth_redirect') || '/admin';
+          window.location.replace(redirectUrl);
+        });
+      }
     }
   }, []);
 
