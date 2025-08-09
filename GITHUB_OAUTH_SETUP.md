@@ -1,35 +1,44 @@
 
-# Setup GitHub OAuth
+# GitHub OAuth Setup Guide
 
-## 1. Environment Variables
-Tambahkan ke Replit Secrets atau file `.env`:
+## Langkah 1: Buat GitHub OAuth App
 
-```
-GITHUB_CLIENT_ID=Ov23lisoZfewJvG9HtHK
-GITHUB_CLIENT_SECRET=your_actual_secret_here
-```
-
-## 2. GitHub OAuth App Configuration
-1. Buka https://github.com/settings/developers
+1. Pergi ke [GitHub Developer Settings](https://github.com/settings/developers)
 2. Klik "New OAuth App"
-3. Application name: `Website Mahapala Narotama`
-4. Homepage URL: `https://your-repl-name.username.repl.co`
-5. Authorization callback URL: `https://your-repl-name.username.repl.co/github-oauth-callback`
+3. Isi form:
+   - **Application name**: Nama aplikasi Anda
+   - **Homepage URL**: URL website Anda (misal: `https://your-site.vercel.app`)
+   - **Authorization callback URL**: `https://your-site.vercel.app/github-oauth-callback`
 
-## 3. Repository Setup
-Pastikan repository target sudah ada dan accessible:
-- Repository: `mahapalanarotama/OfficialWebsite`
-- Branch: `main`
-- Folder untuk upload: `uploads/images/`
+## Langkah 2: Dapatkan Client ID dan Client Secret
 
-## 4. Testing
-1. Login ke admin page
-2. Buka form tambah/edit dengan image upload
-3. Klik "Login dengan GitHub"
-4. Authorize aplikasi
-5. Upload gambar untuk test
+Setelah membuat OAuth App, Anda akan mendapat:
+- **Client ID**: (sudah terisi di kode: `Ov23lisoZfewJvG9HtHK`)
+- **Client Secret**: (sudah terisi di kode: `7f90b5275811168370669968294f6f3199b5489b`)
 
-## 5. Troubleshooting
-- Jika OAuth gagal: Periksa callback URL di GitHub settings
-- Jika upload gagal: Periksa permissions repository dan token scope
-- Jika raw URL tidak benar: Pastikan path repository benar
+## Langkah 3: Setup Environment Variables (Opsional)
+
+Untuk keamanan yang lebih baik, Anda bisa menggunakan environment variables:
+
+```bash
+GITHUB_CLIENT_ID=your_client_id_here
+GITHUB_CLIENT_SECRET=your_client_secret_here
+```
+
+## Troubleshooting
+
+Jika masih error "gagal mendapatkan token GitHub":
+
+1. **Cek Console Browser** - Buka Developer Tools (F12) > Console untuk melihat error detail
+2. **Pastikan OAuth App sudah aktif** - Cek di GitHub Settings > Developer settings > OAuth Apps
+3. **Callback URL harus tepat** - Pastikan callback URL di GitHub OAuth App sesuai dengan domain yang digunakan
+4. **Network Issues** - Cek apakah ada firewall atau adblocker yang memblokir request
+
+## Testing
+
+1. Buka halaman admin
+2. Klik "Login dengan GitHub"
+3. Authorize aplikasi di GitHub
+4. Anda akan diarahkan kembali ke halaman admin dengan status "Terautentikasi"
+
+Jika masih bermasalah, buka Developer Tools > Console untuk melihat log error yang detail.

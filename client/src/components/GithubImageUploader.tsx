@@ -146,16 +146,23 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
             </button>
           </div>
         ) : (
-          <button 
-            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50" 
-            onClick={() => {
-              localStorage.setItem('github_oauth_redirect', window.location.pathname + window.location.search);
-              window.location.href = getGithubOAuthUrl();
-            }} 
-            disabled={authStep === 'authing'}
-          >
-            Login dengan GitHub
-          </button>
+          <div>
+            <button 
+              className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50" 
+              onClick={() => {
+                localStorage.setItem('github_oauth_redirect', window.location.pathname + window.location.search);
+                window.location.href = getGithubOAuthUrl();
+              }} 
+              disabled={authStep === 'authing'}
+            >
+              {authStep === 'authing' ? 'Memproses...' : 'Login dengan GitHub'}
+            </button>
+            {authStep === 'authing' && (
+              <div className="text-sm text-gray-600 mt-1">
+                Sedang memproses autentikasi GitHub...
+              </div>
+            )}
+          </div>
         )}
       </div>
       

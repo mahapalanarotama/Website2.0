@@ -28,31 +28,49 @@ function setCookie(name: string, value: string, days = 7) {
 }
 export async function exchangeCodeForToken(code: string) {
   let token = null;
+  let lastError = null;
   
   // Try multiple endpoints (fallback strategy)
   const endpoints = [
     '/api/github-oauth', // Vercel/local
-    'https://website2-0-client-jvbnwdfb5-mahapalanarotamas-projects.vercel.app/api/github-oauth', // Vercel production
-    '/.netlify/functions/github-oauth' // Netlify fallback
+    '/.netlify/functions/github-oauth', // Netlify
+    'https://website2-0-client-jvbnwdfb5-mahapalanarotamas-projects.vercel.app/api/github-oauth' // Vercel production fallback
   ];
   
   for (const endpoint of endpoints) {
     try {
+      console.log(`Trying endpoint: ${endpoint}`);
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ code })
       });
       
+      console.log(`Response status from ${endpoint}:`, res.status);
+      
       if (res.ok) {
         const data = await res.json();
+        console.log(`Response data from ${endpoint}:`, data);
+        
         if (data.access_token) {
           token = data.access_token;
+          console.log('Successfully got token');
           break;
+        } else if (data.error) {
+          lastError = data.error;
+          console.log(`Error from ${endpoint}:`, data.error);
         }
+      } else {
+        const errorText = await res.text();
+        lastError = `HTTP ${res.status}: ${errorText}`;
+        console.log(`HTTP error from ${endpoint}:`, lastError);
       }
     } catch (err) {
-      console.log(`Failed to exchange token with ${endpoint}:`, err);
+      lastError = err.message;
+      console.log(`Network error with ${endpoint}:`, err);
       continue;
     }
   }
@@ -66,7 +84,9 @@ export async function exchangeCodeForToken(code: string) {
     window.location.replace(redirectUrl);
     return token;
   } else {
-    alert('Gagal mendapatkan token GitHub. Silakan coba lagi.');
+    const errorMsg = lastError ? `Gagal mendapatkan token GitHub: ${lastError}` : 'Gagal mendapatkan token GitHub. Silakan coba lagi.';
+    console.error('Final error:', errorMsg);
+    alert(errorMsg);
     window.location.replace('/admin');
     return null;
   }
