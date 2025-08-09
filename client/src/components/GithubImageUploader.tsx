@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { getCookie, deleteCookie, testGitHubConnection, getGithubOAuthUrl } from "@/lib/github-oauth";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+// Simpan URL raw ke Firestore
+const saveImageToFirestore = async (rawUrl: string) => {
+  await addDoc(collection(db, "gallerys"), {
+    imageUrl: rawUrl,
+    createdAt: serverTimestamp(),
+    // Tambahkan field lain sesuai kebutuhan
+  });
+};
 
 interface GithubImageUploaderProps {
   repo?: string;
@@ -11,8 +21,9 @@ interface GithubImageUploaderProps {
 export default function GithubImageUploader({
   repo = "mahapalanarotama/OfficialWebsite",
   path = "uploads",
-  branch = "main"
-}: GithubImageUploaderProps) {
+  branch = "main",
+  onUpload
+  }: GithubImageUploaderProps) {
   const [token, setToken] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -84,15 +95,13 @@ export default function GithubImageUploader({
         try {
           const base64Content = (reader.result as string).split(',')[1];
           const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const filePath = `${path ? path + '/' : ''}${fileName}`;
-
-          console.log(`Uploading to: ${repo}/contents/${filePath}`);
+          const filePath = `${path}/${fileName}`;
 
           // Upload to GitHub
           const response = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
             method: 'PUT',
             headers: {
-              'Authorization': `token ${token}`,
+              'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
               'Accept': 'application/vnd.github.v3+json'
             },
@@ -104,35 +113,24 @@ export default function GithubImageUploader({
           });
 
           if (!response.ok) {
-            let errorMsg = `Upload failed: ${response.status} ${response.statusText}`;
-            try {
-              const errorData = await response.json();
-              errorMsg = errorData.message || errorMsg;
-            } catch {}
-            setError(errorMsg);
-            setUploading(false);
-            return;
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Upload failed: ${response.status} ${response.statusText}`);
           }
 
           const data = await response.json();
-          const imageUrl = data.content.download_url;
+          // Convert ke raw URL
+          const imageUrl = data.content.download_url.replace("https://github.com/", "https://raw.githubusercontent.com/").replace("/blob/", "/");
 
           setSuccess(`✅ Image uploaded successfully! URL: ${imageUrl}`);
           setFile(null);
 
+          // Simpan ke Firestore
+          await saveImageToFirestore(imageUrl);
+          if (onUpload) onUpload(imageUrl);
+
           // Reset file input
           const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
           if (fileInput) fileInput.value = '';
-        } catch (err) {
-          setError('Upload failed: ' + (err instanceof Error ? err.message : String(err)));
-        }
-        setUploading(false);
-      };
-      reader.onerror = () => {
-        setError('Failed to read file');
-        setUploading(false);
-      };
-      reader.readAsDataURL(file);
 
         } catch (error) {
           console.error('Upload error:', error);
