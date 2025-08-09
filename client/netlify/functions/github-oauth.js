@@ -1,6 +1,4 @@
 
-const fetch = require('node-fetch');
-
 exports.handler = async function(event, context) {
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
@@ -43,6 +41,7 @@ exports.handler = async function(event, context) {
 
     console.log('Exchanging code for token...');
 
+    // Use native fetch (Node 18+ on Netlify)
     const response = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
       headers: {

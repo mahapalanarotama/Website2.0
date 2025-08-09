@@ -1,10 +1,10 @@
-/sitemap.xml
-  Content-Type: application/xml
-/offline
-  Cache-Control: public, max-age=0, must-revalidate
-/offline-survival-app*
-  Cache-Control: public, max-age=0, must-revalidate
-/service-worker.js
-  Cache-Control: public, max-age=0, must-revalidate
-/manifest.json
-  Cache-Control: public, max-age=0, must-revalidate
+
+/.netlify/functions/*
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization
+
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

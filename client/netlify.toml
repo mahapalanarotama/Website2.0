@@ -1,21 +1,15 @@
 
 [build]
-  base = "."
   publish = "dist"
   command = "npm run build"
 
-# Environment variables untuk Netlify:
-# Set di Netlify dashboard > Site settings > Environment variables
-# VITE_API_URL (jika diperlukan)
+[functions]
+  directory = "netlify/functions"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
 
 [[headers]]
   for = "/.netlify/functions/*"
