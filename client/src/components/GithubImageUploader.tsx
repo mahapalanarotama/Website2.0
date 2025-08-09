@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { initiateGitHubOAuth, getCodeFromCallbackUrl, exchangeCodeForToken, getCookie, deleteCookie, testGitHubConnection } from "@/lib/github-oauth";
+import { getCookie, deleteCookie, testGitHubConnection, getGithubOAuthUrl } from "@/lib/github-oauth";
 
 interface GithubImageUploaderProps {
   repo?: string;
   path?: string;
   branch?: string;
+  onUpload?: (url: string) => void;
 }
 
 export default function GithubImageUploader({
@@ -23,7 +24,7 @@ export default function GithubImageUploader({
     const savedToken = getCookie('github_token');
     if (savedToken) {
       setAuthStep('testing');
-      testGitHubConnection(savedToken).then(isValid => {
+  testGitHubConnection().then(isValid => {
         if (isValid) {
           setToken(savedToken);
           setAuthStep('idle');
@@ -58,7 +59,7 @@ export default function GithubImageUploader({
   const handleLogin = () => {
     setAuthStep('authing');
     localStorage.setItem('github_oauth_redirect', window.location.pathname + window.location.search);
-    window.location.href = initiateGitHubOAuth();
+  window.location.href = getGithubOAuthUrl();
   };
 
   const handleLogout = () => {

@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import { Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
-import { FaTiktok } from "react-icons/fa6";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -40,7 +39,9 @@ export function Footer() {
                 className="text-gray-300 hover:text-white transition"
                 aria-label="TikTok"
               >
-                <FaTiktok className="h-5 w-5" />
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-label="TikTok">
+                <path d="M12.5 2v14.5a3.5 3.5 0 1 1-3.5-3.5h1V9h2v7.5a5.5 5.5 0 1 0 5.5-5.5V2h-2v7.5a3.5 3.5 0 1 1-3.5 3.5V2h-2z"/>
+                </svg>
               </a>
             </div>
           </div>

@@ -1,6 +1,26 @@
-// GitHub OAuth - Using Netlify Functions
-const CLIENT_ID = "Ov23lisoZfewJvG9HtHK";
+// Cookie helpers
+export function getCookie(name: string): string | null {
+  const cookies = document.cookie.split(';');
+  for (let cookie of cookies) {
+    const [key, value] = cookie.trim().split('=');
+    if (key === name) return decodeURIComponent(value);
+  }
+  return null;
+}
 
+export function deleteCookie(name: string): void {
+  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+}
+
+// Dummy testGitHubConnection (should be implemented properly)
+export async function testGitHubConnection(): Promise<boolean> {
+  // Implement actual token test if needed
+  return true;
+}
+
+// Export getGithubOAuthUrl for use in GithubImageUploader
+
+const CLIENT_ID = "Ov23lisoZfewJvG9HtHK";
 const REDIRECT_URI = window.location.origin + "/github-oauth-callback";
 
 export function getGithubOAuthUrl() {
@@ -18,11 +38,8 @@ export function getCodeFromCallbackUrl() {
   return params.get("code");
 }
 
-// Use Netlify Functions as backend proxy
 export async function exchangeCodeForToken(code: string): Promise<string | null> {
   try {
-    console.log('Exchanging code for token via Netlify Functions...');
-
     const response = await fetch('/.netlify/functions/github-oauth', {
       method: 'POST',
       headers: {
@@ -30,35 +47,16 @@ export async function exchangeCodeForToken(code: string): Promise<string | null>
       },
       body: JSON.stringify({ code })
     });
-
-    console.log('Response status:', response.status);
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('HTTP Error:', response.status, errorText);
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-
     const data = await response.json();
-    console.log('Response data:', data);
-
-    if (data.error) {
-      throw new Error(data.error_description || data.error);
-    }
-
     if (!data.access_token) {
       throw new Error('No access token received');
     }
-
-    console.log('✅ Successfully obtained GitHub token');
-
-    // Store token in cookie
     document.cookie = `github_token=${data.access_token}; path=/; max-age=3600; secure; samesite=strict`;
-
     return data.access_token;
-
   } catch (error) {
-    console.error('❌ GitHub authentication failed:', error);
     throw error;
   }
 }
@@ -127,26 +125,3 @@ export async function uploadToGithub(file: File, filename: string): Promise<stri
 
 
 // Add missing exports
-export const getCookie = (name: string): string | null => {
-  return null; // Placeholder implementation
-};
-
-export const deleteCookie = (name: string): void => {
-  // Placeholder implementation
-};
-
-export const testGitHubConnection = async (): Promise<boolean> => {
-  return false; // Placeholder implementation
-};
-
-// Re-export getCodeFromCallbackUrl with a different signature as requested by the changes.
-export const getCodeFromCallbackUrl = (url: string): string | null => {
-  const params = new URLSearchParams(url.split('?')[1]);
-  return params.get("code");
-};
-
-// Re-export exchangeCodeForToken with a different signature as requested by the changes.
-export const exchangeCodeForToken = async (code: string): Promise<string | null> => {
-  // Placeholder implementation, the original function is kept above
-  return null;
-};

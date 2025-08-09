@@ -1,4 +1,3 @@
-import { Search } from 'lucide-react';
 
 interface MagnifierIconProps {
   className?: string;
