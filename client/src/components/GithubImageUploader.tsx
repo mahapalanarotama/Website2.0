@@ -84,15 +84,15 @@ export default function GithubImageUploader({
         try {
           const base64Content = (reader.result as string).split(',')[1];
           const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const filePath = `${path}/${fileName}`;
+          const filePath = `${path ? path + '/' : ''}${fileName}`;
 
-          console.log(`Uploading to: ${repo}/${filePath}`);
+          console.log(`Uploading to: ${repo}/contents/${filePath}`);
 
           // Upload to GitHub
           const response = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
             method: 'PUT',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': `token ${token}`,
               'Content-Type': 'application/json',
               'Accept': 'application/vnd.github.v3+json'
             },
@@ -104,8 +104,14 @@ export default function GithubImageUploader({
           });
 
           if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || `Upload failed: ${response.status} ${response.statusText}`);
+            let errorMsg = `Upload failed: ${response.status} ${response.statusText}`;
+            try {
+              const errorData = await response.json();
+              errorMsg = errorData.message || errorMsg;
+            } catch {}
+            setError(errorMsg);
+            setUploading(false);
+            return;
           }
 
           const data = await response.json();
@@ -117,6 +123,16 @@ export default function GithubImageUploader({
           // Reset file input
           const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
           if (fileInput) fileInput.value = '';
+        } catch (err) {
+          setError('Upload failed: ' + (err instanceof Error ? err.message : String(err)));
+        }
+        setUploading(false);
+      };
+      reader.onerror = () => {
+        setError('Failed to read file');
+        setUploading(false);
+      };
+      reader.readAsDataURL(file);
 
         } catch (error) {
           console.error('Upload error:', error);
