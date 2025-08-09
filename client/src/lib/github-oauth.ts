@@ -27,32 +27,47 @@ function setCookie(name: string, value: string, days = 7) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
 }
 export async function exchangeCodeForToken(code: string) {
-  // Request ke Vercel endpoint
-  let data;
   let token = null;
-  const vercelUrl = 'https://website2-0-client-jvbnwdfb5-mahapalanarotamas-projects.vercel.app/api/github-oauth'; // Ganti dengan URL Vercel Anda
-  try {
-    const res = await fetch(vercelUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code })
-    });
-    if (res.ok) {
-      data = await res.json();
-      token = data.access_token;
+  
+  // Try multiple endpoints (fallback strategy)
+  const endpoints = [
+    '/api/github-oauth', // Vercel/local
+    'https://website2-0-client-jvbnwdfb5-mahapalanarotamas-projects.vercel.app/api/github-oauth', // Vercel production
+    '/.netlify/functions/github-oauth' // Netlify fallback
+  ];
+  
+  for (const endpoint of endpoints) {
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access_token) {
+          token = data.access_token;
+          break;
+        }
+      }
+    } catch (err) {
+      console.log(`Failed to exchange token with ${endpoint}:`, err);
+      continue;
     }
-  } catch (err) {
-    token = null;
   }
+  
   // Redirect ke halaman sebelumnya setelah token didapat
   const redirectUrl = localStorage.getItem('github_oauth_redirect') || '/admin';
+  localStorage.removeItem('github_oauth_redirect');
+  
   if (token) {
     setCookie('github_token', token, 7);
-    localStorage.removeItem('github_token');
     window.location.replace(redirectUrl);
     return token;
   } else {
-    window.location.replace('/');
+    alert('Gagal mendapatkan token GitHub. Silakan coba lagi.');
+    window.location.replace('/admin');
     return null;
   }
 }
