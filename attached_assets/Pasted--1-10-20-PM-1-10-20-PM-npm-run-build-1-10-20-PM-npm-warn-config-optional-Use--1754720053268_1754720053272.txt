@@ -1,0 +1,74 @@
+───────────────
+1:10:20 PM: ​
+1:10:20 PM: $ npm run build
+1:10:20 PM: npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+1:10:20 PM: npm warn config `--include=optional` to include them.
+1:10:20 PM: npm warn config
+1:10:20 PM: npm warn config       Default value does install optional deps unless otherwise omitted.
+1:10:20 PM: > client@1.0.0 build
+1:10:20 PM: > tsc && vite build
+1:10:30 PM: src/components/Footer.tsx(43,18): error TS2786: 'FaTiktok' cannot be used as a JSX component.
+1:10:30 PM:   Its return type 'ReactNode' is not a valid JSX element.
+1:10:30 PM:     Type 'undefined' is not assignable to type 'Element | null'.
+1:10:30 PM: src/components/GithubImageUploader.tsx(2,10): error TS2305: Module '"@/lib/github-oauth"' has no exported member 'initiateGitHubOAuth'.
+1:10:30 PM: src/components/GithubImageUploader.tsx(2,31): error TS6133: 'getCodeFromCallbackUrl' is declared but its value is never read.
+1:10:30 PM: src/components/GithubImageUploader.tsx(2,55): error TS6133: 'exchangeCodeForToken' is declared but its value is never read.
+1:10:30 PM: src/components/GithubImageUploader.tsx(26,28): error TS2554: Expected 0 arguments, but got 1.
+1:10:30 PM: src/components/LearningModule.tsx(1,15): error TS2305: Module '"../types/schema"' has no exported member 'LearningModule'.
+1:10:30 PM: src/components/MagnifierIcon.tsx(2,1): error TS6133: 'React' is declared but its value is never read.
+1:10:30 PM: src/lib/github-oauth.ts(16,17): error TS2300: Duplicate identifier 'getCodeFromCallbackUrl'.
+1:10:30 PM: src/lib/github-oauth.ts(22,23): error TS2300: Duplicate identifier 'exchangeCodeForToken'.
+1:10:30 PM: src/lib/github-oauth.ts(130,27): error TS6133: 'name' is declared but its value is never read.
+1:10:30 PM: src/lib/github-oauth.ts(134,30): error TS6133: 'name' is declared but its value is never read.
+1:10:30 PM: src/lib/github-oauth.ts(143,14): error TS2300: Duplicate identifier 'getCodeFromCallbackUrl'.
+1:10:30 PM: src/lib/github-oauth.ts(149,14): error TS2300: Duplicate identifier 'exchangeCodeForToken'.
+1:10:30 PM: src/lib/github-oauth.ts(149,44): error TS6133: 'code' is declared but its value is never read.
+1:10:30 PM: src/pages/LogTableWithSlider.tsx(2,1): error TS6133: 'React' is declared but its value is never read.
+1:10:30 PM: src/pages/LogTableWithSlider.tsx(8,44): error TS6133: 'props' is declared but its value is never read.
+1:10:30 PM: npm error Lifecycle script `build` failed with error:
+1:10:30 PM: npm error code 2
+1:10:30 PM: npm error path /opt/build/repo/client
+1:10:30 PM: npm error workspace client@1.0.0
+1:10:30 PM: npm error location /opt/build/repo/client
+1:10:30 PM: npm error command failed
+1:10:30 PM: npm error command sh -c tsc && vite build
+1:10:30 PM: ​
+1:10:30 PM: "build.command" failed                                        
+1:10:30 PM: ────────────────────────────────────────────────────────────────
+1:10:30 PM: ​
+1:10:30 PM:   Error message
+1:10:30 PM:   Command failed with exit code 2: npm run build (https://ntl.fyi/exit-code-2)
+1:10:30 PM: ​
+1:10:30 PM:   Error location
+1:10:30 PM:   In build.command from netlify.toml:
+1:10:30 PM:   npm run build
+1:10:30 PM: ​
+1:10:30 PM:   Resolved config
+1:10:30 PM:   build:
+1:10:30 PM:     base: /opt/build/repo/client
+1:10:30 PM:     command: npm run build
+1:10:30 PM:     commandOrigin: config
+1:10:30 PM:     environment:
+1:10:30 PM:       - GITHUB_CLIENT_ID
+1:10:30 PM:       - GITHUB_CLIENT_SECRET
+1:10:30 PM:       - NPM_CONFIG_OPTIONAL
+1:10:30 PM:       - VITE_API_URL
+1:10:30 PM:     publish: /opt/build/repo/client/dist
+1:10:30 PM:     publishOrigin: config
+1:10:30 PM:   functionsDirectory: /opt/build/repo/client/netlify/functions
+1:10:30 PM:   headers:
+1:10:31 PM: Failed during stage 'building site': Build script returned non-zero exit code: 2 (https://ntl.fyi/exit-code-2)
+1:10:31 PM:     - for: /.netlify/functions/*
+      values:
+        Access-Control-Allow-Headers: Content-Type, Authorization
+        Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+        Access-Control-Allow-Origin: "*"
+  headersOrigin: config
+  redirects:
+    - from: /*
+      status: 200
+      to: /index.html
+  redirectsOrigin: config
+1:10:31 PM: Build failed due to a user error: Build script returned non-zero exit code: 2
+1:10:31 PM: Failing build: Failed to build site
+1:10:32 PM: Finished processing build request in 34.964s
