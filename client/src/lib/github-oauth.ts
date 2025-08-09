@@ -1,7 +1,5 @@
 
-// GitHub OAuth - Direct Implementation (No Backend Required)
-// Uses GitHub OAuth Device Flow for web applications
-
+// GitHub OAuth - Using Backend Proxy (CORS-Safe)
 const CLIENT_ID = "Ov23lisoZfewJvG9HtHK";
 const REDIRECT_URI = window.location.origin + "/github-oauth-callback";
 
@@ -20,50 +18,62 @@ export function getCodeFromCallbackUrl() {
   return params.get("code");
 }
 
-// Using GitHub's client-side token exchange
+// Use backend proxy to exchange code for token (CORS-safe)
 export async function exchangeCodeForToken(code: string): Promise<string | null> {
   try {
-    console.log('Exchanging code for token via GitHub...');
+    console.log('Exchanging code for token via backend proxy...');
 
-    // Use GitHub's CORS-enabled endpoint
-    const response = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        client_id: CLIENT_ID,
-        client_secret: '7f90b5275811168370669968294f6f3199b5489b',
-        code: code,
-        redirect_uri: REDIRECT_URI
-      })
-    });
+    // Try backend endpoints
+    const endpoints = [
+      '/api/github-oauth', // Express backend
+      '/.netlify/functions/github-oauth', // Netlify functions
+    ];
 
-    if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status}`);
+    let lastError: Error | null = null;
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ code })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (data.error) {
+          throw new Error(data.error_description || data.error);
+        }
+
+        if (!data.access_token) {
+          throw new Error('No access token received');
+        }
+
+        // Store token securely
+        setCookie('github_token', data.access_token, 7);
+        
+        console.log('✅ GitHub authentication successful');
+        return data.access_token;
+
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        console.warn(`Failed to exchange token via ${endpoint}:`, lastError.message);
+        continue; // Try next endpoint
+      }
     }
 
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error_description || data.error);
-    }
-
-    if (!data.access_token) {
-      throw new Error('No access token received from GitHub');
-    }
-
-    // Store token securely
-    setCookie('github_token', data.access_token, 7);
-    
-    console.log('✅ GitHub authentication successful');
-    return data.access_token;
+    // All endpoints failed
+    throw lastError || new Error('All OAuth endpoints failed');
 
   } catch (error) {
     console.error('❌ GitHub authentication failed:', error);
     
-    // Show user-friendly error message
     const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
     alert(`GitHub authentication failed: ${errorMsg}\n\nPlease try again or contact support.`);
     
