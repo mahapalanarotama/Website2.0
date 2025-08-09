@@ -27,11 +27,12 @@ function setCookie(name: string, value: string, days = 7) {
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax; Secure`;
 }
 export async function exchangeCodeForToken(code: string) {
-  // Request ke Netlify Function, jika gagal fallback ke Vercel
+  // Request ke Vercel endpoint
   let data;
   let token = null;
+  const vercelUrl = 'https://website2-0-client.vercel.app/api/github-oauth'; // Ganti dengan URL Vercel Anda
   try {
-    const res = await fetch('/.netlify/functions/github-oauth', {
+    const res = await fetch(vercelUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code })
@@ -39,25 +40,9 @@ export async function exchangeCodeForToken(code: string) {
     if (res.ok) {
       data = await res.json();
       token = data.access_token;
-    } else {
-      throw new Error('Netlify Function not found');
     }
-  } catch (e) {
-    // Fallback ke Vercel
-    const vercelUrl = 'https://your-vercel-app.vercel.app/api/github-oauth'; // Ganti dengan URL Vercel Anda
-    try {
-      const res = await fetch(vercelUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
-      });
-      if (res.ok) {
-        data = await res.json();
-        token = data.access_token;
-      }
-    } catch (err) {
-      token = null;
-    }
+  } catch (err) {
+    token = null;
   }
   // Redirect ke halaman sebelumnya setelah token didapat
   const redirectUrl = localStorage.getItem('github_oauth_redirect') || '/admin';
