@@ -34,9 +34,22 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
+  // Handle CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': 'https://mahapalanarotama.web.id',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      },
+      body: ''
+    };
+  }
+  
   const { code } = JSON.parse(event.body);
-  const CLIENT_ID = 'Ov23lisoZfewJvG9HtHK'; // Ganti dengan client_id OAuth App Anda
-  const CLIENT_SECRET = '7f90b5275811168370669968294f6f3199b5489b'; // Ganti dengan client_secret OAuth App Anda
+  const CLIENT_ID = 'Ov23lisoZfewJvG9HtHK';
+  const CLIENT_SECRET = '7f90b5275811168370669968294f6f3199b5489b';
 
   const res = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
@@ -53,6 +66,11 @@ exports.handler = async function(event, context) {
   const data = await res.json();
   return {
     statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://mahapalanarotama.web.id',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
     body: JSON.stringify(data)
   };
 };

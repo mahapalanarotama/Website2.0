@@ -32,9 +32,9 @@ export async function exchangeCodeForToken(code: string) {
   
   // Try multiple endpoints (fallback strategy)
   const endpoints = [
-    '/api/github-oauth', // Vercel/local
-    '/.netlify/functions/github-oauth', // Netlify
-    'https://website2-0-client-jvbnwdfb5-mahapalanarotamas-projects.vercel.app/api/github-oauth' // Vercel production fallback
+    '/api/github-oauth', // Local/current domain
+    'https://mahapalanarotama.web.id/api/github-oauth', // Production domain
+    '/.netlify/functions/github-oauth', // Netlify fallback
   ];
   
   for (const endpoint of endpoints) {
