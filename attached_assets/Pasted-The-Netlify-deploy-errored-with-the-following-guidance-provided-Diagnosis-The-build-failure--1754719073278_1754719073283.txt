@@ -1,0 +1,86 @@
+The Netlify deploy errored, with the following guidance provided:
+
+**Diagnosis:**
+The build failure is caused by TypeScript errors in the project.
+
+**Solution:**
+1. Fix all TypeScript errors in the project. For example:
+   - In `src/components/Footer.tsx`, resolve the issue with `'FaTiktok'` being used incorrectly as a JSX component.
+   - In various files like `GithubImageUploader.tsx`, `ImageInputWithMode.tsx`, `LearningModule.tsx`, etc., address the TypeScript errors related to missing modules, unused values, incorrect types, etc.
+
+2. Once all TypeScript errors are fixed, run the build command (`npm run build`) again to ensure the project builds successfully.
+
+3. Review the TypeScript errors reported in the logs and make the necessary corrections in the respective files.
+
+By addressing the TypeScript errors, the build should be successful on Netlify.
+
+The relevant error logs are:
+
+Line 195: [96m[1mbuild.command from netlify.toml                               [22m[39m
+Line 196: [96m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 197: ​
+Line 198: [36m$ npm run build[39m
+Line 199: npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+Line 200: npm warn config `--include=optional` to include them.
+Line 201: npm warn config
+Line 202: npm warn config       Default value does install optional deps unless otherwise omitted.
+Line 203: > client@1.0.0 build
+Line 204: > tsc && vite build
+Line 205: src/components/Footer.tsx(43,18): error TS2786: 'FaTiktok' cannot be used as a JSX component.
+Line 206:   Its return type 'ReactNode' is not a valid JSX element.
+Line 207:     Type 'undefined' is not assignable to type 'Element | null'.
+Line 208: src/components/GithubImageUploader.tsx(3,29): error TS6133: 'getCodeFromCallbackUrl' is declared but its value is never read.
+Line 209: src/components/GithubImageUploader.tsx(3,53): error TS6133: 'exchangeCodeForToken' is declared but its value is never read.
+Line 210: src/components/GithubImageUploader.tsx(3,75): error TS2305: Module '"@/lib/github-oauth"' has no exported member 'getCookie'.
+Line 211: src/components/GithubImageUploader.tsx(3,86): error TS2305: Module '"@/lib/github-oauth"' has no exported member 'deleteCookie'.
+Line 212: src/components/GithubImageUploader.tsx(3,100): error TS2305: Module '"@/lib/github-oauth"' has no exported member 'testGitHubCon
+Line 213: src/components/GithubImageUploader.tsx(27,45): error TS7006: Parameter 'isValid' implicitly has an 'any' type.
+Line 214: src/components/ImageInputWithMode.tsx(24,70): error TS2322: Type '{ repo: string; branch: string; path: string; onUpload: (url: 
+Line 215:   Property 'onUpload' does not exist on type 'IntrinsicAttributes & GithubImageUploaderProps'.
+Line 216: src/components/LearningModule.tsx(1,54): error TS2307: Cannot find module '@shared/schema' or its corresponding type declaration
+Line 217: src/components/MagnifierIcon.tsx(1,1): error TS1208: 'MagnifierIcon.tsx' cannot be compiled under '--isolatedModules' because it
+Line 218: src/hooks/use-structure.ts(1,1): error TS1208: 'use-structure.ts' cannot be compiled under '--isolatedModules' because it is con
+Line 219: src/lib/pendaftaran.ts(1,1): error TS1208: 'pendaftaran.ts' cannot be compiled under '--isolatedModules' because it is considere
+Line 220: src/lib/sejarahData.ts(1,1): error TS1208: 'sejarahData.ts' cannot be compiled under '--isolatedModules' because it is considere
+Line 221: src/pages/LogTableWithSlider.tsx(1,1): error TS1208: 'LogTableWithSlider.tsx' cannot be compiled under '--isolatedModules' becau
+Line 222: src/types/firestore.ts(1,1): error TS1208: 'firestore.ts' cannot be compiled under '--isolatedModules' because it is considered 
+Line 223: npm error Lifecycle script `build` failed with error:
+Line 224: npm error code 2
+Line 225: npm error path /opt/build/repo/client
+Line 226: npm error workspace client@1.0.0
+Line 227: npm error location /opt/build/repo/client
+Line 228: npm error command failed
+Line 229: npm error command sh -c tsc && vite build
+Line 230: [91m[1m​[22m[39m
+Line 231: [91m[1m"build.command" failed                                        [22m[39m
+Line 232: [91m[1m────────────────────────────────────────────────────────────────[22m[39m
+Line 233: ​
+Line 234:   [31m[1mError message[22m[39m
+Line 235:   Command failed with exit code 2: npm run build
+Line 236: ​
+Line 237:   [31m[1mError location[22m[39m
+Line 238:   In build.command from netlify.toml:
+Line 239:   npm run build
+Line 240: ​
+Line 241:   [31m[1mResolved config[22m[39m
+Line 242:   build:
+Line 243:     base: /opt/build/repo/client
+Line 244:     command: npm run build
+Line 245:     commandOrigin: config
+Line 246:     environment:
+Line 247:       - GITHUB_CLIENT_ID
+Line 248:       - GITHUB_CLIENT_SECRET
+Line 249:       - NPM_CONFIG_OPTIONAL
+Line 250:       - VITE_API_URL
+Line 251:     publish: /opt/build/repo/client/dist
+Line 252:     publishOrigin: config
+Line 253:   functionsDirectory: /opt/build/repo/client/netlify/functions
+Line 254:   headers:
+Line 255: Failed during stage 'building site': Build script returned non-zero exit code: 2
+Line 256:     - for: /.netlify/functions/*
+      values:
+        Access-Control-Allow-Headers: Content-Type, Authorization
+        Access-
+Line 257: Build failed due to a user error: Build script returned non-zero exit code: 2
+Line 258: Failing build: Failed to build site
+Line 259: Finished processing build request in 43.748s
