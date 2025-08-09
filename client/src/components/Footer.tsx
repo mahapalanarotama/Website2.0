@@ -4,7 +4,7 @@ import { FaTiktok } from "react-icons/fa";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="bg-gray-800 text-white pt-12 pb-6">
       <div className="container mx-auto px-4">
@@ -44,7 +44,7 @@ export function Footer() {
               </a>
             </div>
           </div>
-          
+
           <div>
             <h3 className="font-heading text-xl font-bold mb-4">Link Terkait</h3>
             <ul className="space-y-2">
@@ -78,7 +78,7 @@ export function Footer() {
               </li>
             </ul>
           </div>
-          
+
             <div>
             <h3 className="font-heading text-xl font-bold mb-4">Hubungi Kami</h3>
             <address className="not-italic text-gray-300">
@@ -99,7 +99,7 @@ export function Footer() {
             </address>
             </div>
         </div>
-        
+
         <div className="border-t border-gray-700 pt-6">
           <p className="text-center text-gray-400 text-sm">
             &copy; {currentYear} Mahapala Narotama. All rights reserved.

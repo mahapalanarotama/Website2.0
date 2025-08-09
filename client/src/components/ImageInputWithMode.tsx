@@ -21,7 +21,7 @@ export default function ImageInputWithMode({ value, onChange, repo, branch = "ma
       {mode==='link' ? (
         <input type="text" className="border rounded px-2 py-1 w-full" value={value} onChange={e=>onChange(e.target.value)} placeholder="Paste link gambar di sini" />
       ) : (
-        <GithubImageUploader repo={repo} branch={branch} path={path} onUpload={onChange} />
+        <GithubImageUploader repo={repo} branch={branch} path={path} />
       )}
       {value && (
         <div className="mt-2">

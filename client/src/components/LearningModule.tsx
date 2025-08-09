@@ -1,4 +1,4 @@
-import { LearningModule as LearningModuleType } from "@shared/schema";
+import { type LearningModule as LearningModuleType } from '../types/schema';
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   Map, 

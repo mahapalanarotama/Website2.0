@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { getGithubOAuthUrl, getCodeFromCallbackUrl, exchangeCodeForToken, getCookie, deleteCookie, testGitHubConnection } from "@/lib/github-oauth";
+import { initiateGitHubOAuth, getCodeFromCallbackUrl, exchangeCodeForToken, getCookie, deleteCookie, testGitHubConnection } from "@/lib/github-oauth";
 
 interface GithubImageUploaderProps {
   repo?: string;
@@ -8,10 +7,10 @@ interface GithubImageUploaderProps {
   branch?: string;
 }
 
-export default function GithubImageUploader({ 
-  repo = "mahapalanarotama/OfficialWebsite", 
-  path = "uploads", 
-  branch = "main" 
+export default function GithubImageUploader({
+  repo = "mahapalanarotama/OfficialWebsite",
+  path = "uploads",
+  branch = "main"
 }: GithubImageUploaderProps) {
   const [token, setToken] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
@@ -59,7 +58,7 @@ export default function GithubImageUploader({
   const handleLogin = () => {
     setAuthStep('authing');
     localStorage.setItem('github_oauth_redirect', window.location.pathname + window.location.search);
-    window.location.href = getGithubOAuthUrl();
+    window.location.href = initiateGitHubOAuth();
   };
 
   const handleLogout = () => {
@@ -110,10 +109,10 @@ export default function GithubImageUploader({
 
           const data = await response.json();
           const imageUrl = data.content.download_url;
-          
+
           setSuccess(`✅ Image uploaded successfully! URL: ${imageUrl}`);
           setFile(null);
-          
+
           // Reset file input
           const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
           if (fileInput) fileInput.value = '';
@@ -142,20 +141,20 @@ export default function GithubImageUploader({
   return (
     <div className="border p-4 rounded mb-4 bg-gray-50">
       <h3 className="font-semibold mb-3">🐙 GitHub Image Upload</h3>
-      
+
       {/* Repository Info */}
       <div className="mb-3 text-sm text-gray-600">
         <p><strong>Repository:</strong> {repo}</p>
         <p><strong>Upload Path:</strong> {path}/</p>
         <p><strong>Branch:</strong> {branch}</p>
       </div>
-      
+
       {/* Authentication Status */}
       <div className="mb-4">
         {token ? (
           <div className="flex items-center gap-2">
             <span className="text-green-600 font-bold">✅ GitHub Connected</span>
-            <button 
+            <button
               className="bg-red-500 text-white px-3 py-1 text-sm rounded hover:bg-red-600"
               onClick={handleLogout}
             >
@@ -164,13 +163,13 @@ export default function GithubImageUploader({
           </div>
         ) : (
           <div>
-            <button 
-              className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50" 
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50"
               onClick={handleLogin}
               disabled={authStep !== 'idle'}
             >
-              {authStep === 'authing' ? '🔄 Authenticating...' : 
-               authStep === 'testing' ? '🔍 Verifying...' : 
+              {authStep === 'authing' ? '🔄 Authenticating...' :
+               authStep === 'testing' ? '🔍 Verifying...' :
                '🔑 Connect GitHub'}
             </button>
             {authStep !== 'idle' && (

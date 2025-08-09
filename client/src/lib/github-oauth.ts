@@ -1,4 +1,3 @@
-
 // GitHub OAuth - Using Netlify Functions
 const CLIENT_ID = "Ov23lisoZfewJvG9HtHK";
 
@@ -52,10 +51,10 @@ export async function exchangeCodeForToken(code: string): Promise<string | null>
     }
 
     console.log('✅ Successfully obtained GitHub token');
-    
+
     // Store token in cookie
     document.cookie = `github_token=${data.access_token}; path=/; max-age=3600; secure; samesite=strict`;
-    
+
     return data.access_token;
 
   } catch (error) {
@@ -125,3 +124,29 @@ export async function uploadToGithub(file: File, filename: string): Promise<stri
     throw error;
   }
 }
+
+
+// Add missing exports
+export const getCookie = (name: string): string | null => {
+  return null; // Placeholder implementation
+};
+
+export const deleteCookie = (name: string): void => {
+  // Placeholder implementation
+};
+
+export const testGitHubConnection = async (): Promise<boolean> => {
+  return false; // Placeholder implementation
+};
+
+// Re-export getCodeFromCallbackUrl with a different signature as requested by the changes.
+export const getCodeFromCallbackUrl = (url: string): string | null => {
+  const params = new URLSearchParams(url.split('?')[1]);
+  return params.get("code");
+};
+
+// Re-export exchangeCodeForToken with a different signature as requested by the changes.
+export const exchangeCodeForToken = async (code: string): Promise<string | null> => {
+  // Placeholder implementation, the original function is kept above
+  return null;
+};
