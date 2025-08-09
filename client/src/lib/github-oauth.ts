@@ -30,7 +30,7 @@ export async function exchangeCodeForToken(code: string) {
   // Request ke Vercel endpoint
   let data;
   let token = null;
-  const vercelUrl = 'https://website2-0-client.vercel.app/api/github-oauth'; // Ganti dengan URL Vercel Anda
+  const vercelUrl = 'https://website2-0-client-jvbnwdfb5-mahapalanarotamas-projects.vercel.app/api/github-oauth'; // Ganti dengan URL Vercel Anda
   try {
     const res = await fetch(vercelUrl, {
       method: 'POST',
