@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
-import { FaTiktok } from "react-icons/fa";
+import { FaTiktok } from "react-icons/fa6";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -15,27 +15,27 @@ export function Footer() {
               Mahapala Narotama adalah organisasi yang bergerak di bidang eksplorasi alam dan pelestarian lingkungan.
             </p>
             <div className="flex space-x-4">
-              <a 
-                href="https://www.instagram.com/mahapalanarotama?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
-                target="_blank" 
+              <a
+                href="https://www.instagram.com/mahapalanarotama?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition"
                 aria-label="Instagram"
               >
                 <Instagram className="h-5 w-5" />
               </a>
-              <a 
-                href="https://www.youtube.com/@mahapalanarotama1216" 
-                target="_blank" 
+              <a
+                href="https://www.youtube.com/@mahapalanarotama1216"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition"
                 aria-label="YouTube"
               >
                 <Youtube className="h-5 w-5" />
               </a>
-              <a 
-                href="https://tiktok.com" 
-                target="_blank" 
+              <a
+                href="https://tiktok.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition"
                 aria-label="TikTok"
@@ -49,9 +49,9 @@ export function Footer() {
             <h3 className="font-heading text-xl font-bold mb-4">Link Terkait</h3>
             <ul className="space-y-2">
               <li>
-                <a 
-                  href="https://narotama.ac.id/" 
-                  target="_blank" 
+                <a
+                  href="https://narotama.ac.id/"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="text-gray-300 hover:text-white transition"
                 >
@@ -59,8 +59,8 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="https://wartapalaindonesia.com/" 
+                <a
+                  href="https://wartapalaindonesia.com/"
                   className="text-gray-300 hover:text-white transition"
                 >
                   WARTAPALA Indonesia
@@ -89,11 +89,11 @@ export function Footer() {
                 <span>Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</span>
               </p>
               <p className="mb-2 flex items-center">
-              <Phone className="h-5 w-5 mr-2" strokeWidth={2} /> 
+              <Phone className="h-5 w-5 mr-2" strokeWidth={2} />
               <span>(031) 34133 2882</span>
               </p>
               <p className="flex items-center">
-              <Mail className="h-5 w-5 mr-2" strokeWidth={2} /> 
+              <Mail className="h-5 w-5 mr-2" strokeWidth={2} />
               <span>ukm.mahapala@narotama.ac.id</span>
               </p>
             </address>

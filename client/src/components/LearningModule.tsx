@@ -1,13 +1,13 @@
 import { type LearningModule as LearningModuleType } from '../types/schema';
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Map, 
-  Tent, 
-  Cross, 
-  Compass, 
-  Mountain, 
-  Leaf, 
-  Droplets, 
+import {
+  Map,
+  Tent,
+  Cross,
+  Compass,
+  Mountain,
+  Leaf,
+  Droplets,
   Wind
 } from "lucide-react";
 
@@ -54,8 +54,8 @@ export function LearningModule({ module }: LearningModuleProps) {
           <h3 className="font-heading text-lg font-semibold">{module.title}</h3>
         </div>
         <p className="text-gray-600 mb-4">{module.description}</p>
-        <a 
-          href={module.link} 
+        <a
+          href={module.link}
           className="inline-flex items-center text-primary hover:text-secondary transition"
           target="_blank"
           rel="noopener noreferrer"
