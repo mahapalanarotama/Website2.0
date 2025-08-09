@@ -1,55 +1,63 @@
 
 import React, { useState, useEffect } from "react";
-import { getGithubOAuthUrl, getCodeFromCallbackUrl, exchangeCodeForToken, getCookie, deleteCookie } from "@/lib/github-oauth";
+import { getGithubOAuthUrl, getCodeFromCallbackUrl, exchangeCodeForToken, getCookie, deleteCookie, testGitHubConnection } from "@/lib/github-oauth";
 
 interface GithubImageUploaderProps {
-  onUpload: (url: string) => void;
-  repo: string;
+  repo?: string;
+  path?: string;
   branch?: string;
-  path: string;
 }
 
-export default function GithubImageUploader({ onUpload, repo, branch = "main", path }: GithubImageUploaderProps) {
+export default function GithubImageUploader({ 
+  repo = "mahapalanarotama/OfficialWebsite", 
+  path = "uploads", 
+  branch = "main" 
+}: GithubImageUploaderProps) {
+  const [token, setToken] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
-  const [token, setToken] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [authStep, setAuthStep] = useState<'idle' | 'authing' | 'done'>('idle');
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
+  const [authStep, setAuthStep] = useState<'idle' | 'authing' | 'testing'>('idle');
 
-  // Check for existing token or handle OAuth callback
   useEffect(() => {
-    const existingToken = getCookie('github_token');
-    if (existingToken) {
-      setToken(existingToken);
-      setAuthStep('done');
-      return;
-    }
-
-    // Check if we're on the OAuth callback
-    const code = getCodeFromCallbackUrl();
-    if (code && authStep === 'idle') {
-      setAuthStep('authing');
-      exchangeCodeForToken(code).then(token => {
-        if (token) {
-          setToken(token);
-          setAuthStep('done');
-          // Redirect back to admin page
-          const redirectUrl = localStorage.getItem('github_oauth_redirect') || '/admin';
-          localStorage.removeItem('github_oauth_redirect');
-          window.location.replace(redirectUrl);
-        } else {
+    const savedToken = getCookie('github_token');
+    if (savedToken) {
+      setAuthStep('testing');
+      testGitHubConnection(savedToken).then(isValid => {
+        if (isValid) {
+          setToken(savedToken);
           setAuthStep('idle');
+        } else {
+          deleteCookie('github_token');
+          setAuthStep('idle');
+          setError('Stored token is invalid. Please login again.');
         }
       });
     }
-  }, [authStep]);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(e.target.files?.[0] || null);
-    setError("");
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      // Validate file type
+      if (!selectedFile.type.startsWith('image/')) {
+        setError('Please select an image file.');
+        return;
+      }
+      // Validate file size (max 10MB)
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        setError('File size must be less than 10MB.');
+        return;
+      }
+      setFile(selectedFile);
+      setError('');
+      setSuccess('');
+    }
   };
 
   const handleLogin = () => {
+    setAuthStep('authing');
     localStorage.setItem('github_oauth_redirect', window.location.pathname + window.location.search);
     window.location.href = getGithubOAuthUrl();
   };
@@ -58,6 +66,8 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
     deleteCookie('github_token');
     setToken('');
     setAuthStep('idle');
+    setSuccess('');
+    setError('');
   };
 
   const uploadToGithub = async () => {
@@ -65,6 +75,7 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
 
     setUploading(true);
     setError("");
+    setSuccess("");
 
     try {
       // Convert file to base64
@@ -72,8 +83,10 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
       reader.onload = async () => {
         try {
           const base64Content = (reader.result as string).split(',')[1];
-          const fileName = `${Date.now()}-${file.name}`;
+          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
           const filePath = `${path}/${fileName}`;
+
+          console.log(`Uploading to: ${repo}/${filePath}`);
 
           // Upload to GitHub
           const response = await fetch(`https://api.github.com/repos/${repo}/contents/${filePath}`, {
@@ -81,9 +94,10 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',
+              'Accept': 'application/vnd.github.v3+json'
             },
             body: JSON.stringify({
-              message: `Upload ${fileName}`,
+              message: `Upload image: ${fileName}`,
               content: base64Content,
               branch: branch
             })
@@ -91,49 +105,61 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
 
           if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.message || `Upload failed: ${response.status}`);
+            throw new Error(errorData.message || `Upload failed: ${response.status} ${response.statusText}`);
           }
 
           const data = await response.json();
           const imageUrl = data.content.download_url;
           
-          onUpload(imageUrl);
+          setSuccess(`✅ Image uploaded successfully! URL: ${imageUrl}`);
           setFile(null);
           
           // Reset file input
           const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
           if (fileInput) fileInput.value = '';
-          
-        } catch (err) {
-          console.error('Upload error:', err);
-          setError(err instanceof Error ? err.message : 'Upload failed');
+
+        } catch (error) {
+          console.error('Upload error:', error);
+          setError(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         } finally {
           setUploading(false);
         }
       };
-      
+
+      reader.onerror = () => {
+        setError('Failed to read file');
+        setUploading(false);
+      };
+
       reader.readAsDataURL(file);
-    } catch (err) {
-      console.error('File read error:', err);
-      setError('Failed to read file');
+    } catch (error) {
+      console.error('Upload preparation error:', error);
+      setError(`Failed to prepare upload: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setUploading(false);
     }
   };
 
   return (
     <div className="border p-4 rounded mb-4 bg-gray-50">
-      <h3 className="font-semibold mb-3">GitHub Image Upload</h3>
+      <h3 className="font-semibold mb-3">🐙 GitHub Image Upload</h3>
+      
+      {/* Repository Info */}
+      <div className="mb-3 text-sm text-gray-600">
+        <p><strong>Repository:</strong> {repo}</p>
+        <p><strong>Upload Path:</strong> {path}/</p>
+        <p><strong>Branch:</strong> {branch}</p>
+      </div>
       
       {/* Authentication Status */}
       <div className="mb-4">
         {token ? (
           <div className="flex items-center gap-2">
-            <span className="text-green-600 font-bold">✓ Authenticated</span>
+            <span className="text-green-600 font-bold">✅ GitHub Connected</span>
             <button 
               className="bg-red-500 text-white px-3 py-1 text-sm rounded hover:bg-red-600"
               onClick={handleLogout}
             >
-              Logout
+              Disconnect
             </button>
           </div>
         ) : (
@@ -141,13 +167,15 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
             <button 
               className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 disabled:opacity-50" 
               onClick={handleLogin}
-              disabled={authStep === 'authing'}
+              disabled={authStep !== 'idle'}
             >
-              {authStep === 'authing' ? 'Authenticating...' : 'Login with GitHub'}
+              {authStep === 'authing' ? '🔄 Authenticating...' : 
+               authStep === 'testing' ? '🔍 Verifying...' : 
+               '🔑 Connect GitHub'}
             </button>
-            {authStep === 'authing' && (
+            {authStep !== 'idle' && (
               <div className="text-sm text-gray-600 mt-1">
-                Processing GitHub authentication...
+                {authStep === 'authing' ? 'Redirecting to GitHub...' : 'Checking connection...'}
               </div>
             )}
           </div>
@@ -168,9 +196,10 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
           </div>
 
           {file && (
-            <div className="mb-3">
-              <p className="text-sm text-gray-600">Selected: {file.name}</p>
-              <p className="text-xs text-gray-500">Repository: {repo}/{path}</p>
+            <div className="mb-3 p-2 bg-blue-50 rounded">
+              <p className="text-sm text-gray-700">📁 <strong>Selected:</strong> {file.name}</p>
+              <p className="text-xs text-gray-500">Size: {(file.size / 1024).toFixed(1)} KB</p>
+              <p className="text-xs text-gray-500">Will upload to: {repo}/{path}/{Date.now()}-{file.name}</p>
             </div>
           )}
 
@@ -179,14 +208,21 @@ export default function GithubImageUploader({ onUpload, repo, branch = "main", p
             disabled={!file || uploading}
             className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {uploading ? 'Uploading...' : 'Upload to GitHub'}
+            {uploading ? '📤 Uploading...' : '📤 Upload to GitHub'}
           </button>
+        </div>
+      )}
 
-          {error && (
-            <div className="mt-2 text-red-600 text-sm">
-              Error: {error}
-            </div>
-          )}
+      {/* Status Messages */}
+      {error && (
+        <div className="mt-3 p-3 bg-red-100 border border-red-300 rounded text-red-700 text-sm">
+          <strong>❌ Error:</strong> {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mt-3 p-3 bg-green-100 border border-green-300 rounded text-green-700 text-sm">
+          {success}
         </div>
       )}
     </div>
