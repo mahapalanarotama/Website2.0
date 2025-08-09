@@ -1,36 +1,4 @@
-/**
- * Jika Netlify Functions gagal, Anda bisa migrasi ke Vercel Serverless Function:
- *
- * 1. Buat file api/github-oauth.js di project Vercel Anda:
- *
- * export default async function handler(req, res) {
- *   if (req.method !== 'POST') {
- *     res.status(405).end();
- *     return;
- *   }
- *   const { code } = req.body;
- *   const CLIENT_ID = 'YOUR_GITHUB_CLIENT_ID';
- *   const CLIENT_SECRET = 'YOUR_GITHUB_CLIENT_SECRET';
- *
- *   const response = await fetch('https://github.com/login/oauth/access_token', {
- *     method: 'POST',
- *     headers: {
- *       'Accept': 'application/json',
- *       'Content-Type': 'application/json'
- *     },
- *     body: JSON.stringify({
- *       client_id: CLIENT_ID,
- *       client_secret: CLIENT_SECRET,
- *       code
- *     })
- *   });
- *   const data = await response.json();
- *   res.status(200).json(data);
- * }
- *
- * 2. Deploy ke Vercel, endpoint: https://your-vercel-app.vercel.app/api/github-oauth
- * 3. Di frontend, ganti URL proxy ke endpoint Vercel.
- */
+
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
@@ -39,38 +7,85 @@ exports.handler = async function(event, context) {
     return {
       statusCode: 200,
       headers: {
-        'Access-Control-Allow-Origin': 'https://mahapalanarotama.web.id',
+        'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type',
       },
       body: ''
     };
   }
-  
-  const { code } = JSON.parse(event.body);
-  const CLIENT_ID = 'Ov23lisoZfewJvG9HtHK';
-  const CLIENT_SECRET = '7f90b5275811168370669968294f6f3199b5489b';
 
-  const res = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      code
-    })
-  });
-  const data = await res.json();
-  return {
-    statusCode: 200,
-    headers: {
-      'Access-Control-Allow-Origin': 'https://mahapalanarotama.web.id',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-    body: JSON.stringify(data)
-  };
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({ error: 'Method not allowed' })
+    };
+  }
+
+  try {
+    const { code } = JSON.parse(event.body);
+
+    if (!code) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({ error: 'Authorization code is required' })
+      };
+    }
+
+    const CLIENT_ID = 'Ov23lisoZfewJvG9HtHK';
+    const CLIENT_SECRET = '7f90b5275811168370669968294f6f3199b5489b';
+
+    console.log('Exchanging code for token...');
+
+    const response = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        code: code
+      })
+    });
+
+    const data = await response.json();
+    console.log('GitHub response:', data);
+
+    if (data.error) {
+      return {
+        statusCode: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: JSON.stringify({ error: data.error_description || data.error })
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    };
+
+  } catch (error) {
+    console.error('GitHub OAuth error:', error);
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify({ error: 'Internal server error' })
+    };
+  }
 };

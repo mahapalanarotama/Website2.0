@@ -6,10 +6,9 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "check": "tsc",
-    "db:push": "drizzle-kit push",
-    "preview": "vite preview"
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "netlify-build": "npm install && npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
