@@ -379,50 +379,63 @@ export default function MemberCardPage() {
                           <TableHead>Tahun Angkatan</TableHead>
                           <TableHead>No. Registrasi</TableHead>
                           <TableHead>Keanggotaan</TableHead>
+                          <TableHead>Detail</TableHead>
                           <TableHead>Aksi</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredMembers.map((member) => (
-                          <TableRow key={member.id}>
-                            <TableCell className="font-medium">{member.fullName}</TableCell>
-                            <TableCell>{member.fieldName}</TableCell>
-                            <TableCell>{member.batchName}</TableCell>
-                            <TableCell>{member.batchYear}</TableCell>
-                            <TableCell>{member.registrationNumber}</TableCell>
-                            <TableCell>
-                              {member.membershipStatus === 'Anggota Penuh' ? (
-                                <Badge variant="penuh">Anggota Penuh</Badge>
-                              ) : member.membershipStatus === 'Anggota Muda' ? (
-                                <Badge variant="muda">Anggota Muda</Badge>
-                              ) : (
-                                <Badge>{member.membershipStatus}</Badge>
-                              )}
-                            </TableCell>
-                            <TableCell className="flex space-x-2">
-                              {/* Icon ID Card: show photo in popup with download */}
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setPhotoDialog({ open: true, photoUrl: member.photoUrl || '', fullName: member.fullName })}
-                                className="text-primary hover:text-primary-foreground hover:bg-primary"
-                                disabled={!member.photoUrl}
-                              >
-                                <IdCard className="h-4 w-4" />
-                              </Button>
-                              {/* Icon 3D: show 3D card popup */}
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setCard3DPopup({ open: true, frontUrl: member.photoUrl || '', backUrl: 'https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/back.png', fullName: member.fullName })}
-                                className="text-primary hover:text-primary-foreground hover:bg-primary"
-                                disabled={!member.photoUrl}
-                              >
-                                <span className="font-bold">3D</span>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {filteredMembers.map((member) => {
+                          const detailUrl = `https://mahapalanarotama.web.id/kartu-anggota-detail?type=namalapangan&input=${encodeURIComponent(member.fieldName)}`;
+                          return (
+                            <TableRow key={member.id}>
+                              <TableCell className="font-medium">{member.fullName}</TableCell>
+                              <TableCell>{member.fieldName}</TableCell>
+                              <TableCell>{member.batchName}</TableCell>
+                              <TableCell>{member.batchYear}</TableCell>
+                              <TableCell>{member.registrationNumber}</TableCell>
+                              <TableCell>
+                                {member.membershipStatus === 'Anggota Penuh' ? (
+                                  <Badge variant="penuh">Anggota Penuh</Badge>
+                                ) : member.membershipStatus === 'Anggota Muda' ? (
+                                  <Badge variant="muda">Anggota Muda</Badge>
+                                ) : (
+                                  <Badge>{member.membershipStatus}</Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <a href={detailUrl} target="_blank" rel="noopener noreferrer" title="Lihat detail kartu anggota">
+                                  <img
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(detailUrl)}`}
+                                    alt="Barcode detail kartu anggota"
+                                    className="w-16 h-16 object-contain hover:scale-110 transition cursor-pointer"
+                                  />
+                                </a>
+                              </TableCell>
+                              <TableCell className="flex space-x-2">
+                                {/* Icon ID Card: show photo in popup with download */}
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => setPhotoDialog({ open: true, photoUrl: member.photoUrl || '', fullName: member.fullName })}
+                                  className="text-primary hover:text-primary-foreground hover:bg-primary"
+                                  disabled={!member.photoUrl}
+                                >
+                                  <IdCard className="h-4 w-4" />
+                                </Button>
+                                {/* Icon 3D: show 3D card popup */}
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => setCard3DPopup({ open: true, frontUrl: member.photoUrl || '', backUrl: 'https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/back.png', fullName: member.fullName })}
+                                  className="text-primary hover:text-primary-foreground hover:bg-primary"
+                                  disabled={!member.photoUrl}
+                                >
+                                  <span className="font-bold">3D</span>
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   ) : (
