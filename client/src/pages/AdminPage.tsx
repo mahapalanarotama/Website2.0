@@ -621,30 +621,30 @@ export default function AdminPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide max-w-full">
-          <TabsTrigger value="activities" className="flex items-center gap-2">
+  <TabsList className="mb-8 overflow-x-auto whitespace-nowrap scrollbar-hide px-2 -mx-4">
+          <TabsTrigger value="activities" className="flex items-center gap-2 group transition-all duration-200 bg-muted data-[state=active]:bg-primary/10 data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:bg-muted/90">
             <Calendar className="h-4 w-4" />
-            Activities
+            <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[state=active]:inline ml-1 group-hover:font-semibold group-data-[state=active]:font-bold group-data-[state=active]:text-primary">Activities</span>
           </TabsTrigger>
-          <TabsTrigger value="gallery" className="flex items-center gap-2">
+          <TabsTrigger value="gallery" className="flex items-center gap-2 group transition-all duration-200 bg-muted data-[state=active]:bg-primary/10 data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:bg-muted/90">
             <ImageIcon className="h-4 w-4" />
-            Gallery
+            <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[state=active]:inline ml-1 group-hover:font-semibold group-data-[state=active]:font-bold group-data-[state=active]:text-primary">Gallery</span>
           </TabsTrigger>
-          <TabsTrigger value="members" className="flex items-center gap-2">
+          <TabsTrigger value="members" className="flex items-center gap-2 group transition-all duration-200 bg-muted data-[state=active]:bg-primary/10 data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:bg-muted/90">
             <Users className="h-4 w-4" />
-            Members
+            <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[state=active]:inline ml-1 group-hover:font-semibold group-data-[state=active]:font-bold group-data-[state=active]:text-primary">Members</span>
           </TabsTrigger>
-          <TabsTrigger value="learning" className="flex items-center gap-2">
+          <TabsTrigger value="learning" className="flex items-center gap-2 group transition-all duration-200 bg-muted data-[state=active]:bg-primary/10 data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:bg-muted/90">
             <Book className="h-4 w-4" />
-            Learnings
+            <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[state=active]:inline ml-1 group-hover:font-semibold group-data-[state=active]:font-bold group-data-[state=active]:text-primary">Learnings</span>
           </TabsTrigger>
-          <TabsTrigger value="recycle" className="flex items-center gap-2">
+          <TabsTrigger value="recycle" className="flex items-center gap-2 group transition-all duration-200 bg-muted data-[state=active]:bg-primary/10 data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:bg-muted/90">
             <Trash2 className="h-4 w-4" />
-            Recycle Bin
+            <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[state=active]:inline ml-1 group-hover:font-semibold group-data-[state=active]:font-bold group-data-[state=active]:text-primary">Recycle Bin</span>
           </TabsTrigger>
-          <TabsTrigger value="tracker" className="flex items-center gap-2">
+          <TabsTrigger value="tracker" className="flex items-center gap-2 group transition-all duration-200 bg-muted data-[state=active]:bg-primary/10 data-[state=active]:shadow-lg data-[state=active]:scale-105 data-[state=inactive]:hover:bg-muted/70 data-[state=inactive]:bg-muted/90">
             <MapPin className="h-4 w-4" />
-            Tracker
+            <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[state=active]:inline ml-1 group-hover:font-semibold group-data-[state=active]:font-bold group-data-[state=active]:text-primary">Tracker</span>
           </TabsTrigger>
         </TabsList>
         <TabsContent value="learning">
@@ -663,7 +663,7 @@ export default function AdminPage() {
               Add Learning
             </Button>
           </div>
-          <div className="bg-white rounded-lg shadow">
+          <div className="bg-white rounded-lg shadow overflow-x-auto w-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -745,8 +745,8 @@ export default function AdminPage() {
             </Button>
           </div>
 
-          <div className="bg-white rounded-lg shadow">
-            <Table>
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <Table className="min-w-[600px]">
               <TableHeader>
                 <TableRow>
                   <TableHead>Title</TableHead>
