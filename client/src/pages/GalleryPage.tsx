@@ -104,7 +104,7 @@ export default function GalleryPage() {
                   href="https://instagram.com/mahapalanarotama"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-primary hover:scale-110 transition-transform"
+                  className="hover:text-red-500 hover:scale-110 transition-transform"
                   title="Instagram"
                 >
                   <Instagram size={36} />
