@@ -209,41 +209,45 @@ export default function DeveloperPage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-extrabold mb-8 text-center text-primary">Developer Tools</h1>
-      <div className="mb-6 flex gap-2 border-b border-blue-200">
+      <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto scrollbar-hide px-1 -mx-2">
         <button
-          className={`px-4 py-2 font-semibold rounded-t-lg flex items-center gap-2 ${tab === 'meta' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          className={`flex items-center gap-2 group transition-all duration-200 bg-muted px-3 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[48px] sm:min-w-[120px] justify-center ${tab === 'meta' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          data-active={tab === 'meta'}
           onClick={() => setTab('meta')}
         >
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M16 18v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Meta
+          <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Meta</span>
         </button>
         <button
-          className={`px-4 py-2 font-semibold rounded-t-lg flex items-center gap-2 ${tab === 'logadmin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          className={`flex items-center gap-2 group transition-all duration-200 bg-muted px-3 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[48px] sm:min-w-[120px] justify-center ${tab === 'logadmin' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          data-active={tab === 'logadmin'}
           onClick={() => setTab('logadmin')}
         >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          Log Admin
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Log Admin</span>
         </button>
         <button
-          className={`px-4 py-2 font-semibold rounded-t-lg flex items-center gap-2 ${tab === 'homepage' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          className={`flex items-center gap-2 group transition-all duration-200 bg-muted px-3 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[48px] sm:min-w-[120px] justify-center ${tab === 'homepage' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          data-active={tab === 'homepage'}
           onClick={() => setTab('homepage')}
         >
           <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 8h14"/><path d="M8 17V8"/></svg>
-          Homepage
+          <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Homepage</span>
         </button>
         <button
-          className={`px-4 py-2 font-semibold rounded-t-lg flex items-center gap-2 ${tab === 'visimisi' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-500'}`}
+          className={`flex items-center gap-2 group transition-all duration-200 bg-muted px-3 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[48px] sm:min-w-[120px] justify-center ${tab === 'visimisi' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          data-active={tab === 'visimisi'}
           onClick={() => setTab('visimisi')}
         >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M4 17v-5a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v5"/><circle cx="12" cy="7" r="4"/></svg>
-          Visi & Misi
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Visi & Misi</span>
         </button>
       </div>
       <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
         {tab === 'visimisi' && (
           <>
             <h2 className="font-bold text-xl mb-4 text-green-900 flex items-center gap-2">
-              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><path d="M4 17v-5a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v5"/><circle cx="12" cy="7" r="4"/></svg>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               Visi & Misi Homepage
             </h2>
             {loadingVisiMisi ? (
