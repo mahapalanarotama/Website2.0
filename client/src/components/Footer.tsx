@@ -32,17 +32,22 @@ export function Footer() {
               >
                 <Youtube className="h-5 w-5" />
               </a>
-              <a
-                href="https://tiktok.com"
+                <a
+                href="https://tiktok.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-300 hover:text-white transition"
                 aria-label="TikTok"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-label="TikTok">
-                <path d="M12.5 2v14.5a3.5 3.5 0 1 1-3.5-3.5h1V9h2v7.5a5.5 5.5 0 1 0 5.5-5.5V2h-2v7.5a3.5 3.5 0 1 1-3.5 3.5V2h-2z"/>
+                >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-5 w-5"
+                >
+                  <path d="M16.5 3A4.5 4.5 0 0 0 21 7.5v1.25a6.25 6.25 0 0 1-5-1.25v7.5a5.5 5.5 0 1 1-5.5-5.5h.75v2H10.5a3.5 3.5 0 1 0 3.5 3.5V3h2.5Z" />
                 </svg>
-              </a>
+                </a>
             </div>
           </div>
 
