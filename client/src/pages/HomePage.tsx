@@ -1,3 +1,4 @@
+import ChatbotAssistant from "@/components/ChatbotAssistant";
 // Komponen VisiMisiFirestore di luar HomePage
 function VisiMisiFirestore() {
   const [visi, setVisi] = useState("");
@@ -44,6 +45,7 @@ function VisiMisiFirestore() {
           <p className="text-gray-700 text-justify whitespace-pre-line">{misi}</p>
         )}
       </div>
+      <ChatbotAssistant />
     </>
   );
 }
