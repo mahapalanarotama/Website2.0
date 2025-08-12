@@ -350,8 +350,10 @@ export default function PendaftaranPage() {
                 {/* Alert info perubahan jadwal timeline */}
                 <div className="mt-6">
                   <div className="bg-amber-50 border-l-4 border-amber-400 p-4 flex items-start">
-                    <AlertCircle className="h-5 w-5 text-amber-400 mt-1 mr-3" />
-                    <div>
+                    <span className="flex-shrink-0 flex items-center justify-center mr-4">
+                      <AlertCircle className="h-6 w-6 text-amber-400" />
+                    </span>
+                    <div className="flex-1 min-w-0">
                       <span className="text-sm text-amber-700">
                         Jadwal pelaksanaan setiap tahapan seleksi dapat berubah sesuai situasi dan kebijakan panitia. Pastikan Anda selalu memantau pengumuman terbaru melalui kanal resmi Mahapala Narotama.
                       </span>
@@ -577,7 +579,7 @@ export default function PendaftaranPage() {
             </div>
             <div className="text-center text-xs text-gray-500 mt-2">
               {contact.instagram && <><span>Instagram: @{contact.instagram.replace('@','')}</span><br /></>}
-              {contact.whatsapp && <><span>WhatsApp: {contact.whatsapp}</span><br /></>}
+              {contact.whatsapp && <><span>WhatsApp: +{contact.whatsapp}</span><br /></>}
               {contact.email && <><span>Email: {contact.email}</span></>}
             </div>
           </div>

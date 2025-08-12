@@ -494,7 +494,7 @@ export default function HomePage() {
               </div>
               <div className="text-center text-xs text-gray-500 mt-2">
                 {contact.instagram && <><span>Instagram: @{contact.instagram.replace('@','')}</span><br /></>}
-                {contact.whatsapp && <><span>WhatsApp: {contact.whatsapp}</span><br /></>}
+                {contact.whatsapp && <><span>WhatsApp: +{contact.whatsapp}</span><br /></>}
                 {contact.email && <><span>Email: {contact.email}</span></>}
               </div>
             </div>
