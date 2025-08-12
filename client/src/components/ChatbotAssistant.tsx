@@ -64,7 +64,7 @@ function useScrollToTopVisible() {
   return visible;
 }
 
-async function fetchAIAnswer(question: string): Promise<string> {
+export async function fetchAIAnswer(question: string): Promise<string> {
   try {
     const response = await fetch(
       "https://router.huggingface.co/v1/chat/completions",

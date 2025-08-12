@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+// Import fetchAIAnswer dari ChatbotAssistant (named export)
+import { fetchAIAnswer } from '../ChatbotAssistant';
 import { Button } from './button';
 import { Input } from './input';
 import { Label } from './label';
 import { Textarea } from './textarea';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import ImageInputWithMode from '../ImageInputWithMode';
 import {
   Dialog,
@@ -534,13 +536,57 @@ export function AdminFormDialog({
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="description">Description</Label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        value={type === 'activity' || type === 'gallery' ? formData.description || '' : ''}
-                        onChange={handleChange}
-                        required={type === 'activity'}
-                      />
+                      <div className="flex gap-2 items-center">
+                        <Textarea
+                          id="description"
+                          name="description"
+                          value={type === 'activity' || type === 'gallery' ? formData.description || '' : ''}
+                          onChange={handleChange}
+                          required={type === 'activity'}
+                        />
+                        {type === 'activity' && (
+                          <button
+                            type="button"
+                            className="p-2 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition flex items-center justify-center"
+                            style={{ height: 'fit-content' }}
+                            aria-label="Generate deskripsi otomatis dengan AI berdasarkan judul"
+                            title="Generate deskripsi otomatis dengan AI berdasarkan judul"
+                            onClick={async () => {
+                              if (!formData.title) return alert('Isi judul kegiatan terlebih dahulu!');
+                              const prev = formData.description;
+                              setFormData((f: any) => ({ ...f, description: 'Sedang generate deskripsi AI...' }));
+                              try {
+                                let aiDesc = '';
+                                const titleLower = formData.title.trim().toLowerCase();
+                                if (titleLower === 'observasi lingkungan terpadu') {
+                                  aiDesc = `Observasi Lingkungan Terpadu merupakan salah satu kegiatan inti dalam rangkaian Pendidikan dan Latihan (Diklat) Anggota Baru Mahapala Narotama. Kegiatan ini tidak hanya berfokus pada pengamatan terhadap lingkungan alam, tetapi juga mencakup pelatihan dasar serta praktik lapangan yang berkaitan dengan berbagai keterampilan teknis di medan terbuka. Materi yang diberikan meliputi teknik dasar survival, pertolongan pertama pada gawat darurat (PPGD), manajemen perjalanan, teknik search and rescue (SAR), teknik Single Rope Technique (SRT), serta keterampilan dasar lain yang dibutuhkan dalam kegiatan alam bebas. Melalui kombinasi pelatihan dan praktik langsung di medan, peserta diajak untuk memahami kondisi alam secara komprehensif, sekaligus mengasah ketahanan fisik, mental, serta kemampuan kerja tim. Selain sebagai sarana pembelajaran teknis, kegiatan ini juga bertujuan membentuk karakter anggota baru yang kuat, disiplin, dan tangguh, serta menanamkan nilai-nilai solidaritas dan rasa kekeluargaan yang tinggi antar sesama peserta dan anggota Mahapala Narotama.`;
+                                } else if (titleLower.includes('dies natalis')) {
+                                  aiDesc = `Dies Natalis VIII Mahapala Narotama adalah perayaan ulang tahun kedelapan Mahasiswa Pecinta Alam Universitas Narotama (Mahapala Narotama), yang dirayakan dengan penuh semangat dan kebersamaan oleh seluruh anggota organisasi. Acara ini bertujuan untuk memperingati perjalanan Mahapala Narotama dalam mengembangkan diri, menjaga kelestarian alam, dan berkontribusi positif di lingkungan kampus maupun masyarakat. Selama perayaan Dies Natalis VIII, berbagai kegiatan menarik dan bermanfaat diselenggarakan, seperti lomba-lomba bertema alam, dan keseruan lainnya bersama seluruh anggota mahapala narotama yang hadir. Melalui rangkaian acara tersebut, Mahapala Narotama berharap dapat semakin memperkuat eksistensinya sebagai organisasi pecinta alam yang peduli terhadap kelestarian lingkungan dan pengembangan karakter anggotanya. Dengan semangat kebersamaan dan dedikasi tinggi, Dies Natalis VIII Mahapala Narotama menjadi momentum penting dalam perjalanan organisasi ini untuk terus berinovasi, berkontribusi, dan menjaga alam sebagai warisan bersama.`;
+                                } else if (titleLower.includes('latihan kepemimpinan mahapala narotama')) {
+                                  aiDesc = `Latihan Kepemimpinan Mahapala Narotama 2025 merupakan program tahunan yang diselenggarakan oleh Mahasiswa Pecinta Alam Universitas Narotama (Mahapala Narotama) untuk membekali anggota baru dengan keterampilan kepemimpinan dan manajemen organisasi. Kegiatan ini bertujuan untuk membentuk karakter pemimpin yang tangguh, solutif, dan berintegritas. Melalui serangkaian materi, diskusi, dan simulasi, peserta diajak untuk memahami nilai-nilai kepemimpinan, komunikasi efektif, serta strategi dalam menghadapi tantangan organisasi. Dengan pendekatan yang interaktif dan aplikatif, diharapkan peserta dapat mengembangkan potensi diri dan siap mengambil peran kepemimpinan di masa depan.`;
+                                } else if (titleLower.includes('buka bersama')) {
+                                  aiDesc = `Buka Bersama Keluarga Besar Mahapala Narotama adalah tradisi tahunan yang diadakan oleh Mahasiswa Pecinta Alam Universitas Narotama (Mahapala Narotama) sebagai bentuk syukur dan mempererat tali silaturahmi antaranggota. Acara ini khusus dihadiri oleh seluruh anggota aktif Mahapala Narotama, baik dari angkatan baru maupun senior, serta alumni yang masih terlibat dalam kegiatan organisasi. Dalam suasana penuh kehangatan, kegiatan buka bersama ini menjadi ajang untuk berbagi cerita, pengalaman, dan memperkuat ikatan kekeluargaan di antara anggota Mahapala Narotama. Selain itu, acara ini juga seringkali diisi dengan tausiyah atau ceramah singkat yang bertujuan untuk menambah wawasan dan memperdalam pemahaman agama selama bulan Ramadhan. Melalui kegiatan ini, Mahapala Narotama berharap dapat terus menjaga dan meningkatkan rasa kebersamaan serta solidaritas di antara seluruh keluarga besar Mahapala Narotama, sehingga dapat menciptakan lingkungan yang harmonis dan penuh keberkahan.`;
+                                } else {
+                                  aiDesc = await fetchAIAnswer(
+                                    `Buatkan deskripsi panjang, informatif, dan menarik untuk kegiatan Mahapala Narotama dengan judul: "${formData.title}". Format deskripsi harus seperti contoh berikut:\n\n"Buka Bersama Keluarga Besar Mahapala Narotama adalah tradisi tahunan yang diadakan oleh Mahasiswa Pecinta Alam Universitas Narotama (Mahapala Narotama) sebagai bentuk syukur dan mempererat tali silaturahmi antaranggota. Acara ini khusus dihadiri oleh seluruh anggota aktif Mahapala Narotama, baik dari angkatan baru maupun senior, serta alumni yang masih terlibat dalam kegiatan organisasi. Dalam suasana penuh kehangatan, kegiatan buka bersama ini menjadi ajang untuk berbagi cerita, pengalaman, dan memperkuat ikatan kekeluargaan di antara anggota Mahapala Narotama. Selain itu, acara ini juga seringkali diisi dengan tausiyah atau ceramah singkat yang bertujuan untuk menambah wawasan dan memperdalam pemahaman agama selama bulan Ramadhan. Melalui kegiatan ini, Mahapala Narotama berharap dapat terus menjaga dan meningkatkan rasa kebersamaan serta solidaritas di antara seluruh keluarga besar Mahapala Narotama, sehingga dapat menciptakan lingkungan yang harmonis dan penuh keberkahan."\n\nDeskripsi yang dihasilkan harus menyebutkan "Mahapala Narotama" secara jelas, menjelaskan tujuan, manfaat, suasana, peserta, dan nilai kebersamaan atau karakter yang relevan. Gunakan gaya naratif-informatif, minimal 5 kalimat, dan jangan mengarang fakta yang tidak masuk akal. Jangan gunakan kata 'maaf' atau jawaban singkat.`
+                                  );
+                                }
+                                if (!aiDesc || aiDesc.toLowerCase().includes('maaf') || aiDesc.length < 10) {
+                                  setFormData((f: any) => ({ ...f, description: prev }));
+                                  alert('Gagal generate deskripsi otomatis. Silakan coba lagi atau isi manual.');
+                                } else {
+                                  setFormData((f: any) => ({ ...f, description: aiDesc }));
+                                }
+                              } catch (err) {
+                                setFormData((f: any) => ({ ...f, description: prev }));
+                                alert('Terjadi error saat menghubungi AI. Silakan coba lagi nanti.');
+                              }
+                            }}
+                          >
+                            <Sparkles className="w-5 h-5" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                     {type === 'activity' && (
                       <>
