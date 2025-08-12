@@ -133,8 +133,8 @@ export default function GalleryPage() {
           <DialogContent className="max-w-xs w-full p-0 rounded-xl">
             <div className="p-6 flex flex-col items-center gap-0">
               <h2 className="font-heading text-lg font-bold" style={{marginBottom: 0}}>{contact.title || 'Hubungi Kami'}</h2>
-              {contact.description && <div className="text-center text-sm text-gray-600" style={{marginTop: 0, marginBottom: 18}}>{contact.description}</div>}
-              <div className="flex gap-6 justify-center">
+              {contact.description && <div className="text-center text-sm text-gray-600" style={{marginTop: 0, marginBottom: 0}}>{contact.description}</div>}
+              <div className="flex gap-6 justify-center" style={{marginTop: 15}}>
                 {contact.instagram && (
                   <a
                     href={`https://instagram.com/${contact.instagram.replace('@','')}`}

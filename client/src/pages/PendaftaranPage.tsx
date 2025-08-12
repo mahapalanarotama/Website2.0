@@ -347,6 +347,17 @@ export default function PendaftaranPage() {
                     <TimelineItem key={idx} item={item} delay={idx * 0.15} />
                   ))}
                 </div>
+                {/* Alert info perubahan jadwal timeline */}
+                <div className="mt-6">
+                  <div className="bg-amber-50 border-l-4 border-amber-400 p-4 flex items-start">
+                    <AlertCircle className="h-5 w-5 text-amber-400 mt-1 mr-3" />
+                    <div>
+                      <span className="text-sm text-amber-700">
+                        Jadwal pelaksanaan setiap tahapan seleksi dapat berubah sesuai situasi dan kebijakan panitia. Pastikan Anda selalu memantau pengumuman terbaru melalui kanal resmi Mahapala Narotama.
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             )}
             
@@ -530,8 +541,8 @@ export default function PendaftaranPage() {
         <DialogContent className="max-w-xs w-full p-0 rounded-xl">
           <div className="p-6 flex flex-col items-center gap-0">
             <h2 className="font-heading text-lg font-bold" style={{marginBottom: 0}}>{contact.title || 'Hubungi Kami'}</h2>
-            {contact.description && <div className="text-center text-sm text-gray-600" style={{marginTop: 0, marginBottom: 18}}>{contact.description}</div>}
-            <div className="flex gap-6 justify-center">
+            {contact.description && <div className="text-center text-sm text-gray-600" style={{marginTop: 0, marginBottom: 0}}>{contact.description}</div>}
+            <div className="flex gap-6 justify-center" style={{marginTop: 15}}>
               {contact.instagram && (
                 <a
                   href={`https://instagram.com/${contact.instagram.replace('@','')}`}
