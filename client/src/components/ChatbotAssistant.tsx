@@ -1,16 +1,11 @@
-// Fungsi sederhana untuk format markdown (**tebal**, *miring*) pada jawaban
+import { marked } from 'marked';
+// Fungsi format markdown penuh menggunakan marked
 function formatMarkdown(text: string): string {
   if (!text) return '';
-  // Tebal: **text**
-  let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  // Miring: *text*
-  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  // Baris baru
-  html = html.replace(/\n/g, '<br/>');
-  return html;
+  return marked.parse(text, { breaks: true });
 }
 import { useState, useEffect, useRef } from 'react';
-import { Brain, X } from 'lucide-react';
+import { Brain, X, User } from 'lucide-react';
 
 interface FaqItem {
   q: string;
@@ -115,7 +110,7 @@ export default function ChatbotAssistant() {
   const chatRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [closing, setClosing] = useState(false);
-  const [faqPrompts, setFaqPrompts] = useState<string[]>(() => getRandomFaqPrompts(FAQ));
+  const [faqPrompts, setFaqPrompts] = useState<string[]>(() => getRandomFaqPrompts(FAQ, 1));
   const [typing, setTyping] = useState(false);
   const [typingText, setTypingText] = useState('');
   const chatScrollRef = useRef<HTMLDivElement>(null);
@@ -131,7 +126,7 @@ export default function ChatbotAssistant() {
 
   // Regenerate FAQ prompts setiap kali chat dibuka
   useEffect(() => {
-    if (open) setFaqPrompts(getRandomFaqPrompts(FAQ));
+    if (open) setFaqPrompts(getRandomFaqPrompts(FAQ, 1));
   }, [open]);
 
   // Close chat when clicking outside
@@ -195,7 +190,7 @@ export default function ChatbotAssistant() {
     }
     // Ganti prompt yang dipakai dengan yang baru
     if (typeof customInput === 'string') {
-      setFaqPrompts(getRandomFaqPrompts(FAQ, 3, [customInput]));
+      setFaqPrompts(getRandomFaqPrompts(FAQ, 1, [customInput]));
     }
   };
 
@@ -251,14 +246,24 @@ export default function ChatbotAssistant() {
               <div className="text-gray-500">Tanyakan apa saja tentang website, FAQ, atau pendaftaran.</div>
             )}
             {messages.map((msg, i) => (
-              <div key={i} className={msg.from === 'user' ? 'text-right mb-2' : 'text-left mb-2'}>
-                <span className={msg.from === 'user' ? 'inline-block bg-blue-100 text-blue-800 rounded px-2 py-1' : 'inline-block bg-gray-100 text-gray-800 rounded px-2 py-1'}>
+              <div key={i} className={msg.from === 'user' ? 'flex justify-end mb-2' : 'flex justify-start mb-2'}>
+                {msg.from === 'bot' && (
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-white border border-blue-200 flex items-center justify-center mr-2 overflow-hidden">
+                    <img src="../../favicon.png" alt="MPN" className="w-7 h-7 object-contain" />
+                  </span>
+                )}
+                <span className={msg.from === 'user' ? 'inline-block bg-blue-100 text-blue-800 rounded px-3 py-2 max-w-[70%]' : 'inline-block bg-gray-100 text-gray-800 rounded px-3 py-2 max-w-[70%]'}>
                   {msg.from === 'bot' ? (
                     <span dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.text) }} />
                   ) : (
                     msg.text
                   )}
                 </span>
+                {msg.from === 'user' && (
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center ml-2">
+                    <User className="w-5 h-5 text-blue-700" />
+                  </span>
+                )}
               </div>
             ))}
             {typing && typingText && (
