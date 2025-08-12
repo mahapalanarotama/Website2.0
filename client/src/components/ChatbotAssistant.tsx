@@ -1,3 +1,14 @@
+// Fungsi sederhana untuk format markdown (**tebal**, *miring*) pada jawaban
+function formatMarkdown(text: string): string {
+  if (!text) return '';
+  // Tebal: **text**
+  let html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Miring: *text*
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  // Baris baru
+  html = html.replace(/\n/g, '<br/>');
+  return html;
+}
 import { useState, useEffect, useRef } from 'react';
 import { Brain, X } from 'lucide-react';
 
@@ -69,6 +80,10 @@ async function fetchAIAnswer(question: string): Promise<string> {
         body: JSON.stringify({
           messages: [
             {
+              role: "system",
+              content: "Kamu adalah MPN AI Assistant, asisten virtual Mahapala Narotama yang ramah, romantis, informatif, dan sangat mencintai alam. Jawablah semua pertanyaan dalam bahasa Indonesia yang baik, sopan, dan selalu perkenalkan dirimu sebagai MPN AI Assistant jika diminta. Tunjukkan kecintaanmu pada alam dan ajak pengguna untuk ikut menjaga dan mencintai alam dalam setiap kesempatan yang relevan.",
+            },
+            {
               role: "user",
               content: question,
             },
@@ -91,7 +106,10 @@ async function fetchAIAnswer(question: string): Promise<string> {
 export default function ChatbotAssistant() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<{from: 'user'|'bot', text: string}[]>([]);
+  const [messages, setMessages] = useState<{from: 'user'|'bot', text: string}[]>([{
+    from: 'bot',
+    text: '🌸 Hai, aku <strong>MPN AI Assistant</strong>! Senang bisa menemani harimu di dunia maya dan alam nyata. Aku sangat mencintai alam, dan siap membantu kamu seputar Mahapala Narotama, pendaftaran anggota baru, atau pertanyaan lain yang ingin kamu tahu. Jangan ragu untuk bertanya, dan jangan lupa untuk selalu mencintai serta menjaga alam bersama aku! 💙🌿',
+  }]);
   // removed unused loading state
   const scrollToTopVisible = useScrollToTopVisible();
   const chatRef = useRef<HTMLDivElement>(null);
@@ -102,6 +120,7 @@ export default function ChatbotAssistant() {
   const [typingText, setTypingText] = useState('');
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const [inputFocused, setInputFocused] = useState(false);
+  const [showPromptMenu, setShowPromptMenu] = useState(false);
 
   // Auto-scroll ke bawah setiap ada pesan baru
   useEffect(() => {
@@ -161,7 +180,7 @@ export default function ChatbotAssistant() {
       // Animasi mengetik karakter demi karakter untuk jawaban FAQ
       const answer = faq.a;
       for (let i = 1; i <= answer.length; i++) {
-        setTypingText(answer.slice(0, i));
+        setTypingText(formatMarkdown(answer.slice(0, i)));
         // eslint-disable-next-line no-await-in-loop
         await new Promise(res => setTimeout(res, 18));
       }
@@ -234,7 +253,11 @@ export default function ChatbotAssistant() {
             {messages.map((msg, i) => (
               <div key={i} className={msg.from === 'user' ? 'text-right mb-2' : 'text-left mb-2'}>
                 <span className={msg.from === 'user' ? 'inline-block bg-blue-100 text-blue-800 rounded px-2 py-1' : 'inline-block bg-gray-100 text-gray-800 rounded px-2 py-1'}>
-                  {msg.text}
+                  {msg.from === 'bot' ? (
+                    <span dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.text) }} />
+                  ) : (
+                    msg.text
+                  )}
                 </span>
               </div>
             ))}
@@ -255,10 +278,20 @@ export default function ChatbotAssistant() {
               </div>
             )}
           </div>
-          <div className="p-2 border-t flex gap-2">
+          <div className="p-3 border-t flex gap-2 relative items-center bg-gray-50">
+            {/* Tombol menu prompt di kiri */}
+            <button
+              className="flex items-center justify-center bg-white border border-gray-300 hover:bg-blue-100 text-blue-700 rounded-full w-9 h-9 shadow mr-2 transition"
+              style={{zIndex: 2}}
+              title="Lihat semua pertanyaan FAQ"
+              onClick={() => setShowPromptMenu(true)}
+              type="button"
+            >
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="18" r="1.5"/></svg>
+            </button>
             <input
               type="text"
-              className="flex-1 border rounded px-2 py-1 text-sm focus:outline-none"
+              className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 min-w-0 bg-white"
               placeholder="Tulis pertanyaan..."
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -266,12 +299,59 @@ export default function ChatbotAssistant() {
               disabled={typing}
               onFocus={() => setInputFocused(true)}
               onBlur={() => setInputFocused(false)}
+              style={{maxWidth: 180}}
             />
             <button
               onClick={() => handleSend()}
-              className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-50"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-semibold shadow"
               disabled={typing || !input.trim()}
+              style={{minWidth: 64}}
             >Kirim</button>
+          {/* Modal Prompt Menu */}
+          {showPromptMenu && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-40">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-0 relative overflow-y-auto max-h-[80vh] border border-blue-100">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-blue-100 bg-gradient-to-r from-blue-50 to-green-50 rounded-t-2xl">
+                  <h2 className="text-lg font-bold text-blue-800">Daftar Pertanyaan FAQ</h2>
+                  <button
+                    className="text-gray-500 hover:text-red-500 text-2xl font-bold"
+                    onClick={() => setShowPromptMenu(false)}
+                    aria-label="Tutup daftar pertanyaan"
+                    type="button"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="px-6 py-4">
+                  {/* Kategorisasi manual berdasarkan urutan FAQ */}
+                  <div className="mb-5">
+                    <div className="font-semibold text-blue-700 mb-2 text-base">Informasi Pendaftaran</div>
+                    <ul className="space-y-1">
+                      {FAQ.slice(0,8).map((item, idx) => (
+                        <li key={idx}><button className="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 transition text-sm" onClick={() => { setShowPromptMenu(false); handleSend(item.q); }}>{item.q}</button></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="mb-5">
+                    <div className="font-semibold text-blue-700 mb-2 text-base">Informasi Organisasi</div>
+                    <ul className="space-y-1">
+                      {FAQ.slice(8,18).map((item, idx) => (
+                        <li key={idx}><button className="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 transition text-sm" onClick={() => { setShowPromptMenu(false); handleSend(item.q); }}>{item.q}</button></li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-blue-700 mb-2 text-base">Informasi Perkuliahan</div>
+                    <ul className="space-y-1">
+                      {FAQ.slice(18).map((item, idx) => (
+                        <li key={idx}><button className="w-full text-left px-3 py-2 rounded-lg hover:bg-blue-50 transition text-sm" onClick={() => { setShowPromptMenu(false); handleSend(item.q); }}>{item.q}</button></li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           </div>
           {/* FAQ Prompt */}
           <div className="px-3 pb-3 pt-1">
