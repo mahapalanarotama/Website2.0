@@ -1,5 +1,5 @@
 import DeveloperPage from "@/pages/DeveloperPage";
-import React from "react";
+import React, { useEffect } from "react";
 import { getMeta, MetaData } from "@/lib/meta";
 import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
@@ -29,6 +29,28 @@ import GithubOAuthCallback from "@/pages/GithubOAuthCallback";
 
 function App() {
   useLeafCursor();
+
+  // Blokir klik kanan
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    document.addEventListener('contextmenu', handleContextMenu);
+    // Blokir shortcut DevTools
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && e.key === 'U')
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   // Dynamic meta state
   const [meta, setMeta] = React.useState<MetaData | null>(null);

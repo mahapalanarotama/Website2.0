@@ -29,3 +29,17 @@ if ('serviceWorker' in navigator) {
     };
   });
 }
+
+// Blokir klik kanan
+window.addEventListener('contextmenu', event => event.preventDefault());
+// Blokir shortcut DevTools
+window.addEventListener('keydown', function(e) {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+    (e.ctrlKey && e.key === 'U')
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
