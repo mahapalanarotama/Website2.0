@@ -597,6 +597,7 @@ export function AdminFormDialog({
                         repo="mahapalanarotama/OfficialWebsite"
                         branch="main"
                         path={type === 'activity' ? 'Img/activities' : 'Img/gallery'}
+                        addToGallery={type === 'gallery'}
                       />
                     </div>
                   </>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import GithubImageUploader from "./GithubImageUploader";
+import { GithubImageUploader } from "./GithubImageUploader";
 
 interface Props {
   value: string;
@@ -9,7 +9,7 @@ interface Props {
   path: string;
 }
 
-export default function ImageInputWithMode({ value, onChange, repo, branch = "main", path }: Props) {
+export default function ImageInputWithMode({ value, onChange, repo, branch = "main", path, addToGallery = false }: Props & { addToGallery?: boolean }) {
   const [mode, setMode] = useState<'link'|'github'>('link');
 
   return (
@@ -21,7 +21,7 @@ export default function ImageInputWithMode({ value, onChange, repo, branch = "ma
       {mode==='link' ? (
         <input type="text" className="border rounded px-2 py-1 w-full" value={value} onChange={e=>onChange(e.target.value)} placeholder="Paste link gambar di sini" />
       ) : (
-  <GithubImageUploader repo={repo} branch={branch} path={path} onUpload={onChange} />
+  <GithubImageUploader repo={repo} branch={branch} path={path} onUpload={onChange} addToGallery={addToGallery} />
       )}
       {value && (
         <div className="mt-2">

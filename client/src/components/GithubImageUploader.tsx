@@ -11,19 +11,22 @@ const saveImageToFirestore = async (rawUrl: string) => {
   });
 };
 
-interface GithubImageUploaderProps {
+export interface GithubImageUploaderProps {
   repo?: string;
   path?: string;
   branch?: string;
   onUpload?: (url: string) => void;
+  addToGallery?: boolean;
 }
 
-export default function GithubImageUploader({
-  repo = "mahapalanarotama/OfficialWebsite",
-  path = "uploads",
-  branch = "main",
-  onUpload
-  }: GithubImageUploaderProps) {
+export function GithubImageUploader(props: GithubImageUploaderProps) {
+  const {
+    repo = "mahapalanarotama/OfficialWebsite",
+    path = "uploads",
+    branch = "main",
+    onUpload,
+    addToGallery = false
+  } = props;
   const [token, setToken] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -124,8 +127,10 @@ export default function GithubImageUploader({
           setSuccess(`✅ Image uploaded successfully! URL: ${imageUrl}`);
           setFile(null);
 
-          // Simpan ke Firestore
-          await saveImageToFirestore(imageUrl);
+          // Simpan ke Firestore hanya jika addToGallery true
+          if (addToGallery) {
+            await saveImageToFirestore(imageUrl);
+          }
           if (onUpload) onUpload(imageUrl);
 
           // Reset file input
