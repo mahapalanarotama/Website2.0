@@ -65,6 +65,39 @@ import { getCarouselContent, CarouselContentItem } from "@/lib/homepage";
 import { DEFAULT_CAROUSEL } from "../shared/carouselDefault";
 import Autoplay from "embla-carousel-autoplay";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+// Ambil data contact dari Firestore
+function useContactData() {
+  const [contact, setContact] = useState({
+    title: 'Hubungi Kami',
+    description: '',
+    whatsapp: '',
+    email: '',
+    instagram: '',
+  });
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let unsub = () => {};
+    async function fetchContact() {
+      const { db } = await import("@/lib/firebase");
+      const { doc, getDoc } = await import("firebase/firestore");
+      const snap = await getDoc(doc(db, "homepage", "contact"));
+      if (snap.exists()) {
+        const data = snap.data();
+        setContact({
+          title: data.title || 'Hubungi Kami',
+          description: data.description || '',
+          whatsapp: data.whatsapp || '',
+          email: data.email || '',
+          instagram: data.instagram || '',
+        });
+      }
+      setLoading(false);
+    }
+    fetchContact();
+    return () => unsub();
+  }, []);
+  return { contact, loading };
+}
 import { Instagram, Mail, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -74,6 +107,7 @@ import { motion } from "framer-motion";
 
 
 export default function HomePage() {
+  const { contact } = useContactData();
   const { data: activities, isLoading: activitiesLoading } = useActivities(3); // hanya 3 terbaru
   const { data: learningModules } = useLearningModules(3); // hanya 3 terbaru
   const { data: gallery, isLoading: galleryLoading } = useGallery();
@@ -419,42 +453,49 @@ export default function HomePage() {
             </Button>
           </div>
         </div>
-        {/* Dialog Kontak */}
+        {/* Dialog Kontak (dinamis) */}
         <Dialog open={showContact} onOpenChange={setShowContact}>
           <DialogContent className="max-w-xs w-full p-0 rounded-xl">
-            <div className="p-6 flex flex-col items-center gap-4">
-              <h2 className="font-heading text-lg font-bold mb-2">Hubungi Kami</h2>
+            <div className="p-6 flex flex-col items-center gap-0">
+              <h2 className="font-heading text-lg font-bold" style={{marginBottom: 0}}>{contact.title || 'Hubungi Kami'}</h2>
+              {contact.description && <div className="text-center text-sm text-gray-600" style={{marginTop: 0, marginBottom: 18}}>{contact.description}</div>}
               <div className="flex gap-6 justify-center">
-                <a
-                  href="https://instagram.com/mahapalanarotama"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-red-500 hover:scale-110 transition-transform"
-                  title="Instagram"
-                >
-                  <Instagram size={36} />
-                </a>
-                <a
-                  href="https://wa.me/6281234567890"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-green-600 hover:scale-110 transition-transform"
-                  title="WhatsApp"
-                >
-                  <Phone size={36} />
-                </a>
-                <a
-                  href="mailto:ukm.mahapala@narotama.ac.id"
-                  className="hover:text-blue-600 hover:scale-110 transition-transform"
-                  title="Email"
-                >
-                  <Mail size={36} />
-                </a>
+                {contact.instagram && (
+                  <a
+                    href={`https://instagram.com/${contact.instagram.replace('@','')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-red-500 hover:scale-110 transition-transform"
+                    title="Instagram"
+                  >
+                    <Instagram size={36} />
+                  </a>
+                )}
+                {contact.whatsapp && (
+                  <a
+                    href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g,'')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-green-600 hover:scale-110 transition-transform"
+                    title="WhatsApp"
+                  >
+                    <Phone size={36} />
+                  </a>
+                )}
+                {contact.email && (
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className="hover:text-blue-600 hover:scale-110 transition-transform"
+                    title="Email"
+                  >
+                    <Mail size={36} />
+                  </a>
+                )}
               </div>
               <div className="text-center text-xs text-gray-500 mt-2">
-                Instagram: @mahapalanarotama<br />
-                WhatsApp: 0812-3456-7890<br />
-                Email: ukm.mahapala@narotama.ac.id
+                {contact.instagram && <><span>Instagram: @{contact.instagram.replace('@','')}</span><br /></>}
+                {contact.whatsapp && <><span>WhatsApp: {contact.whatsapp}</span><br /></>}
+                {contact.email && <><span>Email: {contact.email}</span></>}
               </div>
             </div>
           </DialogContent>

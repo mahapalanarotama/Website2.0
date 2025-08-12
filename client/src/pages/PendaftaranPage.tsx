@@ -1,14 +1,63 @@
 import { useEffect, useState } from "react";
 import { getMeta } from "@/lib/meta";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useRef } from "react";
 import { useInView } from "framer-motion";
 import { AlertCircle, CheckCircle, ArrowRight, Download, Calendar, Users, FileText, Mail, Instagram, Phone } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+// Tipe untuk contact cards
+type ContactCard = {
+  title: string;
+  description: string;
+  content: string[];
+};
+// Ambil data contact dari Firestore
+function useContactData() {
+  const [contact, setContact] = useState<{
+    title: string;
+    description: string;
+    whatsapp: string;
+    email: string;
+    instagram: string;
+    cards: ContactCard[];
+  }>({
+    title: 'Hubungi Kami',
+    description: '',
+    whatsapp: '',
+    email: '',
+    instagram: '',
+    cards: [],
+  });
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let unsub = () => {};
+    async function fetchContact() {
+      const { db } = await import("@/lib/firebase");
+      const { doc, getDoc } = await import("firebase/firestore");
+      const snap = await getDoc(doc(db, "homepage", "contact"));
+      if (snap.exists()) {
+        const data = snap.data() as any;
+        setContact({
+          title: data.title || 'Hubungi Kami',
+          description: data.description || '',
+          whatsapp: data.whatsapp || '',
+          email: data.email || '',
+          instagram: data.instagram || '',
+          cards: Array.isArray(data.cards) ? (data.cards as ContactCard[]) : [],
+        });
+      }
+      setLoading(false);
+    }
+    fetchContact();
+    return () => unsub();
+  }, []);
+  return { contact, loading };
+}
 
 export default function PendaftaranPage() {
+  const { contact, loading: loadingContact } = useContactData();
   // Timeline data dan animasi scroll
   const timelineItems = [
     {
@@ -445,84 +494,80 @@ export default function PendaftaranPage() {
             </div>
           </motion.div>
           
-          {/* Contact Cards */}
+          {/* Contact Cards (dinamis) */}
           <div className="mt-16">
             <h3 className="font-heading text-2xl font-bold text-center mb-8">Kontak Informasi Pendaftaran</h3>
-            <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <Card className="hover:shadow-lg transition duration-300">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Sekretariat</CardTitle>
-                  <CardDescription>Kesekretariatan Mahapala Narotama</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">Ruang BEM (D3.01), Gedung D Lt. 3, Universitas Narotama</p>
-                  <p className="text-sm text-gray-500 mt-1">Senin - Jumat, 09:00 - 16:00 WIB</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="hover:shadow-lg transition duration-300">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Narahubung</CardTitle>
-                  <CardDescription>Informasi Pendaftaran</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">Yuan (Koordinator): 081234567890</p>
-                  <p className="text-sm">Nadia (Sekretaris): 089876543210</p>
-                </CardContent>
-              </Card>
-              
-              <Card className="hover:shadow-lg transition duration-300">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Media Sosial</CardTitle>
-                  <CardDescription>Ikuti kami untuk update</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm">Instagram: @mahapalanarotama</p>
-                  <p className="text-sm">YouTube: @mahapalanarotama1216</p>
-                </CardContent>
-              </Card>
-            </div>
+            {loadingContact ? (
+              <div className="text-center text-gray-400">Memuat kontak...</div>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {contact.cards && contact.cards.length > 0 ? contact.cards.map((card, idx) => (
+                    <Card className="hover:shadow-lg transition duration-300 p-6" key={idx}>
+                      <div>
+                        <div className="font-bold text-lg" style={{marginBottom: 0}}>{card.title}</div>
+                        {card.content.map((line, i) => (
+                          line.trim() === ''
+                            ? <div key={i} style={{ height: '1em' }} />
+                            : <div className="text-sm" key={i}>{line}</div>
+                        ))}
+                        {card.description && (
+                          <div className="text-sm text-gray-500" style={{marginTop: 0}}>{card.description}</div>
+                        )}
+                      </div>
+                    </Card>
+                )) : (
+                  <div className="col-span-3 text-center text-gray-400">Belum ada kontak pendaftaran.</div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </section>
       {/* Dialog for registration form (Google Formulir) dihapus, hanya open tab baru */}
       
-      {/* Dialog for contact information */}
+      {/* Dialog for contact information (dinamis) */}
       <Dialog open={showContact} onOpenChange={setShowContact}>
         <DialogContent className="max-w-xs w-full p-0 rounded-xl">
-          <div className="p-6 flex flex-col items-center gap-4">
-            <h2 className="font-heading text-lg font-bold mb-2">Hubungi Kami</h2>
+          <div className="p-6 flex flex-col items-center gap-0">
+            <h2 className="font-heading text-lg font-bold" style={{marginBottom: 0}}>{contact.title || 'Hubungi Kami'}</h2>
+            {contact.description && <div className="text-center text-sm text-gray-600" style={{marginTop: 0, marginBottom: 18}}>{contact.description}</div>}
             <div className="flex gap-6 justify-center">
-              <a
-                href="https://instagram.com/mahapalanarotama"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-red-500 hover:scale-110 transition-transform"
-                title="Instagram"
-              >
-                <Instagram size={36} />
-              </a>
-              <a
-                href="https://wa.me/6281234567890"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-green-600 hover:scale-110 transition-transform"
-                title="WhatsApp"
-              >
-                <Phone size={36} />
-              </a>
-              <a
-                href="mailto:ukm.mahapala@narotama.ac.id"
-                className="hover:text-blue-600 hover:scale-110 transition-transform"
-                title="Email"
-              >
-                <Mail size={36} />
-              </a>
+              {contact.instagram && (
+                <a
+                  href={`https://instagram.com/${contact.instagram.replace('@','')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-red-500 hover:scale-110 transition-transform"
+                  title="Instagram"
+                >
+                  <Instagram size={36} />
+                </a>
+              )}
+              {contact.whatsapp && (
+                <a
+                  href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g,'')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-green-600 hover:scale-110 transition-transform"
+                  title="WhatsApp"
+                >
+                  <Phone size={36} />
+                </a>
+              )}
+              {contact.email && (
+                <a
+                  href={`mailto:${contact.email}`}
+                  className="hover:text-blue-600 hover:scale-110 transition-transform"
+                  title="Email"
+                >
+                  <Mail size={36} />
+                </a>
+              )}
             </div>
             <div className="text-center text-xs text-gray-500 mt-2">
-              Instagram: @mahapalanarotama<br />
-              WhatsApp: 0812-3456-7890<br />
-              Email: ukm.mahapala@narotama.ac.id
+              {contact.instagram && <><span>Instagram: @{contact.instagram.replace('@','')}</span><br /></>}
+              {contact.whatsapp && <><span>WhatsApp: {contact.whatsapp}</span><br /></>}
+              {contact.email && <><span>Email: {contact.email}</span></>}
             </div>
           </div>
         </DialogContent>

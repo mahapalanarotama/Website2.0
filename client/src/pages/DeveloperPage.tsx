@@ -29,7 +29,69 @@ export default function DeveloperPage() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'meta' | 'logadmin' | 'homepage' | 'visimisi'>('meta');
+  const [tab, setTab] = useState<'meta' | 'logadmin' | 'homepage' | 'visimisi' | 'contact'>('meta');
+  // Tipe untuk contact cards
+  type ContactCard = {
+    title: string;
+    description: string;
+    content: string[];
+  };
+  // State untuk contact dialog dan contact cards
+  const [contactDialog, setContactDialog] = useState({
+    title: '',
+    description: '',
+    whatsapp: '',
+    email: '',
+    instagram: '',
+  });
+  const [contactCards, setContactCards] = useState<ContactCard[]>([]);
+  const [loadingContact, setLoadingContact] = useState(false);
+  // Firestore: load data saat tab contact dibuka
+  useEffect(() => {
+    if (tab === 'contact') {
+      setLoadingContact(true);
+      import('@/lib/firebase').then(({ db }) => {
+        import('firebase/firestore').then(({ doc, getDoc }) => {
+          getDoc(doc(db, 'homepage', 'contact')).then((snap) => {
+            if (snap.exists()) {
+              const data = snap.data();
+              setContactDialog({
+                title: data.title || '',
+                description: data.description || '',
+                whatsapp: data.whatsapp || '',
+                email: data.email || '',
+                instagram: data.instagram || '',
+              });
+              setContactCards(Array.isArray(data.cards)
+                ? data.cards.map((c: any) => {
+                    // Fallback: if old structure, convert to new
+                    if (typeof c === 'object' && c && ('name' in c || 'value' in c || 'icon' in c)) {
+                      return {
+                        title: c.name || '',
+                        description: c.icon || '',
+                        content: c.value ? [c.value] : [],
+                      };
+                    }
+                    // New structure
+                    if ('title' in c && 'description' in c && 'content' in c) return c;
+                    // Unknown, fallback to empty
+                    return { title: '', description: '', content: [] };
+                  })
+                : []);
+            } else {
+              setContactDialog({ title: '', description: '', whatsapp: '', email: '', instagram: '' });
+              setContactCards([]);
+            }
+            setLoadingContact(false);
+          });
+        });
+      });
+    }
+  }, [tab]);
+
+  // Handler simpan contact ke Firestore
+  // State for edit mode in contact tab
+  const [editContactMode, setEditContactMode] = useState(false);
   const [visi, setVisi] = useState('');
   const [misi, setMisi] = useState('');
   const [visiEdit, setVisiEdit] = useState('');
@@ -209,41 +271,172 @@ export default function DeveloperPage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-extrabold mb-8 text-center text-primary">Developer Tools</h1>
-      <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto scrollbar-hide px-1 -mx-2">
+  <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto scrollbar-hide px-1 -mx-2 whitespace-nowrap" style={{ WebkitOverflowScrolling: 'touch' }}>
         <button
-          className={`flex items-center gap-2 group transition-all duration-200 bg-muted px-3 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[48px] sm:min-w-[120px] justify-center ${tab === 'meta' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'meta' ? 'data-[active=true]' : 'data-[active=false]'}`}
           data-active={tab === 'meta'}
           onClick={() => setTab('meta')}
         >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M16 18v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span className="flex items-center justify-center p-0 sm:p-1"><svg width="22" height="22" className="sm:w-[26px] sm:h-[26px] text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 18v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
           <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Meta</span>
         </button>
         <button
-          className={`flex items-center gap-2 group transition-all duration-200 bg-muted px-3 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[48px] sm:min-w-[120px] justify-center ${tab === 'logadmin' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'logadmin' ? 'data-[active=true]' : 'data-[active=false]'}`}
           data-active={tab === 'logadmin'}
           onClick={() => setTab('logadmin')}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span className="flex items-center justify-center p-0 sm:p-1"><svg width="22" height="22" viewBox="0 0 24 24" className="sm:w-[26px] sm:h-[26px] text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
           <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Log Admin</span>
         </button>
         <button
-          className={`flex items-center gap-2 group transition-all duration-200 bg-muted px-3 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[48px] sm:min-w-[120px] justify-center ${tab === 'homepage' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'homepage' ? 'data-[active=true]' : 'data-[active=false]'}`}
           data-active={tab === 'homepage'}
           onClick={() => setTab('homepage')}
         >
-          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M3 8h14"/><path d="M8 17V8"/></svg>
+          <span className="flex items-center justify-center p-0 sm:p-1"><svg width="22" height="22" className="sm:w-[26px] sm:h-[26px] text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
           <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Homepage</span>
         </button>
         <button
-          className={`flex items-center gap-2 group transition-all duration-200 bg-muted px-3 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[48px] sm:min-w-[120px] justify-center ${tab === 'visimisi' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'visimisi' ? 'data-[active=true]' : 'data-[active=false]'}`}
           data-active={tab === 'visimisi'}
           onClick={() => setTab('visimisi')}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          <span className="flex items-center justify-center p-0 sm:p-1"><svg width="22" height="22" viewBox="0 0 24 24" className="sm:w-[26px] sm:h-[26px] text-green-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>
           <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Visi & Misi</span>
         </button>
+        <button
+          className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'contact' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          data-active={tab === 'contact'}
+          onClick={() => setTab('contact')}
+        >
+          <span className="flex items-center justify-center p-0 sm:p-1"><svg width="22" height="22" className="sm:w-[26px] sm:h-[26px] text-blue-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10.5a8.38 8.38 0 0 1-1.9.5 3.48 3.48 0 0 0-2.6-1.5c-1.7 0-3 1.3-3 3 0 .2 0 .4.1.6A8.5 8.5 0 0 1 3 5.5a3 3 0 0 0 1 4c-.9 0-1.7-.3-2.4-.7v.1c0 1.5 1.1 2.8 2.6 3.1-.3.1-.6.2-.9.2-.2 0-.4 0-.6-.1.4 1.2 1.5 2.1 2.8 2.1A6.9 6.9 0 0 1 2 18.5c-.2 0-.4 0-.6-.1A9.9 9.9 0 0 0 8 20.5c6.3 0 9.8-5.2 9.8-9.8v-.4A7.1 7.1 0 0 0 21 10.5z"/></svg></span>
+          <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Contact</span>
+        </button>
       </div>
-      <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
+  <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
+        {tab === 'contact' && (
+          <>
+            <h2 className="font-bold text-xl mb-4 text-blue-900 flex items-center gap-2">
+              <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600"><path d="M21 10.5a8.38 8.38 0 0 1-1.9.5 3.48 3.48 0 0 0-2.6-1.5c-1.7 0-3 1.3-3 3 0 .2 0 .4.1.6A8.5 8.5 0 0 1 3 5.5a3 3 0 0 0 1 4c-.9 0-1.7-.3-2.4-.7v.1c0 1.5 1.1 2.8 2.6 3.1-.3.1-.6.2-.9.2-.2 0-.4 0-.6-.1.4 1.2 1.5 2.1 2.8 2.1A6.9 6.9 0 0 1 2 18.5c-.2 0-.4 0-.6-.1A9.9 9.9 0 0 0 8 20.5c6.3 0 9.8-5.2 9.8-9.8v-.4A7.1 7.1 0 0 0 21 10.5z"/></svg>
+              Edit Kontak & Hubungi Kami
+            </h2>
+            {!editContactMode ? (
+              <>
+                <div className="mb-6">
+                  <div className="font-semibold mb-2">Dialog Hubungi Kami</div>
+                  <div className="mb-2"><b>Judul:</b> {contactDialog.title}</div>
+                  <div className="mb-2"><b>Deskripsi:</b> {contactDialog.description}</div>
+                  <div className="mb-2"><b>WhatsApp:</b> {contactDialog.whatsapp}</div>
+                  <div className="mb-2"><b>Email:</b> {contactDialog.email}</div>
+                  <div className="mb-2"><b>Instagram:</b> {contactDialog.instagram}</div>
+                </div>
+                <div className="mb-6">
+                  <div className="font-semibold mb-2">Contact Cards (Pendaftaran)</div>
+                  {contactCards.length === 0 && <div className="text-gray-400">Belum ada contact card.</div>}
+                  {contactCards.map((card, idx) => (
+                    <div key={idx} className="border rounded p-3 mb-3 bg-white shadow-sm flex items-start gap-3">
+                      {/* Icon kiri jika ada */}
+                      {card.description && card.description.startsWith('fa-') ? (
+                        <i className={`fa ${card.description} text-xl text-blue-600 mt-1`} aria-hidden="true" style={{ minWidth: 28, textAlign: 'center' }}></i>
+                      ) : card.description && card.description.startsWith('mdi-') ? (
+                        <span className={`mdi ${card.description} text-xl text-blue-600 mt-1`} style={{ minWidth: 28, textAlign: 'center' }}></span>
+                      ) : card.description && card.description.startsWith('svg:') ? (
+                        <span className="inline-block mt-1" style={{ minWidth: 28, textAlign: 'center' }} dangerouslySetInnerHTML={{ __html: card.description.slice(4) }} />
+                      ) : null}
+                      <div className="flex-1">
+                        <div className="font-bold text-base mb-1">{card.title}</div>
+                        {card.content.map((line, i) => (
+                          line.trim() === ''
+                            ? <div key={i} style={{ height: '1em' }} />
+                            : <div className="text-sm" key={i}>{line}</div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow" onClick={() => setEditContactMode(true)}>Edit</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <div className="font-semibold mb-2">Dialog Hubungi Kami</div>
+                  <input className="w-full border rounded p-2 mb-2" placeholder="Judul (Default=Hubungi Kami)" value={contactDialog.title} onChange={e => setContactDialog({ ...contactDialog, title: e.target.value })} />
+                  <textarea className="w-full border rounded p-2 mb-2" placeholder="Deskripsi (Opsional)" value={contactDialog.description} onChange={e => setContactDialog({ ...contactDialog, description: e.target.value })} />
+                  <input className="w-full border rounded p-2 mb-2" placeholder="WhatsApp (+628xx-xxxx-xxxx)" value={contactDialog.whatsapp} onChange={e => setContactDialog({ ...contactDialog, whatsapp: e.target.value })} />
+                  <input className="w-full border rounded p-2 mb-2" placeholder="Email (xxxx@gmail.com)" value={contactDialog.email} onChange={e => setContactDialog({ ...contactDialog, email: e.target.value })} />
+                  <input className="w-full border rounded p-2 mb-2" placeholder="Instagram (not '@' just 'Admin')" value={contactDialog.instagram} onChange={e => setContactDialog({ ...contactDialog, instagram: e.target.value })} />
+                </div>
+                <div className="mb-6">
+                  <div className="font-semibold mb-2">Contact Cards (Pendaftaran)</div>
+                  {contactCards.map((card, idx) => (
+                    <div key={idx} className="border rounded p-3 mb-3 bg-white shadow-sm flex items-start gap-3">
+                      {/* Icon kiri jika ada */}
+                      {card.description && card.description.startsWith('fa-') ? (
+                        <i className={`fa ${card.description} text-xl text-blue-600 mt-1`} aria-hidden="true" style={{ minWidth: 28, textAlign: 'center' }}></i>
+                      ) : card.description && card.description.startsWith('mdi-') ? (
+                        <span className={`mdi ${card.description} text-xl text-blue-600 mt-1`} style={{ minWidth: 28, textAlign: 'center' }}></span>
+                      ) : card.description && card.description.startsWith('svg:') ? (
+                        <span className="inline-block mt-1" style={{ minWidth: 28, textAlign: 'center' }} dangerouslySetInnerHTML={{ __html: card.description.slice(4) }} />
+                      ) : null}
+                      <div className="flex-1">
+                        <div className="flex gap-2 mb-2">
+                          <input className="border rounded p-2 flex-1" placeholder="Judul" value={card.title} onChange={e => {
+                            setContactCards(prev => prev.map((c, i) => i === idx ? { ...c, title: e.target.value } : c));
+                          }} />
+                          <input className="border rounded p-2 flex-1" placeholder="Deskripsi (opsional, isi kode ikon: fa-whatsapp, mdi-phone, svg:<svg...>)" value={card.description} onChange={e => {
+                            setContactCards(prev => prev.map((c, i) => i === idx ? { ...c, description: e.target.value } : c));
+                          }} />
+                        </div>
+                        <div className="mb-2">
+                          <label className="block text-xs text-gray-500 mb-1">Isi Konten (1 baris = 1 item)</label>
+                          <textarea
+                            className="border rounded p-2 w-full"
+                            rows={3}
+                            placeholder="Isi konten, pisahkan baris untuk setiap item"
+                            value={card.content.join('\n')}
+                            onChange={e => {
+                              const lines = e.target.value.split(/\r?\n/);
+                              setContactCards(prev => prev.map((c, i) => i === idx ? { ...c, content: lines } : c));
+                            }}
+                          />
+                        </div>
+                        {idx < 3 ? (
+                          <button className="bg-gray-300 text-gray-400 px-2 py-1 rounded cursor-not-allowed" disabled>Hapus (Wajib Ada)</button>
+                        ) : (
+                          <button
+                            className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                            onClick={() => {
+                              const confirmed = window.confirm('Centang kotak di bawah ini untuk menghapus:\n\u2611 Saya yakin ingin menghapus card ini.');
+                              if (confirmed) {
+                                setContactCards(prev => prev.filter((_, i) => i !== idx));
+                              }
+                            }}
+                          >Hapus</button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-2" onClick={() => setContactCards(prev => [...prev, { title: '', description: '', content: [''] }])}>Tambah Card</button>
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <button className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded" onClick={() => setEditContactMode(false)}>Batal</button>
+                  <button
+                    className={`bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow ${loadingContact ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    disabled={loadingContact}
+                    onClick={() => {
+                      setPendingSaveType('contact' as any);
+                      setGlobalConfirmOpen(true);
+                    }}
+                  >
+                    {loadingContact ? 'Menyimpan...' : 'Simpan'}
+                  </button>
+                </div>
+              </>
+            )}
+          </>
+        )}
         {tab === 'visimisi' && (
           <>
             <h2 className="font-bold text-xl mb-4 text-green-900 flex items-center gap-2">
@@ -611,6 +804,16 @@ export default function DeveloperPage() {
                     await handleSaveVisiMisi();
                     window.dispatchEvent(new Event('visimisi-updated'));
                     setVisiMisiEditMode(false);
+                  } else if (pendingSaveType === 'contact') {
+                    setLoadingContact(true);
+                    const { db } = await import('@/lib/firebase');
+                    const { doc, setDoc } = await import('firebase/firestore');
+                    await setDoc(doc(db, 'homepage', 'contact'), {
+                      ...contactDialog,
+                      cards: contactCards
+                    }, { merge: true });
+                    setEditContactMode(false);
+                    setLoadingContact(false);
                   }
                   setGlobalConfirmOpen(false);
                   setGlobalConfirmed(false);
