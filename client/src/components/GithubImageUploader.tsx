@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getCookie, deleteCookie, testGitHubConnection, getGithubOAuthUrl } from "@/lib/github-oauth";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-// Simpan URL raw ke Firestore
-const saveImageToFirestore = async (rawUrl: string) => {
-  await addDoc(collection(db, "gallerys"), {
-    imageUrl: rawUrl,
-    createdAt: serverTimestamp(),
-    // Tambahkan field lain sesuai kebutuhan
-  });
-};
+
+
 
 export interface GithubImageUploaderProps {
   repo?: string;
@@ -24,8 +16,7 @@ export function GithubImageUploader(props: GithubImageUploaderProps) {
     repo = "mahapalanarotama/OfficialWebsite",
     path = "uploads",
     branch = "main",
-    onUpload,
-    addToGallery = false
+    onUpload
   } = props;
   const [token, setToken] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
@@ -127,10 +118,7 @@ export function GithubImageUploader(props: GithubImageUploaderProps) {
           setSuccess(`✅ Image uploaded successfully! URL: ${imageUrl}`);
           setFile(null);
 
-          // Simpan ke Firestore hanya jika addToGallery true
-          if (addToGallery) {
-            await saveImageToFirestore(imageUrl);
-          }
+          // Jangan simpan ke Firestore di sini. Penyimpanan dilakukan saat submit form galeri.
           if (onUpload) onUpload(imageUrl);
 
           // Reset file input
