@@ -78,6 +78,7 @@ export default function ChatbotAssistant() {
   const [typing, setTyping] = useState(false);
   const [typingText, setTypingText] = useState('');
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const [inputFocused, setInputFocused] = useState(false);
 
   // Auto-scroll ke bawah setiap ada pesan baru
   useEffect(() => {
@@ -113,6 +114,7 @@ export default function ChatbotAssistant() {
   useEffect(() => {
     if (!(open || closing)) return;
     function handleScroll() {
+      if (inputFocused) return; // Don't close if input is focused
       setClosing(true);
       setTimeout(() => {
         setOpen(false);
@@ -121,7 +123,7 @@ export default function ChatbotAssistant() {
     }
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [open, closing]);
+  }, [open, closing, inputFocused]);
 
   const handleSend = async (customInput?: string) => {
     const sendText = typeof customInput === 'string' ? customInput : input;
@@ -239,6 +241,8 @@ export default function ChatbotAssistant() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' ? handleSend() : undefined}
               disabled={typing}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
             />
             <button
               onClick={() => handleSend()}
