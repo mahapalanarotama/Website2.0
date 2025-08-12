@@ -7,10 +7,33 @@ interface FaqItem {
 }
 
 const FAQ: FaqItem[] = [
-  { q: 'Bagaimana cara mendaftar?', a: 'Klik menu Pendaftaran, isi formulir, dan ikuti petunjuk yang diberikan.' },
-  { q: 'Apa saja persyaratan pendaftaran?', a: 'Persyaratan pendaftaran dapat dilihat di halaman Pendaftaran.' },
-  { q: 'Bagaimana cara menghubungi admin?', a: 'Gunakan menu Hubungi Kami atau kontak yang tertera di footer.' },
-  { q: 'Apakah ada biaya pendaftaran?', a: 'Informasi biaya pendaftaran dapat dilihat di halaman Pendaftaran.' },
+    // Informasi Pendaftaran
+    { q: 'Bagaimana cara mendaftar sebagai anggota Mahapala Narotama?', a: 'Untuk mendaftar sebagai anggota, kunjungi halaman Pendaftaran di website Mahapala Narotama, isi formulir yang tersedia, dan ikuti petunjuk selanjutnya.' },
+    { q: 'Apa saja syarat pendaftaran anggota baru?', a: 'Syarat pendaftaran meliputi identitas diri (KTP/KTM), nomor telepon aktif, dan komitmen mengikuti kegiatan organisasi.' },
+    { q: 'Kapan pendaftaran anggota baru dibuka?', a: 'Jadwal pendaftaran anggota baru diumumkan secara berkala di website dan media sosial Mahapala Narotama.' },
+    { q: 'Apakah pendaftaran anggota Mahapala Narotama gratis?', a: 'Ya, pendaftaran anggota baru Mahapala Narotama tidak dipungut biaya.' },
+    { q: 'Bagaimana alur seleksi calon anggota?', a: 'Setelah mendaftar, calon anggota akan mengikuti seleksi administrasi dan wawancara sesuai jadwal yang ditentukan.' },
+    { q: 'Apakah ada batas usia untuk mendaftar?', a: 'Tidak ada , namun Pendaftar harus dari Mahasiswa Aktif Universitas Narotama dengan ketentuan dapat di lihat di Halaman Pendaftaran' },
+    { q: 'Bagaimana jika saya salah mengisi data pendaftaran?', a: 'Data dapat diedit sebelum pendaftaran ditutup' },
+    { q: 'Apakah bisa mendaftar lewat HP?', a: 'Ya, seluruh proses pendaftaran dapat dilakukan melalui perangkat mobile.' },
+
+    // Informasi Organisasi Mahapala Narotama
+    { q: 'Apa itu Mahapala Narotama?', a: 'Mahapala Narotama adalah organisasi pecinta alam di Universitas Narotama yang bergerak di bidang pelestarian alam, petualangan, dan pengembangan diri.' },
+    { q: 'Apa manfaat menjadi anggota Mahapala Narotama?', a: 'Anggota dapat mengikuti pelatihan, kegiatan alam bebas, pengembangan softskill, serta memperluas jaringan pertemanan.' },
+    { q: 'Apa saja kegiatan rutin Mahapala Narotama?', a: 'Kegiatan rutin meliputi pelatihan dasar, ekspedisi, bakti sosial, seminar lingkungan, dan diskusi rutin.' },
+    { q: 'Bagaimana cara mengikuti kegiatan Mahapala Narotama?', a: 'Setelah menjadi anggota, Anda dapat mendaftar/ mengikuti kegiatan melalui pengumuman di website atau grup resmi.' },
+    { q: 'Apakah ada grup diskusi untuk pendaftar?', a: 'Ya, grup diskusi akan diberikan setelah pendaftaran melakukan pendaftaran.' },
+    { q: 'Bagaimana cara menghubungi pengurus Mahapala Narotama?', a: 'Gunakan menu Hubungi Kami di website atau kontak WhatsApp/email yang tersedia.' },
+    { q: 'Apakah ada pelatihan untuk anggota baru?', a: 'Ya, anggota baru akan mendapatkan pelatihan dasar organisasi dan kegiatan alam.' },
+    { q: 'Apakah ada kuota anggota baru setiap tahun?', a: 'Ya, kuota anggota baru terbatas sesuai kebijakan organisasi.' },
+    { q: 'Bagaimana cara mendapatkan sertifikat keanggotaan?', a: 'Sertifikat akan diberikan setelah menyelesaikan pelatihan dan aktif berpartisipasi dalam kegiatan.' },
+   
+    // Informasi Perkuliahan
+    { q: 'Apakah Mahapala Narotama hanya untuk mahasiswa Universitas Narotama?', a: 'Ya, anggota Mahapala Narotama adalah mahasiswa aktif Universitas Narotama.' },
+    { q: 'Apakah kegiatan Mahapala Narotama mengganggu perkuliahan?', a: 'Tidak, kegiatan organisasi diatur agar tidak mengganggu jadwal perkuliahan anggota.' },
+    { q: 'Bagaimana jika ada jadwal kuliah yang bentrok dengan kegiatan?', a: 'Anggota dapat mengkomunikasikan jadwal kepada pengurus agar dapat menyesuaikan keikutsertaan dalam kegiatan.' },
+    { q: 'Apakah ada dukungan akademik untuk anggota?', a: 'Mahapala Narotama mendukung anggotanya dalam hal akademik melalui diskusi dan saling membantu antar anggota.' },
+    { q: 'Apakah keanggotaan Mahapala Narotama mempengaruhi nilai akademik?', a: 'Keanggotaan tidak mempengaruhi nilai akademik, namun pengalaman organisasi dapat menjadi nilai tambah di luar akademik.' },
 ];
 
 function getRandomFaqPrompts(faqArr: FaqItem[], max = 3, exclude: string[] = []): string[] {
