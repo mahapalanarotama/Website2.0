@@ -2,7 +2,9 @@ import { marked } from 'marked';
 // Fungsi format markdown penuh menggunakan marked
 function formatMarkdown(text: string): string {
   if (!text) return '';
-  return marked.parse(text, { breaks: true });
+  // Gunakan parseSync agar selalu return string
+  // @ts-ignore
+  return marked.parseSync ? marked.parseSync(text, { breaks: true }) : marked.parse(text, { breaks: true });
 }
 import { useState, useEffect, useRef } from 'react';
 import { Brain, X, User } from 'lucide-react';
