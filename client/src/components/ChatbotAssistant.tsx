@@ -251,7 +251,7 @@ export default function ChatbotAssistant() {
               <div key={i} className={msg.from === 'user' ? 'flex justify-end mb-2' : 'flex justify-start mb-2'}>
                 {msg.from === 'bot' && (
                   <span className="flex-shrink-0 w-8 h-8 rounded-full bg-white border border-blue-200 flex items-center justify-center mr-2 overflow-hidden">
-                    <img src="../../favicon.png" alt="MPN" className="w-7 h-7 object-contain" />
+                    <img src="https://raw.githubusercontent.com/mahapalanarotama/OfficialWebsite/refs/heads/main/Img/favicon.png" alt="MPN" className="w-7 h-7 object-contain" />
                   </span>
                 )}
                 <span className={msg.from === 'user' ? 'inline-block bg-blue-100 text-blue-800 rounded px-3 py-2 max-w-[70%]' : 'inline-block bg-gray-100 text-gray-800 rounded px-3 py-2 max-w-[70%]'}>
