@@ -63,26 +63,18 @@ export default function LearningPage() {
 
   return (
     <>
-      {/* Tombol Navigasi ke /eduhub */}
-      <button
-        ref={eduhubBtnRef}
-        onClick={goToEduhub}
-        className="fixed bottom-6 z-40 bg-gradient-to-r from-green-500 via-green-400 to-green-600 text-white shadow-xl rounded-full px-6 py-3 font-bold text-lg flex items-center gap-2 hover:scale-105 hover:shadow-2xl transition-all duration-300 border-4 border-white/70 backdrop-blur-lg eduhub-fab"
-        style={{right: 'calc(1.5rem + 3.5rem)', boxShadow:'0 4px 24px 0 rgba(34,197,94,0.18)'}}
-      >
-        <span className="inline-block animate-pulse">🏕️</span>
-        <span>Ke EduHub</span>
-      </button>
-      <style>{`
-        .eduhub-fab {
-          transition: right 0.35s cubic-bezier(.4,2,.6,1), box-shadow 0.3s;
-          bottom: 1.5rem !important;
-        }
-        .eduhub-fab-shift {
-          right: calc(1.5rem + 3.5rem) !important;
-          bottom: 1.5rem !important;
-        }
-      `}</style>
+      {/* Tombol Navigasi ke /eduhub di pojok kanan atas */}
+      <div className="w-full flex justify-center md:justify-end items-center mt-4 mb-2 pr-0 md:pr-4">
+        <button
+          ref={eduhubBtnRef}
+          onClick={goToEduhub}
+          className="bg-gradient-to-r from-green-500 via-green-400 to-green-600 text-white shadow-xl rounded-full px-6 py-3 font-bold text-lg flex items-center gap-2 hover:scale-105 hover:shadow-2xl transition-all duration-300 border-4 border-white/70 backdrop-blur-lg"
+          style={{boxShadow:'0 4px 24px 0 rgba(34,197,94,0.18)'}}
+        >
+          <span className="inline-block animate-pulse">🏕️</span>
+          <span>Ke EduHub</span>
+        </button>
+      </div>
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
