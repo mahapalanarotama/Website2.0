@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { LearningModule } from "@/components/LearningModule";
 import { useLearningModules } from "@/hooks/use-learning";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 // import { learningModulesFront } from "@/components/externalLearningLinks"; // dihapus, gunakan Firestore
 
 export default function LearningPage() {
+  const navigate = typeof window !== 'undefined' ? (window as any).useNavigate?.() || (()=>{}) : ()=>{};
+  // fallback: if not using react-router, use window.location
+  const goToEduhub = () => {
+    if (typeof navigate === 'function' && navigate.length > 0) {
+      navigate('/eduhub');
+    } else {
+      window.location.href = '/eduhub';
+    }
+  };
   const [searchQuery, setSearchQuery] = useState<string>("");
   const { data: modules, isLoading } = useLearningModules();
+  const eduhubBtnRef = useRef<HTMLButtonElement>(null);
 
   // Gabungkan data dari backend dan eksternal (frontend)
   const allModules = modules || [];
@@ -20,8 +30,59 @@ export default function LearningPage() {
       : true;
   });
 
+  useEffect(() => {
+    function isVisible(el: Element | null) {
+      if (!el) return false;
+      const style = window.getComputedStyle(el);
+      if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.right > 0;
+    }
+    function updateFabPosition() {
+      // Cek beberapa kemungkinan class/id tombol scroll to top
+      const scrollBtn = document.querySelector('.scroll-to-top, .scroll-to-top-visible, #scrollToTop, .scrollTopBtn');
+      const fab = eduhubBtnRef.current;
+      if (!fab) return;
+      if (scrollBtn && isVisible(scrollBtn)) {
+        fab.classList.add('eduhub-fab-shift');
+      } else {
+        fab.classList.remove('eduhub-fab-shift');
+      }
+    }
+    updateFabPosition();
+    window.addEventListener('scroll', updateFabPosition);
+    window.addEventListener('resize', updateFabPosition);
+    // Jaga-jaga jika tombol scroll-to-top muncul karena event lain
+    const interval = setInterval(updateFabPosition, 400);
+    return () => {
+      window.removeEventListener('scroll', updateFabPosition);
+      window.removeEventListener('resize', updateFabPosition);
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <>
+      {/* Tombol Navigasi ke /eduhub */}
+      <button
+        ref={eduhubBtnRef}
+        onClick={goToEduhub}
+        className="fixed bottom-6 z-40 bg-gradient-to-r from-green-500 via-green-400 to-green-600 text-white shadow-xl rounded-full px-6 py-3 font-bold text-lg flex items-center gap-2 hover:scale-105 hover:shadow-2xl transition-all duration-300 border-4 border-white/70 backdrop-blur-lg eduhub-fab"
+        style={{right: 'calc(1.5rem + 3.5rem)', boxShadow:'0 4px 24px 0 rgba(34,197,94,0.18)'}}
+      >
+        <span className="inline-block animate-pulse">🏕️</span>
+        <span>Ke EduHub</span>
+      </button>
+      <style>{`
+        .eduhub-fab {
+          transition: right 0.35s cubic-bezier(.4,2,.6,1), box-shadow 0.3s;
+          bottom: 1.5rem !important;
+        }
+        .eduhub-fab-shift {
+          right: calc(1.5rem + 3.5rem) !important;
+          bottom: 1.5rem !important;
+        }
+      `}</style>
       <section className="py-12 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -32,7 +93,6 @@ export default function LearningPage() {
               Materi dan panduan kegiatan alam bebas yang dapat diakses oleh seluruh anggota Mahapala Narotama
             </p>
           </div>
-          
           <div className="max-w-md mx-auto mb-10">
             <div className="bg-gray-50 p-6 rounded-lg shadow-md">
               <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
@@ -46,7 +106,6 @@ export default function LearningPage() {
               />
             </div>
           </div>
-          
           {isLoading && allModules.length === 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
