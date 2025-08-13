@@ -1,3 +1,5 @@
+// Custom scrollbar styling for leaderboard dialog
+// Letakkan di bawah komponen utama agar selalu aktif
 import React from "react";
 import { useState, useEffect, useRef } from "react";
 // Confetti SVG component
@@ -320,18 +322,31 @@ export default function EduHubPage() {
         )}
       </div>
       <div className="mb-6">
-        <div className="mb-2 flex items-center gap-3">
-          <span className="font-semibold text-green-700">Progres Penyelesaian:</span>
-          <span className="font-mono text-green-900 text-lg">{done} / {total}</span>
-          {/* Trophy Button */}
-          <button
-            className="ml-2 p-1 rounded-full bg-yellow-100 border border-yellow-300 shadow hover:scale-110 transition-transform"
-            title="Lihat Peringkat"
-            onClick={() => setShowLeaderboard(true)}
-            style={{ lineHeight: 0 }}
-          >
-            <TrophyIcon />
-          </button>
+        <div className="mb-2 flex items-center justify-between">
+          {/* Kiri: Progres & Trophy */}
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-green-700">Progres:</span>
+            <span className="font-mono text-green-900 text-lg">{done} / {total}</span>
+            <button
+              className="ml-2 p-1 rounded-full bg-yellow-100 border border-yellow-300 shadow hover:scale-110 transition-transform"
+              title="Lihat Peringkat"
+              onClick={() => setShowLeaderboard(true)}
+              style={{ lineHeight: 0 }}
+            >
+              <TrophyIcon />
+            </button>
+          </div>
+          {/* Kanan: Nama & Icon User */}
+          <div className="flex items-center gap-2">
+            {userName && (
+              <>
+                <span className="text-green-700 font-semibold text-sm truncate max-w-[120px]" title={userName}>
+                  {userName}
+                </span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle"><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 3-3.87"/><circle cx="12" cy="7" r="4"/></svg>
+              </>
+            )}
+          </div>
         </div>
         <div className="w-full h-5 bg-gray-200 rounded-full overflow-hidden shadow-inner mb-4">
           <div
@@ -355,11 +370,26 @@ export default function EduHubPage() {
                 <span className="text-xl font-bold text-yellow-600">Peringkat Terbaik</span>
               </div>
             </DialogHeader>
-            {loadingLeaderboard ? (
-              <div className="text-center py-6">Memuat peringkat...</div>
-            ) : (
-              <>
-                {(() => {
+            <div
+              className="w-full"
+              style={{
+                maxWidth: '420px',
+                margin: '0 auto',
+              }}
+            >
+              <div
+                className="overflow-y-auto custom-scrollbar"
+                style={{
+                  maxHeight: '60vh',
+                  minHeight: '180px',
+                  paddingRight: '4px',
+                }}
+              >
+                {loadingLeaderboard ? (
+                  <div className="text-center py-6">Memuat peringkat...</div>
+                ) : (
+                  <>
+                    {(() => {
                   // Sort leaderboard: skor desc, updatedAt asc
                   const sorted = [...leaderboard].sort((a, b) => {
                     const progA = (typeof a.progress === 'number' ? a.progress : Number(a.progress)) || 0;
@@ -420,11 +450,24 @@ export default function EduHubPage() {
                       </div>
                     )}
                   </>;
-                })()}
-              </>
-            )}
-            <div className="mt-4 text-xs text-gray-500 text-center">Peringkat dihitung dari jumlah modul selesai. Top 3 mendapat efek khusus!</div>
+                    })()}
+                  </>
+                )}
+              </div>
+              <div className="mt-4 text-xs text-gray-500 text-center">Peringkat dihitung dari jumlah modul selesai. Top 3 mendapat efek khusus!</div>
+            </div>
           </DialogContent>
+<style>{`
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    background: #f3f4f6;
+    border-radius: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 8px;
+  }
+`}</style>
         </Dialog>
         {/* Name Input Dialog */}
         <Dialog open={showNameDialog}>
