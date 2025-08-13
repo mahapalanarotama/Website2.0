@@ -1,3 +1,4 @@
+  // --- PATCH: Pindahkan useEffect fetchLeaderboard ke bawah deklarasi fungsi fetchLeaderboard ---
 // Custom scrollbar styling for leaderboard dialog
 // Letakkan di bawah komponen utama agar selalu aktif
 import React from "react";
@@ -184,8 +185,8 @@ export default function EduHubPage() {
       const data = await getLeaderboardFromFirestore(); // ambil semua data
       // Debug: tampilkan data mentah di konsol
       console.log('LEADERBOARD RAW DATA:', data);
-      // Simpan semua user dengan progress >= 1
-      setLeaderboard((data as any[]).filter(u => Number(u.progress) >= 1));
+      // Simpan semua user, filter progress >= 1 hanya untuk tampilan 10 besar di UI
+      setLeaderboard(Array.isArray(data) ? data : []);
     } catch (e) {
       setLeaderboard([]);
       console.error('LEADERBOARD ERROR:', e);
@@ -194,6 +195,11 @@ export default function EduHubPage() {
   };
 
   // fallback: if not using react-router, use window.location
+
+  // Selalu fetch leaderboard saat komponen mount, agar leaderboard tampil untuk user baru/progres 0
+  useEffect(() => {
+    fetchLeaderboard();
+  }, []);
 
 
   return (
@@ -409,23 +415,26 @@ export default function EduHubPage() {
                     return aTime - bTime;
                   });
                   // Hanya tampilkan 10 peringkat teratas di leaderboard
+                  // Ambil 10 besar dengan progress >= 1
+                  const top10 = sorted.filter(u => ((typeof u.progress === 'number' ? u.progress : Number(u.progress)) || 0) >= 1).slice(0, 10);
                   return <>
                     <ol className="space-y-2 mt-2">
-                      {sorted.length === 0 && <div className="text-center text-gray-400">Belum ada data peringkat.</div>}
-                      {sorted.slice(0, 10).map((u, i) => {
-                        const name = u.name || '(Tanpa Nama)';
-                        const progress = (typeof u.progress === 'number' ? u.progress : Number(u.progress)) || 0;
-                        const isYou = userName && name.toLowerCase() === userName.toLowerCase();
-                        return (
-                          <li key={name + i} className={`flex items-center gap-3 p-2 rounded-lg ${i===0?"bg-yellow-100 border-2 border-yellow-400 shadow-lg animate-pulse":i===1?"bg-gray-200 border border-gray-400":""} ${i<3?"font-bold":i===0?"text-yellow-700":i===1?"text-gray-700":i===2?"text-orange-700":""} ${isYou?"ring-2 ring-green-500":''}`}>
-                            <span className="w-6 text-center text-lg">
-                              {i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}
-                            </span>
-                            <span className="flex-1 truncate">{name} {isYou && <span className="text-green-600 font-bold">(You)</span>}</span>
-                            <span className="font-mono">{progress} / {total}</span>
-                          </li>
-                        );
-                      })}
+                      {top10.length === 0
+                        ? <div className="text-center text-gray-400">Belum ada data peringkat.</div>
+                        : top10.map((u, i) => {
+                            const name = u.name || '(Tanpa Nama)';
+                            const progress = (typeof u.progress === 'number' ? u.progress : Number(u.progress)) || 0;
+                            const isYou = userName && name.toLowerCase() === userName.toLowerCase();
+                            return (
+                              <li key={name + i} className={`flex items-center gap-3 p-2 rounded-lg ${i===0?"bg-yellow-100 border-2 border-yellow-400 shadow-lg animate-pulse":i===1?"bg-gray-200 border border-gray-400":""} ${i<3?"font-bold":i===0?"text-yellow-700":i===1?"text-gray-700":i===2?"text-orange-700":""} ${isYou?"ring-2 ring-green-500":''}`}>
+                                <span className="w-6 text-center text-lg">
+                                  {i===0?"🥇":i===1?"🥈":i===2?"🥉":i+1}
+                                </span>
+                                <span className="flex-1 truncate">{name} {isYou && <span className="text-green-600 font-bold">(You)</span>}</span>
+                                <span className="font-mono">{progress} / {total}</span>
+                              </li>
+                            );
+                          })}
                     </ol>
                   </>;
                     })()}
@@ -454,6 +463,7 @@ export default function EduHubPage() {
                 const idx = sortedAll.findIndex(u => (u.name || '').toLowerCase() === userName.toLowerCase());
                 // Jika user masuk 10 besar, jangan tampilkan kotak privat
                 if (idx !== -1 && idx < 10) return null;
+                // Selalu tampilkan kotak privat meskipun idx === -1 (user belum ada di leaderboard)
                 const userScore = idx !== -1 ? ((typeof sortedAll[idx].progress === 'number' ? sortedAll[idx].progress : Number(sortedAll[idx].progress)) || 0) : 0;
                 return (
                   <div className="mb-2 px-3 py-2 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3 shadow-sm">
