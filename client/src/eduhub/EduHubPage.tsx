@@ -385,7 +385,8 @@ export default function EduHubPage() {
                     const bTime = (b && typeof b === 'object' && 'updatedAt' in b && b.updatedAt) ? getTime(b.updatedAt) : Infinity;
                     return aTime - bTime;
                   });
-                  // Render 10 teratas
+                  // Render 10 besar dan 10+
+                  const idx = userName ? sorted.findIndex(u => (u.name || '').toLowerCase() === userName.toLowerCase()) : -1;
                   return <>
                     <ol className="space-y-2 mt-2">
                       {sorted.length === 0 && <div className="text-center text-gray-400">Belum ada data peringkat.</div>}
@@ -404,33 +405,32 @@ export default function EduHubPage() {
                         );
                       })}
                     </ol>
-                    {/* Jika user tidak masuk 10 besar, tampilkan posisi user di bawah */}
-                    {(() => {
-                      if (!userName) return null;
-                      const idx = sorted.findIndex(u => (u.name || '').toLowerCase() === userName.toLowerCase());
-                      if (idx >= 10 && sorted[idx]) {
-                        const u = sorted[idx];
-                        const progress = (typeof u.progress === 'number' ? u.progress : Number(u.progress)) || 0;
-                        return (
-                          <div className="mt-4 border-t pt-3">
-                            <div className="text-xs text-gray-500 mb-1 text-center">Peringkat Anda</div>
-                            <ol className="space-y-2">
-                              <li className="flex items-center gap-3 p-2 rounded-lg ring-2 ring-green-500 bg-green-50 font-bold">
-                                <span className="w-6 text-center text-lg">{idx+1}</span>
-                                <span className="flex-1 truncate">{u.name} <span className="text-green-600 font-bold">(You)</span></span>
+                    {/* 10+ section */}
+                    {sorted.length > 10 && (
+                      <div className="mt-6 border-t pt-3">
+                        <div className="text-xs text-gray-500 mb-1 text-center">Peringkat 10+</div>
+                        <ol className="space-y-2">
+                          {sorted.slice(10).map((u, i) => {
+                            const name = u.name || '(Tanpa Nama)';
+                            const progress = (typeof u.progress === 'number' ? u.progress : Number(u.progress)) || 0;
+                            const realIdx = i + 10;
+                            const isYou = userName && name.toLowerCase() === userName.toLowerCase();
+                            return (
+                              <li key={name + realIdx} className={`flex items-center gap-3 p-2 rounded-lg ${isYou ? 'ring-2 ring-green-500 bg-green-50 font-bold' : ''}`}>
+                                <span className="w-6 text-center text-lg">{realIdx+1}</span>
+                                <span className="flex-1 truncate">{name} {isYou && <span className="text-green-600 font-bold">(You)</span>}</span>
                                 <span className="font-mono">{progress} / {total}</span>
                               </li>
-                            </ol>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })()}
+                            );
+                          })}
+                        </ol>
+                      </div>
+                    )}
                   </>;
                 })()}
               </>
             )}
-            <div className="mt-4 text-xs text-gray-500 text-center">Peringkat dihitung dari jumlah modul selesai. Top 3 mendapat efek khusus!<br/>Data real-time dari Firestore.</div>
+            <div className="mt-4 text-xs text-gray-500 text-center">Peringkat dihitung dari jumlah modul selesai. Top 3 mendapat efek khusus!</div>
           </DialogContent>
         </Dialog>
         {/* Name Input Dialog */}
