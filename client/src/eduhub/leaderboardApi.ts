@@ -12,13 +12,12 @@ import {
 
 const LEADERBOARD_COLLECTION = "eduhub_leaderboard";
 
-export async function saveUserProgressToFirestore(name: string, progress: number, deviceId?: string) {
-  if (!name || !deviceId) return;
-  const ref = doc(db, LEADERBOARD_COLLECTION, deviceId);
+export async function saveUserProgressToFirestore(name: string, progress: number) {
+  if (!name) return;
+  const ref = doc(db, LEADERBOARD_COLLECTION, name);
   await setDoc(ref, {
     name,
     progress: Number(progress) || 0,
-    deviceId,
     updatedAt: serverTimestamp(),
   }, { merge: true });
 }
@@ -31,8 +30,7 @@ export async function getLeaderboardFromFirestore() {
       return {
         name: d.name,
         progress: Number(d.progress) || 0,
-        updatedAt: d.updatedAt || null,
-        deviceId: d.deviceId || doc.id
+        updatedAt: d.updatedAt || null
       };
     });
   } catch (e) {

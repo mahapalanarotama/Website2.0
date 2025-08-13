@@ -22,54 +22,26 @@ import { BadgeCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
-
 import { saveUserProgressToFirestore, getLeaderboardFromFirestore } from "./leaderboardApi";
-import { getDeviceId } from "./deviceId";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
 
 
-
-// Ambil data user: prioritas Firestore jika deviceId ditemukan, fallback ke localStorage
-async function getUserData() {
-  const deviceId = await getDeviceId();
-  // Cek Firestore
+function getUserData() {
   try {
-    const ref = doc(db, "eduhub_leaderboard", deviceId);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      const d = snap.data();
-      // Simpan ke localStorage agar sinkron
-      const userData = {
-        deviceId,
-        name: d.name || "",
-        progress: d.progress ? d.progressData || {} : {},
-      };
-      setUserData(userData);
-      return userData;
-    }
-  } catch {}
-  // Fallback ke localStorage
-  try {
-    const data = JSON.parse(localStorage.getItem("eduhub_userdata") || "{}") || {};
-    if (!data.deviceId) {
-      data.deviceId = deviceId;
-      setUserData(data);
-    }
-    return data;
+    return JSON.parse(localStorage.getItem("eduhub_userdata") || "{}") || {};
   } catch {
-    setUserData({ deviceId });
-    return { deviceId };
+    return {};
   }
 }
 function setUserData(data: any) {
   localStorage.setItem("eduhub_userdata", JSON.stringify(data));
 }
 
-// setProgress: update progress in localStorage
+function getProgress() {
+  return getUserData().progress || {};
+}
 function setProgress(progress: any) {
-  getUserData().then(data => setUserData({ ...data, progress }));
+  const data = getUserData();
+  setUserData({ ...data, progress });
 }
 
 
@@ -91,9 +63,8 @@ export default function EduHubPage() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [progress, setProgressState] = useState<any>({});
-  const [userName, setUserName] = useState<string>("");
-  const [deviceId, setDeviceId] = useState<string>("");
+  const [progress, setProgressState] = useState(getProgress());
+  const [userName, setUserName] = useState(getUserData().name || "");
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -104,33 +75,30 @@ export default function EduHubPage() {
   // Tambahkan state untuk urutan acak quiz
   const [shuffledQuiz, setShuffledQuiz] = useState<any[]>([]);
 
-
   useEffect(() => {
-    (async () => {
-      const data = await getUserData();
-      setDeviceId(data.deviceId);
-      setProgressState(data.progress || {});
-      if (!data.name) {
-        setShowNameDialog(true);
-      } else {
-        setUserName(data.name);
-        // Simpan nama ke Firestore walau progres 0
-        saveUserProgressToFirestore(data.name, Object.values(data.progress || {}).filter(Boolean).length, data.deviceId);
-      }
-    })();
+    setProgressState(getProgress());
+    const data = getUserData();
+    if (!data.name) {
+      setShowNameDialog(true);
+    } else {
+      setUserName(data.name);
+      // Simpan nama ke Firestore walau progres 0
+      saveUserProgressToFirestore(data.name, Object.values(getProgress()).filter(Boolean).length);
+    }
+    // Cleanup old users with 0 progress
+  // cleanupOldZeroProgressUsers();
   }, []);
 
   // Save progress to Firestore whenever userName or progress changes
-
   useEffect(() => {
-    if (userName && deviceId) {
+    if (userName) {
       const prog = Object.values(progress).filter(Boolean).length;
-      saveUserProgressToFirestore(userName, prog, deviceId).then(() => {
+      saveUserProgressToFirestore(userName, prog).then(() => {
         if (prog >= 1) fetchLeaderboard();
       });
     }
     // eslint-disable-next-line
-  }, [userName, progress, deviceId]);
+  }, [userName, progress]);
 
   // Fungsi untuk mengacak array dan mengembalikan array baru beserta mapping index
   function shuffleOptions(options: string[], answerIdx: number) {
@@ -151,17 +119,13 @@ export default function EduHubPage() {
   };
 
   // Handle name input save
-
   const handleSaveName = async () => {
     if (nameInput.trim().length < 2) return;
-    const data = await getUserData();
-    const newData = { ...data, name: nameInput.trim(), progress };
-    setUserData(newData);
+    setUserData({ ...getUserData(), name: nameInput.trim(), progress });
     setUserName(nameInput.trim());
-    setDeviceId(newData.deviceId);
     setShowNameDialog(false);
     // Simpan nama ke Firestore walau progres 0
-    await saveUserProgressToFirestore(nameInput.trim(), Object.values(progress).filter(Boolean).length, newData.deviceId);
+    await saveUserProgressToFirestore(nameInput.trim(), Object.values(progress).filter(Boolean).length);
     fetchLeaderboard();
   };
 
@@ -227,6 +191,7 @@ export default function EduHubPage() {
     setLoadingLeaderboard(false);
   };
 
+  // fallback: if not using react-router, use window.location
 
 
   return (
@@ -414,7 +379,7 @@ export default function EduHubPage() {
                     return aTime - bTime;
                   });
                   // Render 10 besar dan 10+
-                  // idx tidak perlu jika tidak dipakai
+                  // idx tidak diperlukan lagi, sudah dihandle di atas
                   return <>
                     <ol className="space-y-2 mt-2">
                       {sorted.length === 0 && <div className="text-center text-gray-400">Belum ada data peringkat.</div>}
