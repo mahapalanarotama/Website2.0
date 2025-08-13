@@ -19,32 +19,60 @@ function ConfettiBurst() {
 }
 import { modules } from "./modules";
 import { BadgeCheck } from "lucide-react";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { saveUserProgressToFirestore, getLeaderboardFromFirestore, cleanupOldZeroProgressUsers } from "./leaderboardApi";
 
 
-function getUserData() {
+import { saveUserProgressToFirestore, getLeaderboardFromFirestore } from "./leaderboardApi";
+import { getDeviceId } from "./deviceId";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+
+
+
+// Ambil data user: prioritas Firestore jika deviceId ditemukan, fallback ke localStorage
+async function getUserData() {
+  const deviceId = await getDeviceId();
+  // Cek Firestore
   try {
-    return JSON.parse(localStorage.getItem("eduhub_userdata") || "{}") || {};
+    const ref = doc(db, "eduhub_leaderboard", deviceId);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const d = snap.data();
+      // Simpan ke localStorage agar sinkron
+      const userData = {
+        deviceId,
+        name: d.name || "",
+        progress: d.progress ? d.progressData || {} : {},
+      };
+      setUserData(userData);
+      return userData;
+    }
+  } catch {}
+  // Fallback ke localStorage
+  try {
+    const data = JSON.parse(localStorage.getItem("eduhub_userdata") || "{}") || {};
+    if (!data.deviceId) {
+      data.deviceId = deviceId;
+      setUserData(data);
+    }
+    return data;
   } catch {
-    return {};
+    setUserData({ deviceId });
+    return { deviceId };
   }
 }
 function setUserData(data: any) {
   localStorage.setItem("eduhub_userdata", JSON.stringify(data));
 }
 
-function getProgress() {
-  return getUserData().progress || {};
-}
+// setProgress: update progress in localStorage
 function setProgress(progress: any) {
-  const data = getUserData();
-  setUserData({ ...data, progress });
+  getUserData().then(data => setUserData({ ...data, progress }));
 }
 
-import { useNavigate } from "react-router-dom";
+
 
 // Trophy SVG (Gold)
 function TrophyIcon({ className = "", style = {} }) {
@@ -63,8 +91,9 @@ export default function EduHubPage() {
   const [answers, setAnswers] = useState<number[]>([]);
   const [showQuiz, setShowQuiz] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [progress, setProgressState] = useState(getProgress());
-  const [userName, setUserName] = useState(getUserData().name || "");
+  const [progress, setProgressState] = useState<any>({});
+  const [userName, setUserName] = useState<string>("");
+  const [deviceId, setDeviceId] = useState<string>("");
   const [showNameDialog, setShowNameDialog] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -75,30 +104,33 @@ export default function EduHubPage() {
   // Tambahkan state untuk urutan acak quiz
   const [shuffledQuiz, setShuffledQuiz] = useState<any[]>([]);
 
+
   useEffect(() => {
-    setProgressState(getProgress());
-    const data = getUserData();
-    if (!data.name) {
-      setShowNameDialog(true);
-    } else {
-      setUserName(data.name);
-      // Simpan nama ke Firestore walau progres 0
-      saveUserProgressToFirestore(data.name, Object.values(getProgress()).filter(Boolean).length);
-    }
-    // Cleanup old users with 0 progress
-  // cleanupOldZeroProgressUsers();
+    (async () => {
+      const data = await getUserData();
+      setDeviceId(data.deviceId);
+      setProgressState(data.progress || {});
+      if (!data.name) {
+        setShowNameDialog(true);
+      } else {
+        setUserName(data.name);
+        // Simpan nama ke Firestore walau progres 0
+        saveUserProgressToFirestore(data.name, Object.values(data.progress || {}).filter(Boolean).length, data.deviceId);
+      }
+    })();
   }, []);
 
   // Save progress to Firestore whenever userName or progress changes
+
   useEffect(() => {
-    if (userName) {
+    if (userName && deviceId) {
       const prog = Object.values(progress).filter(Boolean).length;
-      saveUserProgressToFirestore(userName, prog).then(() => {
+      saveUserProgressToFirestore(userName, prog, deviceId).then(() => {
         if (prog >= 1) fetchLeaderboard();
       });
     }
     // eslint-disable-next-line
-  }, [userName, progress]);
+  }, [userName, progress, deviceId]);
 
   // Fungsi untuk mengacak array dan mengembalikan array baru beserta mapping index
   function shuffleOptions(options: string[], answerIdx: number) {
@@ -119,13 +151,17 @@ export default function EduHubPage() {
   };
 
   // Handle name input save
+
   const handleSaveName = async () => {
     if (nameInput.trim().length < 2) return;
-    setUserData({ ...getUserData(), name: nameInput.trim(), progress });
+    const data = await getUserData();
+    const newData = { ...data, name: nameInput.trim(), progress };
+    setUserData(newData);
     setUserName(nameInput.trim());
+    setDeviceId(newData.deviceId);
     setShowNameDialog(false);
     // Simpan nama ke Firestore walau progres 0
-    await saveUserProgressToFirestore(nameInput.trim(), Object.values(progress).filter(Boolean).length);
+    await saveUserProgressToFirestore(nameInput.trim(), Object.values(progress).filter(Boolean).length, newData.deviceId);
     fetchLeaderboard();
   };
 
@@ -191,15 +227,7 @@ export default function EduHubPage() {
     setLoadingLeaderboard(false);
   };
 
-  const navigate = typeof window !== 'undefined' ? (window as any).useNavigate?.() || (()=>{}) : ()=>{};
-  // fallback: if not using react-router, use window.location
-  const goToEduhub = () => {
-    if (typeof navigate === 'function' && navigate.length > 0) {
-      navigate('/eduhub');
-    } else {
-      window.location.href = '/eduhub';
-    }
-  };
+
 
   return (
     <div className="relative max-w-3xl mx-auto p-4">
@@ -386,7 +414,7 @@ export default function EduHubPage() {
                     return aTime - bTime;
                   });
                   // Render 10 besar dan 10+
-                  const idx = userName ? sorted.findIndex(u => (u.name || '').toLowerCase() === userName.toLowerCase()) : -1;
+                  // idx tidak perlu jika tidak dipakai
                   return <>
                     <ol className="space-y-2 mt-2">
                       {sorted.length === 0 && <div className="text-center text-gray-400">Belum ada data peringkat.</div>}
