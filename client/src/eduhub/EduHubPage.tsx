@@ -181,11 +181,11 @@ export default function EduHubPage() {
   const fetchLeaderboard = async () => {
     setLoadingLeaderboard(true);
     try {
-  const data = await getLeaderboardFromFirestore(); // ambil semua data, filter di bawah
+      const data = await getLeaderboardFromFirestore(); // ambil semua data
       // Debug: tampilkan data mentah di konsol
       console.log('LEADERBOARD RAW DATA:', data);
-      // Hanya tampilkan user dengan progress >= 1 (pastikan tipe number)
-      setLeaderboard((data as any[]).filter(u => Number(u.progress) >= 1).slice(0, 10));
+      // Simpan semua user dengan progress >= 1
+      setLeaderboard((data as any[]).filter(u => Number(u.progress) >= 1));
     } catch (e) {
       setLeaderboard([]);
       console.error('LEADERBOARD ERROR:', e);
@@ -408,8 +408,7 @@ export default function EduHubPage() {
                     const bTime = (b && typeof b === 'object' && 'updatedAt' in b && b.updatedAt) ? getTime(b.updatedAt) : Infinity;
                     return aTime - bTime;
                   });
-                  // Render 10 besar dan 10+
-                  // idx tidak diperlukan lagi, sudah dihandle di atas
+                  // Hanya tampilkan 10 peringkat teratas di leaderboard
                   return <>
                     <ol className="space-y-2 mt-2">
                       {sorted.length === 0 && <div className="text-center text-gray-400">Belum ada data peringkat.</div>}
@@ -428,32 +427,42 @@ export default function EduHubPage() {
                         );
                       })}
                     </ol>
-                    {/* 10+ section */}
-                    {sorted.length > 10 && (
-                      <div className="mt-6 border-t pt-3">
-                        <div className="text-xs text-gray-500 mb-1 text-center">Peringkat 10+</div>
-                        <ol className="space-y-2">
-                          {sorted.slice(10).map((u, i) => {
-                            const name = u.name || '(Tanpa Nama)';
-                            const progress = (typeof u.progress === 'number' ? u.progress : Number(u.progress)) || 0;
-                            const realIdx = i + 10;
-                            const isYou = userName && name.toLowerCase() === userName.toLowerCase();
-                            return (
-                              <li key={name + realIdx} className={`flex items-center gap-3 p-2 rounded-lg ${isYou ? 'ring-2 ring-green-500 bg-green-50 font-bold' : ''}`}>
-                                <span className="w-6 text-center text-lg">{realIdx+1}</span>
-                                <span className="flex-1 truncate">{name} {isYou && <span className="text-green-600 font-bold">(You)</span>}</span>
-                                <span className="font-mono">{progress} / {total}</span>
-                              </li>
-                            );
-                          })}
-                        </ol>
-                      </div>
-                    )}
                   </>;
                     })()}
                   </>
                 )}
               </div>
+              {/* Kotak privat info user */}
+              {userName && (() => {
+                // Hitung peringkat user dari seluruh data
+                const sortedAll = [...leaderboard].sort((a, b) => {
+                  const progA = (typeof a.progress === 'number' ? a.progress : Number(a.progress)) || 0;
+                  const progB = (typeof b.progress === 'number' ? b.progress : Number(b.progress)) || 0;
+                  if (progB !== progA) return progB - progA;
+                  // Compare updatedAt (Firestore Timestamp or Date or string)
+                  const getTime = (val: any) => {
+                    if (!val) return Infinity;
+                    if (typeof val.toDate === 'function') return val.toDate().getTime();
+                    if (val instanceof Date) return val.getTime();
+                    if (typeof val === 'string' || typeof val === 'number') return new Date(val).getTime();
+                    return Infinity;
+                  };
+                  const aTime = (a && typeof a === 'object' && 'updatedAt' in a && a.updatedAt) ? getTime(a.updatedAt) : Infinity;
+                  const bTime = (b && typeof b === 'object' && 'updatedAt' in b && b.updatedAt) ? getTime(b.updatedAt) : Infinity;
+                  return aTime - bTime;
+                });
+                const idx = sortedAll.findIndex(u => (u.name || '').toLowerCase() === userName.toLowerCase());
+                // Jika user masuk 10 besar, jangan tampilkan kotak privat
+                if (idx !== -1 && idx < 10) return null;
+                const userScore = idx !== -1 ? ((typeof sortedAll[idx].progress === 'number' ? sortedAll[idx].progress : Number(sortedAll[idx].progress)) || 0) : 0;
+                return (
+                  <div className="mb-2 px-3 py-2 rounded-lg bg-green-50 border border-green-200 flex items-center gap-3 shadow-sm">
+                    <span className="w-7 text-center font-bold text-green-700">{idx !== -1 ? idx+1 : '-'}</span>
+                    <span className="flex-1 truncate text-green-800 font-semibold">{userName} <span className="text-green-500 font-normal">(You)</span></span>
+                    <span className="font-mono text-green-700">{userScore} / {total}</span>
+                  </div>
+                );
+              })()}
               <div className="mt-4 text-xs text-gray-500 text-center">Peringkat dihitung dari jumlah modul selesai. Top 3 mendapat efek khusus!</div>
             </div>
           </DialogContent>
