@@ -1,3 +1,4 @@
+import { saveGpsTrackerToFirestore, syncOfflineGpsToFirestore } from "@/lib/gpsFirestore";
 import { useState, useEffect, useRef } from "react";
 import { BookOpen, Map, Phone, AlertTriangle } from "lucide-react";
 
@@ -155,6 +156,27 @@ function PelacakGPS() {
   const [nama, setNama] = useState(() => localStorage.getItem('gps_nama') || '');
   const intervalRef = useRef<any>(null);
 
+  // Sync otomatis saat online kembali
+  useEffect(() => {
+    function syncIfOnline() {
+      if (navigator.onLine) syncOfflineGpsToFirestore();
+    }
+    window.addEventListener('online', syncIfOnline);
+    // Cek saat mount juga
+    syncIfOnline();
+    return () => window.removeEventListener('online', syncIfOnline);
+  }, []);
+
+  async function saveAndSync(data: any) {
+    if (navigator.onLine) {
+      try {
+        await saveGpsTrackerToFirestore(data);
+      } catch {}
+    } else {
+      // Sudah otomatis tersimpan di localStorage
+    }
+  }
+
   function stopTracking() {
     setTracking(false);
     if (intervalRef.current) {
@@ -189,6 +211,8 @@ function PelacakGPS() {
           setPositions((prev: any) => {
             const next = [...prev, data];
             localStorage.setItem("gps_track", JSON.stringify(next));
+            // Kirim ke Firestore jika online, jika offline tetap simpan lokal
+            saveAndSync(data);
             return next;
           });
         },

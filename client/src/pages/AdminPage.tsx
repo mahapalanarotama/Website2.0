@@ -47,10 +47,13 @@ import {   Calendar,
   UserPlus,
   Users,
 } from 'lucide-react';
-import TrackerMap from '@/components/TrackerMap';
+import TrackerMap, { getColor } from '@/components/TrackerMap';
 import { addDevLog } from '@/lib/devlog';
 
 export default function AdminPage() {
+  // ...existing code...
+  // State untuk expand jejak per pengguna
+  const [expandedHistoryUser, setExpandedHistoryUser] = useState<string | null>(null);
   // Authentication state
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState('');
@@ -213,6 +216,8 @@ export default function AdminPage() {
     const snap = await getDocs(collection(db, "gps_history"));
     setTrackerHistory(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
   };
+
+  // (handleDeleteUserHistory removed because it was unused)
 
   // Notifikasi sederhana
   const notify = (msg: string) => window.alert(msg);
@@ -1093,68 +1098,97 @@ export default function AdminPage() {
         <TabsContent value="tracker">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">GPS Tracker</h2>
-            <Button onClick={fetchTrackers} variant="outline" size="sm">Refresh</Button>
+            <Button
+              onClick={async () => {
+                await fetchTrackers();
+                await fetchTrackerHistory();
+              }}
+              variant="outline"
+              size="sm"
+            >Refresh</Button>
           </div>
           <div className="mb-6">
             <TrackerMap 
-              points={trackers.map(t => ({ lat: t.lat, lon: t.lon, nama: t.nama, time: t.time }))}
-              history={trackerHistory.map(t => ({ lat: t.lat, lon: t.lon, nama: t.nama, time: t.time }))}
+              key={
+                (Array.isArray(trackers) && trackers.length)
+                  ? `${trackers[trackers.length-1].lat},${trackers[trackers.length-1].lon},${trackers[trackers.length-1].time}`
+                  : (Array.isArray(trackerHistory) && trackerHistory.length)
+                    ? `${trackerHistory[trackerHistory.length-1].lat},${trackerHistory[trackerHistory.length-1].lon},${trackerHistory[trackerHistory.length-1].time}`
+                    : 'default-map'
+              }
+              points={Array.isArray(trackers) ? trackers.map(t => ({ lat: t.lat, lon: t.lon, nama: t.nama, time: t.time })) : []}
+              history={Array.isArray(trackerHistory) ? trackerHistory.map(t => ({ lat: t.lat, lon: t.lon, nama: t.nama, time: t.time })) : []}
             />
           </div>
-          <div className="overflow-x-auto bg-white rounded-lg shadow p-2">
-            <table className="w-full text-sm">
-              <thead>
+          <div className="overflow-x-auto bg-white rounded-xl shadow-lg p-3 mb-8 border border-gray-200">
+            <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+              <thead className="bg-gradient-to-r from-blue-50 to-blue-100">
                 <tr>
-                  <th>
+                  <th className="py-2 px-2 border-b font-semibold">
                     <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         checked={isAllSelected}
                         onChange={handleSelectAll}
-                        className="accent-primary h-4 w-4"
+                        className="accent-primary h-4 w-4 rounded"
+                        title="Pilih semua"
                       />
                       Nama
                     </div>
                   </th>
-                  <th>Waktu</th>
-                  <th>Lat</th>
-                  <th>Lon</th>
-                  <th>Status</th>
-                  <th>View Maps</th>
+                  <th className="py-2 px-2 border-b font-semibold">Waktu</th>
+                  <th className="py-2 px-2 border-b font-semibold">Lat</th>
+                  <th className="py-2 px-2 border-b font-semibold">Lon</th>
+                  <th className="py-2 px-2 border-b font-semibold">Status</th>
+                  <th className="py-2 px-2 border-b font-semibold">View Maps</th>
                 </tr>
               </thead>
               <tbody>
                 {trackers.map((t) => (
-                  <tr key={t.id}>
-                    <td>
+                  <tr key={t.id} className="hover:bg-blue-50 transition-all border-b last:border-b-0">
+                    <td className="py-2 px-2">
                       <div className="flex items-center gap-2">
                         <input
                           type="checkbox"
                           checked={selectedTrackerIds.includes(t.id)}
                           onChange={() => handleSelectOne(t.id)}
-                          className="accent-primary h-4 w-4"
+                          className="accent-primary h-4 w-4 rounded"
+                          title="Pilih baris ini"
                         />
-                        {t.nama}
+                        {/* Titik warna sesuai polyline/marker */}
+                        <span
+                          className="inline-block h-3 w-3 rounded-full mr-2 border border-gray-300"
+                          style={{ background: (typeof t.nama === 'string') ? getColor(t.nama) : '#888' }}
+                          title="Warna penanda di peta"
+                        ></span>
+<span className="font-medium text-gray-800">{t.nama}</span>
                       </div>
                     </td>
-                    <td>{getWIBTimeString(t.time)}</td>
-                    <td>{t.lat}</td>
-                    <td>{t.lon}</td>
-                    <td>
-                      <span className={`inline-block px-2 py-1 rounded text-xs font-bold ${t.online ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}`}>
+                    <td className="py-2 px-2">{getWIBTimeString(t.time)}</td>
+                    <td className="py-2 px-2">{t.lat}</td>
+                    <td className="py-2 px-2">{t.lon}</td>
+                    <td className="py-2 px-2">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold shadow-sm ${t.online ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}
+                        title={t.online ? 'Pengguna online' : 'Pengguna offline'}>
+                        {t.online ? (
+                          <span className="h-2 w-2 rounded-full bg-green-500 inline-block"></span>
+                        ) : (
+                          <span className="h-2 w-2 rounded-full bg-gray-400 inline-block"></span>
+                        )}
                         {t.online ? 'Online' : 'Offline'}
                       </span>
                     </td>
-                    <td>
+                    <td className="py-2 px-2">
                       {t.lat && t.lon ? (
                         <a
                           href={`https://www.google.com/maps?q=${t.lat},${t.lon}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 underline hover:text-blue-800"
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition text-xs font-semibold shadow"
                           title="Lihat di Google Maps"
                         >
-                          Lihat Maps
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 12.414a4 4 0 10-1.414 1.414l4.243 4.243a1 1 0 001.414-1.414z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                          Maps
                         </a>
                       ) : (
                         <span className="text-gray-400">-</span>
@@ -1164,16 +1198,185 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
-            <div className="mt-2 flex gap-2">
-              <Button
-                variant="destructive"
-                size="sm"
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
                 disabled={selectedTrackerIds.length === 0}
                 onClick={handleDeleteSelected}
+                className={`rounded shadow flex items-center gap-1 px-3 py-2 text-sm font-semibold transition
+                  ${selectedTrackerIds.length === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                    : 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-200 cursor-pointer'}
+                `}
+                title="Hapus semua tracker yang dipilih"
               >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 Hapus Data Terpilih
-              </Button>
+              </button>
             </div>
+          </div>
+
+          {/* Tabel gps_history: satu baris per nama pengguna (jejak terakhir), expandable */}
+          <div className="overflow-x-auto bg-white rounded-xl shadow-lg p-3 border border-gray-200 mt-8">
+            <div className="font-bold mb-2 text-blue-900 text-lg">Riwayat Jejak (gps_history, per pengguna)</div>
+            <table className="w-full text-xs border border-gray-200 rounded-lg overflow-hidden">
+              <thead className="bg-gradient-to-r from-blue-50 to-blue-100">
+                <tr>
+                  <th className="py-2 px-2 border-b font-semibold">Nama</th>
+                  <th className="py-2 px-2 border-b font-semibold">Waktu Terakhir</th>
+                  <th className="py-2 px-2 border-b font-semibold">Lat</th>
+                  <th className="py-2 px-2 border-b font-semibold">Lon</th>
+                  <th className="py-2 px-2 border-b font-semibold">View Maps</th>
+                  <th className="py-2 px-2 border-b font-semibold">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  if (trackerHistory.length === 0) {
+                    return <tr><td colSpan={6} className="text-center text-gray-400 py-4">Belum ada data jejak.</td></tr>;
+                  }
+                  // Gabungkan per nama, ambil jejak terakhir (berdasarkan time terbesar)
+                  const grouped = trackerHistory.reduce((acc, cur) => {
+                    if (!cur.nama) return acc;
+                    if (!acc[cur.nama] || (cur.time && cur.time > acc[cur.nama].time)) {
+                      acc[cur.nama] = cur;
+                    }
+                    return acc;
+                  }, {} as Record<string, any>);
+                  return Object.values(grouped).map((h: any) => (
+                    <>
+                      <tr key={h.nama} className="bg-gray-50 hover:bg-blue-50 transition-all border-b last:border-b-0">
+                        <td className="py-2 px-2 font-semibold text-blue-900">{h.nama}</td>
+                        <td className="py-2 px-2">{getWIBTimeString(h.time)}</td>
+                        <td className="py-2 px-2">{h.lat}</td>
+                        <td className="py-2 px-2">{h.lon}</td>
+                        <td className="py-2 px-2">
+                          {h.lat && h.lon ? (
+                            <a
+                              href={`https://www.google.com/maps?q=${h.lat},${h.lon}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition text-xs font-semibold shadow"
+                              title="Lihat di Google Maps"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 12.414a4 4 0 10-1.414 1.414l4.243 4.243a1 1 0 001.414-1.414z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                              Maps
+                            </a>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="py-2 px-2 flex flex-col gap-1">
+                          <button
+                            type="button"
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold shadow ${expandedHistoryUser === h.nama ? 'bg-blue-200 text-blue-900' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'} mb-1`}
+                            onClick={() => setExpandedHistoryUser(expandedHistoryUser === h.nama ? null : h.nama)}
+                            title={expandedHistoryUser === h.nama ? 'Sembunyikan jejak' : 'Lihat semua jejak'}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={expandedHistoryUser === h.nama ? 'M20 12H4' : 'M12 4v16m8-8H4'} /></svg>
+                            {expandedHistoryUser === h.nama ? 'Sembunyikan Jejak' : 'Lihat Semua Jejak'}
+                          </button>
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold shadow bg-red-100 text-red-700 hover:bg-red-200"
+                            onClick={async () => {
+                              if (!window.confirm(`Hapus semua jejak milik '${h.nama}'?`)) return;
+                              try {
+                                // Hapus semua history milik nama ini
+                                const all = trackerHistory.filter(x => x.nama === h.nama);
+                                for (const item of all) {
+                                  await deleteDoc(doc(db, 'gps_history', item.id));
+                                }
+                                await fetchTrackerHistory();
+                                notify('Semua jejak pengguna berhasil dihapus!');
+                                if (expandedHistoryUser === h.nama) setExpandedHistoryUser(null);
+                              } catch (err) {
+                                notify('Gagal menghapus jejak!');
+                                console.error(err);
+                              }
+                            }}
+                            title="Hapus semua jejak pengguna ini"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            Hapus Semua Jejak
+                          </button>
+                        </td>
+                      </tr>
+                      {expandedHistoryUser === h.nama && (
+                        <tr>
+                          <td colSpan={6} className="bg-white p-0">
+                            <div className="p-2 border rounded shadow-inner max-h-[300px] overflow-y-auto">
+                              <div className="font-semibold mb-1 text-blue-900">Semua Jejak {h.nama}:</div>
+                              <table className="w-full text-xs border border-gray-200 rounded-lg overflow-hidden">
+                                <thead className="bg-gradient-to-r from-blue-50 to-blue-100">
+                                  <tr>
+                                    <th className="py-1 px-1 border-b">#</th>
+                                    <th className="py-1 px-1 border-b">Waktu</th>
+                                    <th className="py-1 px-1 border-b">Lat</th>
+                                    <th className="py-1 px-1 border-b">Lon</th>
+                                    <th className="py-1 px-1 border-b">Map</th>
+                                    <th className="py-1 px-1 border-b">Aksi</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {trackerHistory.filter(x => x.nama === h.nama)
+                                    .sort((a, b) => (b.time || 0) - (a.time || 0))
+                                    .map((item, idx) => (
+                                      <tr key={item.id} className="hover:bg-blue-50 transition-all border-b last:border-b-0">
+                                        <td className="py-1 px-1 font-semibold">{idx + 1}</td>
+                                        <td className="py-1 px-1">{getWIBTimeString(item.time)}</td>
+                                        <td className="py-1 px-1">{item.lat}</td>
+                                        <td className="py-1 px-1">{item.lon}</td>
+                                        <td className="py-1 px-1">
+                                          {item.lat && item.lon ? (
+                                            <a
+                                              href={`https://www.google.com/maps?q=${item.lat},${item.lon}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition text-xs font-semibold shadow"
+                                              title="Lihat di Google Maps"
+                                            >
+                                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 12.414a4 4 0 10-1.414 1.414l4.243 4.243a1 1 0 001.414-1.414z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                              Lokasi
+                                            </a>
+                                          ) : (
+                                            <span className="text-gray-400">-</span>
+                                          )}
+                                        </td>
+                                        <td className="py-1 px-1">
+                                          <button
+                                            type="button"
+                                            className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold shadow bg-red-100 text-red-700 hover:bg-red-200"
+                                            onClick={async () => {
+                                              if (!window.confirm('Hapus jejak ini?')) return;
+                                              try {
+                                                await deleteDoc(doc(db, 'gps_history', item.id));
+                                                await fetchTrackerHistory();
+                                                notify('Jejak berhasil dihapus!');
+                                              } catch (err) {
+                                                notify('Gagal menghapus jejak!');
+                                                console.error(err);
+                                              }
+                                            }}
+                                            title="Hapus jejak ini"
+                                          >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                            Hapus
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  ));
+                })()}
+              </tbody>
+            </table>
           </div>
         </TabsContent>
       </Tabs>
