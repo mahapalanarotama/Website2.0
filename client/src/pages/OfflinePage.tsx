@@ -1,7 +1,8 @@
+import React from "react";
 import { saveGpsTrackerToFirestore, syncOfflineGpsToFirestore } from "@/lib/gpsFirestore";
 import { useState, useEffect, useRef } from "react";
-import { BookOpen, Map, Phone, AlertTriangle } from "lucide-react";
-
+import { BookOpen, Map, Phone, AlertTriangle, Download } from "lucide-react"; // Merged imports
+ 
 
 // --- Komponen Fitur Survival ---
 function DownloadPanduan({ url, label }: { url: string; label: string }) {
@@ -310,9 +311,79 @@ const tipsSurvival = [
 
 export default function OfflinePage() {
   const [tab, setTab] = useState('fitur');
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showPwaBanner, setShowPwaBanner] = useState(false);
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowPwaBanner(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setShowPwaBanner(false);
+        setDeferredPrompt(null);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-green-50 py-8 px-2">
       <div className="max-w-xl mx-auto">
+        {/* PWA Install Banner */}
+        {/* Tombol Download APK (Install PWA) */}
+        <div className="flex justify-center mb-4">
+          <button
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-green-600 to-green-400 shadow-lg hover:from-green-700 hover:to-green-500 text-white font-bold text-xl transition-all duration-200 animate-bounce-soc border-2 border-green-700"
+            style={{ minWidth: 220, minHeight: 56, boxShadow: '0 4px 24px #22c55e55' }}
+            onClick={() => {
+              if (deferredPrompt) {
+                deferredPrompt.prompt();
+              } else {
+                alert('Untuk menginstall aplikasi di layar utama:\n\n1. Klik ikon tiga titik di pojok browser\n2. Pilih "Install app" atau "Tambahkan ke layar utama"');
+              }
+            }}
+          >
+            <img src="/OfflineApp.png" alt="App Icon" className="w-8 h-8 rounded-full border-2 border-green-300 bg-white shadow" />
+            <span>Install di Layar Utama</span>
+          </button>
+        </div>
+        <style>{`
+          @keyframes bounce-soc {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+          }
+          .animate-bounce-soc {
+            animation: bounce-soc 1.6s infinite;
+          }
+        `}</style>
+        {showPwaBanner && (
+          <div className="flex items-center gap-3 bg-green-100 border border-green-300 rounded-xl shadow p-4 mb-6 animate-fade-in">
+            <img src="/OfflineApp.png" alt="App Icon" className="w-12 h-12 rounded-full border-2 border-green-300 bg-white shadow" />
+            <div className="flex-1">
+              <div className="font-bold text-green-900 text-lg">Install Aplikasi</div>
+              <div className="text-green-800 text-sm">Akses lebih cepat & offline seperti aplikasi asli!</div>
+            </div>
+            <button
+              className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow font-semibold transition"
+              onClick={handleInstallClick}
+            >
+              <Download className="w-5 h-5" /> Install
+            </button>
+            <button
+              className="ml-2 text-green-700 hover:text-green-900 text-xs underline"
+              onClick={() => setShowPwaBanner(false)}
+            >Tutup</button>
+          </div>
+        )}
         <h1 className="text-2xl font-bold text-center text-green-800 mb-4">Mode Offline & Survival Tools</h1>
         <p className="text-center text-gray-600 mb-6">Tetap siap di alam bebas! Semua fitur berikut dapat diakses tanpa internet.</p>
         <nav className="flex flex-wrap justify-center gap-2 mb-6">

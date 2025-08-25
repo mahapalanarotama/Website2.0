@@ -5,6 +5,13 @@ const ASSETS = [
   '/offline',
   '/favicon.ico',
   '/manifest.json',
+  '/OfflineApp.png',
+  '/panduan-survival.pdf',
+  '/navigasi-darat.pdf',
+  '/ppgd.pdf',
+  '/robots.txt',
+  '/sitemap.xml',
+  '/src/index.css',
   // Tambahkan asset CSS/JS yang dipakai halaman offline
 ];
 
