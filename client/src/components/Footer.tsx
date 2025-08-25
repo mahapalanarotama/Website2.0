@@ -82,6 +82,11 @@ export function Footer() {
                   Galeri Foto
                 </Link>
               </li>
+              <li>
+                <Link href="/url-shortener" className="text-gray-300 hover:text-white transition">
+                  URL Shortener
+                </Link>
+              </li>
             </ul>
           </div>
 

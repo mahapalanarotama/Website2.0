@@ -21,6 +21,8 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { useLeafCursor } from "@/components/CursorLeafTrail";
 import OfflinePage from "@/pages/OfflinePage";
+import UrlShortenerPage from "@/pages/url-shortener";
+import ShortRedirectPage from "@/pages/s/[shortcode]";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SejarahPage from "@/pages/SejarahPage";
 import SejarahAdminPage from "@/pages/SejarahAdminPage";
@@ -118,6 +120,8 @@ function App() {
           <Switch>
             <Route path="/github-oauth-callback" component={GithubOAuthCallback} />
             <Route path="/offline" component={OfflinePage} />
+            <Route path="/url-shortener" component={UrlShortenerPage} />
+            <Route path="/s/:shortcode" component={ShortRedirectPage} />
             <Route path="/" component={HomePage} />
             <Route path="/kegiatan" component={ActivitiesPage} />
             <Route path="/pembelajaran" component={LearningPage} />
