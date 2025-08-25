@@ -2,6 +2,8 @@
 const CACHE_NAME = 'offline-cache-v1';
 const OFFLINE_URL = '/offline';
 const ASSETS = [
+  '/',
+  '/index.html',
   '/offline',
   '/favicon.ico',
   '/manifest.json',
@@ -12,7 +14,7 @@ const ASSETS = [
   '/robots.txt',
   '/sitemap.xml',
   '/src/index.css',
-  // Tambahkan asset CSS/JS yang dipakai halaman offline
+  // Tambahkan asset CSS/JS utama hasil build jika ada
 ];
 
 self.addEventListener('install', event => {
@@ -23,12 +25,19 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  // Hanya intercept request ke /offline dan asset terkait
+  // Untuk semua request asset di ASSETS, cache duluan
   if (ASSETS.includes(url.pathname)) {
     event.respondWith(
       caches.match(event.request).then(response =>
         response || fetch(event.request)
       )
+    );
+    return;
+  }
+  // Untuk navigasi (HTML), fallback ke offline page jika gagal
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/offline'))
     );
   }
 });
