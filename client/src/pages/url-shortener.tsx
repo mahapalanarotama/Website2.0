@@ -21,17 +21,29 @@ export default function UrlShortenerPage() {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u), (error) => {
+      console.error('Auth state change error:', error);
+    });
     return () => unsub();
   }, []);
 
   async function handleLogin() {
-    const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error('Login error:', error);
+      showToast("Gagal login. Coba lagi.", "error");
+    }
   }
 
   async function handleLogout() {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error('Logout error:', error);
+      showToast("Gagal logout.", "error");
+    }
   }
 
   async function handleSubmit(e: any) {

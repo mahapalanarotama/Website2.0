@@ -9,17 +9,35 @@ export default function ShortRedirectPage() {
 
   useEffect(() => {
     async function fetchAndRedirect() {
-      if (!shortcode) return;
-  const ref = doc(db, "shortlinks", shortcode);
-  const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const { url } = snap.data();
-        window.location.replace(url);
-      } else {
-        navigate("/shortener-notfound", { replace: true });
+      try {
+        if (!shortcode) {
+          navigate("/", { replace: true });
+          return;
+        }
+        
+        const ref = doc(db, "shortlinks", shortcode);
+        const snap = await getDoc(ref);
+        
+        if (snap.exists()) {
+          const { url } = snap.data();
+          if (url) {
+            window.location.replace(url);
+          } else {
+            navigate("/", { replace: true });
+          }
+        } else {
+          navigate("/", { replace: true });
+        }
+      } catch (error) {
+        console.error('Error fetching shortcode:', error);
+        navigate("/", { replace: true });
       }
     }
-    fetchAndRedirect();
+    
+    fetchAndRedirect().catch((error) => {
+      console.error('Unhandled error in fetchAndRedirect:', error);
+      navigate("/", { replace: true });
+    });
   }, [shortcode, navigate]);
 
   return (
