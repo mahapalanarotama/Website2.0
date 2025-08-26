@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://mahapalanarotama.web.id/sitemap.xml
