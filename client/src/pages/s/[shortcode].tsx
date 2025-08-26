@@ -1,70 +1,91 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
 
 export default function ShortRedirectPage() {
-  const [, setLocation] = useLocation();
   const [shortcode, setShortcode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Ambil shortcode dari URL secara manual
-    const path = window.location.pathname;
-    const pathParts = path.split('/');
-    const extractedShortcode = pathParts[2]; // /s/[shortcode]
-    
-    console.log('Path:', path, 'Extracted shortcode:', extractedShortcode);
-    setShortcode(extractedShortcode);
-    
-    if (!extractedShortcode) {
-      console.log('No shortcode found in path');
-      setError('Kode tidak valid');
-      setTimeout(() => setLocation("/"), 2000);
-      return;
-    }
+    let mounted = true;
 
-    async function fetchAndRedirect() {
+    const initialize = async () => {
       try {
-        setIsLoading(true);
+        // Ambil shortcode dari URL secara manual
+        const path = window.location.pathname || '';
+        const pathParts = path.split('/');
+        const extractedShortcode = pathParts[2]; // /s/[shortcode]
+        
+        console.log('Path:', path, 'Extracted shortcode:', extractedShortcode);
+        
+        if (!mounted) return;
+        setShortcode(extractedShortcode);
+        
+        if (!extractedShortcode) {
+          console.log('No shortcode found in path');
+          if (mounted) setError('Kode tidak valid');
+          setTimeout(() => {
+            if (mounted) window.location.href = '/';
+          }, 2000);
+          return;
+        }
+
+        // Dynamic import untuk Firebase
+        const { db } = await import("@/lib/firebase");
+        const { doc, getDoc } = await import("firebase/firestore");
+        
+        if (!mounted) return;
         console.log('Fetching shortlink data for:', extractedShortcode);
         
         const ref = doc(db, "shortlinks", extractedShortcode);
         const snap = await getDoc(ref);
         
+        if (!mounted) return;
+        
         if (snap.exists()) {
           const data = snap.data();
-          const { url } = data;
+          const url = data?.url;
           console.log('Shortlink found, redirecting to:', url);
           
-          if (url) {
-            setError(null);
+          if (url && typeof url === 'string') {
             setTimeout(() => {
-              console.log('Redirecting to:', url);
-              window.location.href = url;
+              if (mounted) {
+                console.log('Redirecting to:', url);
+                window.location.href = url;
+              }
             }, 1000);
           } else {
-            console.log('No URL in document');
-            setError('URL tidak ditemukan');
-            setTimeout(() => setLocation("/"), 2000);
+            console.log('No valid URL in document');
+            if (mounted) setError('URL tidak valid');
+            setTimeout(() => {
+              if (mounted) window.location.href = '/';
+            }, 2000);
           }
         } else {
           console.log('Shortlink not found');
-          setError('Link tidak ditemukan');
-          setTimeout(() => setLocation("/"), 2000);
+          if (mounted) setError('Link tidak ditemukan');
+          setTimeout(() => {
+            if (mounted) window.location.href = '/';
+          }, 2000);
         }
       } catch (error) {
-        console.error('Error fetching shortcode:', error);
-        setError('Terjadi kesalahan');
-        setTimeout(() => setLocation("/"), 2000);
+        console.error('Error in ShortRedirectPage:', error);
+        if (mounted) {
+          setError('Terjadi kesalahan');
+          setTimeout(() => {
+            if (mounted) window.location.href = '/';
+          }, 2000);
+        }
       } finally {
-        setIsLoading(false);
+        if (mounted) setIsLoading(false);
       }
-    }
-    
-    fetchAndRedirect();
-  }, [setLocation]);
+    };
+
+    initialize();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">

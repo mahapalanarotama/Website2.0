@@ -19,10 +19,10 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     return { hasError: true, error };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
-    // You can log error to an error reporting service here
-    // console.error(error, errorInfo);
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log error untuk debugging
+    console.error('ErrorBoundary caught an error:', error);
+    console.error('Error info:', errorInfo);
   }
 
   render() {
