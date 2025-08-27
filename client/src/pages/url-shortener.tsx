@@ -201,7 +201,7 @@ export default function UrlShortenerPage() {
 
   // Copy to clipboard & toast state
   const [copied, setCopied] = useState<string|false>(false);
-  const [toast, setToast] = useState<{msg: string, type: "success"|"error"} | null>(null);
+  const [, setToast] = useState<{msg: string, type: "success"|"error"} | null>(null);
 
   function copyToClipboard(text: string, code?: string) {
     navigator.clipboard.writeText(text).then(() => {
