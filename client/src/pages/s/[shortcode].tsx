@@ -32,17 +32,17 @@ export default function ShortRedirectPage() {
   }, [shortcode, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-blue-100">
-      <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="bg-white rounded-xl shadow-2xl p-8 text-center border-2 border-green-400">
         {error ? (
           <>
             <div className="text-2xl font-bold mb-2 text-red-700">Terjadi Kesalahan</div>
-            <div className="text-gray-600">{error}</div>
+            <div className="text-green-700">{error}</div>
           </>
         ) : (
           <>
-            <div className="text-2xl font-bold mb-2 text-purple-700">🔗 Redirecting...</div>
-            <div className="text-gray-600">Mohon tunggu, Anda akan diarahkan ke link tujuan.</div>
+            <div className="text-2xl font-bold mb-2 text-green-700">🔗 Redirecting...</div>
+            <div className="text-yellow-700">Mohon tunggu, Anda akan diarahkan ke link tujuan.</div>
           </>
         )}
       </div>
