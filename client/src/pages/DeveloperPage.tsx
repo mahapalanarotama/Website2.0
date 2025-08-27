@@ -335,7 +335,15 @@ export default function DeveloperPage() {
           data-active={tab === 'poster'}
           onClick={() => setTab('poster')}
         >
-          <span className="flex items-center justify-center p-0 sm:p-1"><svg width="22" height="22" className="sm:w-[26px] sm:h-[26px] text-green-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+          <span className="flex items-center justify-center p-0 sm:p-1">
+            {/* Poster icon: vertical rectangle, circle, and text lines */}
+            <svg width="22" height="22" className="sm:w-[26px] sm:h-[26px] text-green-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <rect x="5" y="3" width="14" height="18" rx="2"/>
+              <circle cx="12" cy="8" r="3"/>
+              <line x1="8" y1="15" x2="16" y2="15" />
+              <line x1="8" y1="17" x2="16" y2="17" />
+            </svg>
+          </span>
           <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Poster</span>
         </button>
         <button
@@ -383,7 +391,13 @@ export default function DeveloperPage() {
         {tab === 'poster' && (
           <>
             <h2 className="font-bold text-xl mb-4 text-green-900 flex items-center gap-2">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              {/* Poster icon: vertical rectangle, circle, and text lines */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+                <rect x="5" y="3" width="18" height="18" rx="2"/>
+                <circle cx="14" cy="9" r="3"/>
+                <line x1="10" y1="16" x2="20" y2="16" />
+                <line x1="10" y1="18" x2="20" y2="18" />
+              </svg>
               Konfigurasi Poster Popup
             </h2>
             <div className="flex justify-end mb-4">
