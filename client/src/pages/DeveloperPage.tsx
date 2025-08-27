@@ -384,7 +384,7 @@ export default function DeveloperPage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-extrabold mb-8 text-center text-primary">Developer Tools</h1>
-      <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto scrollbar-hide px-1 -mx-2 whitespace-nowrap" style={{ WebkitOverflowScrolling: 'touch' }}>
+  <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto overflow-y-hidden scrollbar-hide px-1 -mx-2 whitespace-nowrap" style={{ WebkitOverflowScrolling: 'touch' }}>
         <button
           className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'poster' ? 'data-[active=true]' : 'data-[active=false]'}`}
           data-active={tab === 'poster'}
