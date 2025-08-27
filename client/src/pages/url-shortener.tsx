@@ -324,13 +324,7 @@ export default function UrlShortenerPage() {
         )}
         {/* Tabel Data URL Shortener User */}
         {/* Toast notification di bawah halaman */}
-      {/* Toast notification di pojok kanan bawah halaman */}
-      {toast && (
-        <div className={`toast fixed bottom-4 right-4 px-5 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 animate-toastSlideIn ${toast.type === 'error' ? 'bg-gradient-to-r from-red-500 to-yellow-400' : 'bg-gradient-to-r from-green-400 to-yellow-400'} text-white`}>
-          <i className={`fas ${toast.type === 'error' ? 'fa-exclamation-triangle' : 'fa-check'}`}></i>
-          <span>{toast.msg}</span>
-        </div>
-      )}
+  {/* Toast notification di pojok kanan bawah halaman telah dihapus */}
       </div>
 
       {/* Tabel Data URL Shortener User di luar card utama */}
