@@ -353,20 +353,34 @@ export default function UrlShortenerPage() {
                       <td className="px-3 py-2 font-mono text-green-600">{link.code}</td>
                       <td className="px-3 py-2 text-black max-w-[120px] md:max-w-[300px] truncate" style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{link.url}</td>
                       <td className="px-3 py-2 break-all">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <a href={`/s/${link.code}`} target="_blank" rel="noopener noreferrer" className="text-yellow-600 underline break-all max-w-[120px] md:max-w-none truncate" style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{window.location.origin + "/s/" + link.code}</a>
-                            <button
-                              className={`bg-green-100 text-green-700 px-2 py-1 rounded shadow text-xs flex items-center justify-center ${copied === link.code ? 'bg-green-100' : 'hover:bg-green-200'}`}
-                              title="Salin URL Pendek"
-                              onClick={() => {
-                                copyToClipboard(window.location.origin + "/s/" + link.code, link.code);
-                              }}
-                              style={{minWidth:'32px',minHeight:'32px'}}
-                            >
-                              <span className="material-icons" style={{fontSize:'18px', color: copied === link.code ? '#22c55e' : undefined, transition: 'color 0.2s'}} aria-hidden="true">
-                                {copied === link.code ? 'check' : 'content_copy'}
-                              </span>
-                            </button>
+                        <div className="flex items-center flex-nowrap w-full">
+                          <a
+                            href={`/s/${link.code}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-yellow-600 underline break-all truncate"
+                            style={{
+                              maxWidth: '200px',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              flexShrink: 1
+                            }}
+                          >
+                            {window.location.origin + "/s/" + link.code}
+                          </a>
+                          <button
+                            className={`bg-green-100 text-green-700 px-2 py-1 rounded shadow text-xs flex items-center justify-center ml-2 ${copied === link.code ? 'bg-green-100' : 'hover:bg-green-200'}`}
+                            title="Salin URL Pendek"
+                            onClick={() => {
+                              copyToClipboard(window.location.origin + "/s/" + link.code, link.code);
+                            }}
+                            style={{minWidth:'32px',minHeight:'32px', flexShrink: 0}}
+                          >
+                            <span className="material-icons" style={{fontSize:'18px', color: copied === link.code ? '#22c55e' : undefined, transition: 'color 0.2s'}} aria-hidden="true">
+                              {copied === link.code ? 'check' : 'content_copy'}
+                            </span>
+                          </button>
                         </div>
                       </td>
       {/* Tambahan style untuk mobile table dan input */}
@@ -390,7 +404,7 @@ export default function UrlShortenerPage() {
           table th, table td { padding: 6px !important; }
           table th { font-size: 13px !important; }
           table td { font-size: 12px !important; }
-          .max-w-[120px] { max-width: 90px !important; }
+          a.text-yellow-600 { max-width: 120px !important; }
           input[type="text"] { font-size: 15px !important; padding-left: 12px !important; padding-right: 12px !important; }
         }
       `}</style>
