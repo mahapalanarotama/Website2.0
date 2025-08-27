@@ -27,18 +27,26 @@ export default function UrlShortenerPage() {
   const [editId, setEditId] = useState<string|null>(null);
   const [editCode, setEditCode] = useState("");
   const [editUrl, setEditUrl] = useState("");
+  const [isCustomResult, setIsCustomResult] = useState<boolean>(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     return () => unsub();
   }, []);
 
-  // Generate kode otomatis saat longUrl berubah dan customCode kosong
+  // Generate kode otomatis hanya jika URL valid dan customCode kosong
   useEffect(() => {
-    if (longUrl.trim() && !customCode.trim()) {
-      setAutoCode(generateShortCode());
-    } else if (!longUrl.trim()) {
-      setAutoCode("");
+    if (!customCode.trim()) {
+      try {
+        if (longUrl.trim()) {
+          new URL(longUrl);
+          setAutoCode(generateShortCode());
+        } else {
+          setAutoCode("");
+        }
+      } catch {
+        setAutoCode("");
+      }
     }
   }, [longUrl, customCode]);
 
@@ -128,8 +136,17 @@ export default function UrlShortenerPage() {
         return;
       }
       let code = customCode.trim() || autoCode;
+      const isCustom = !!customCode.trim();
       if (!/^([a-zA-Z0-9_-]{3,20})$/.test(code)) {
         setError("Kode harus 3-20 karakter, huruf/angka/underscore/dash.");
+        setLoading(false);
+        return;
+      }
+      // Cek apakah user sudah pernah membuat shortlink untuk url asli yang sama
+      const userLinksSnap = await getDocs(collection(db, `users/${user.uid}/shortlinks`));
+      const alreadyExists = userLinksSnap.docs.some(doc => (doc.data().url === longUrl));
+      if (alreadyExists) {
+        setError("Anda sudah pernah membuat URL pendek untuk URL asli ini.");
         setLoading(false);
         return;
       }
@@ -144,6 +161,7 @@ export default function UrlShortenerPage() {
       // Simpan juga ke koleksi user
       await addDoc(collection(db, `users/${user.uid}/shortlinks`), { code, url: longUrl, created: Date.now() });
       setResult({ code, url: longUrl });
+      setIsCustomResult(isCustom);
       setLongUrl("");
       setCustomCode("");
       setAutoCode("");
@@ -187,10 +205,7 @@ export default function UrlShortenerPage() {
       ))}
   <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-xl relative z-10 animate-slideUp border border-green-300 backdrop-blur-lg">
         <div className="flex items-center justify-center mb-4">
-          <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-br from-green-500 to-yellow-400 shadow-lg mr-3">
-            <i className="fas fa-link text-3xl text-white"></i>
-          </span>
-          <h1 className="text-3xl font-extrabold text-green-600 animate-glow">URL Shortener</h1>
+          <h1 className="text-3xl font-extrabold text-green-600 animate-glow">🔗 URL Shortener</h1>
         </div>
   <p className="text-green-600 mb-6 text-center animate-fadeIn text-lg">Transformasi URL panjang menjadi singkat dan elegan</p>
         {!user ? (
@@ -227,7 +242,7 @@ export default function UrlShortenerPage() {
                     <i className="fas fa-link"></i>
                     https://mahapalanarotama.web.id/s/
                   </div>
-                  <span className="absolute left-[140px] top-1/2 -translate-y-1/2 text-green-400"><i className="fas fa-hashtag"></i></span>
+                  <span className="absolute left-[140px] top-1/2 -transl</div>ate-y-1/2 text-green-400"><i className="fas fa-hashtag"></i></span>
                   <input
                     ref={customInputRef}
                     className={`w-full border border-green-300 rounded-xl pl-5 pr-5 py-3 focus:border-green-500 focus:shadow-lg transition bg-green-100 text-black ${!customActive && autoCode ? 'placeholder:text-black' : 'placeholder:text-green-400'}`}
@@ -271,7 +286,7 @@ export default function UrlShortenerPage() {
             </div>
             <div className="result-item mb-2 bg-white/80 rounded-xl p-2 shadow-sm">
               <span className="text-green-600 text-xs">Kode:</span> <span className="font-mono bg-green-100 px-2 py-1 rounded text-green-700">{result.code}</span>
-              {customCode.trim() ? <span className="text-yellow-600 ml-2">(kustom)</span> : <span className="text-gray-400 ml-2">(otomatis)</span>}
+              {isCustomResult ? <span className="text-yellow-600 ml-2">(kustom)</span> : <span className="text-gray-400 ml-2">(otomatis)</span>}
             </div>
             <button
               className={`copy-btn bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500 text-white px-4 py-2 rounded-xl mt-2 inline-flex items-center gap-2 transition shadow ${copied ? 'copied bg-gray-700' : ''}`}
@@ -283,12 +298,13 @@ export default function UrlShortenerPage() {
         )}
         {/* Tabel Data URL Shortener User */}
         {/* Toast notification di bawah halaman */}
-        {toast && (
-          <div className={`toast fixed left-1/2 -translate-x-1/2 bottom-4 px-5 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 animate-toastSlideIn ${toast.type === 'error' ? 'bg-gradient-to-r from-red-500 to-yellow-400' : 'bg-gradient-to-r from-green-400 to-yellow-400'} text-white`}>
-            <i className={`fas ${toast.type === 'error' ? 'fa-exclamation-triangle' : 'fa-check'}`}></i>
-            <span>{toast.msg}</span>
-          </div>
-        )}
+      {/* Toast notification di pojok kanan bawah halaman */}
+      {toast && (
+        <div className={`toast fixed bottom-4 right-4 px-5 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 animate-toastSlideIn ${toast.type === 'error' ? 'bg-gradient-to-r from-red-500 to-yellow-400' : 'bg-gradient-to-r from-green-400 to-yellow-400'} text-white`}>
+          <i className={`fas ${toast.type === 'error' ? 'fa-exclamation-triangle' : 'fa-check'}`}></i>
+          <span>{toast.msg}</span>
+        </div>
+      )}
       </div>
 
       {/* Tabel Data URL Shortener User di luar card utama */}
