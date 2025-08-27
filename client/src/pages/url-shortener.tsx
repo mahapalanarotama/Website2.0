@@ -79,19 +79,44 @@ export default function UrlShortenerPage() {
 
   // Edit link & Delete link harus berada sebelum return agar dikenali di JSX
   const handleEditLink = async (id: string) => {
+    if (!window.confirm("Simpan perubahan data ini?")) return;
     setError("");
     setLoading(true);
     try {
+      // Validasi kode
       if (!/^([a-zA-Z0-9_-]{3,20})$/.test(editCode)) {
         setError("Kode harus 3-20 karakter, huruf/angka/underscore/dash.");
         setLoading(false);
         return;
       }
-      new URL(editUrl);
-      // Update di shortlinks utama
+      // Validasi url
+      try {
+        new URL(editUrl);
+      } catch {
+        setError("URL tidak valid.");
+        setLoading(false);
+        return;
+      }
+      // Cek kode baru tidak boleh sama dengan kode milik shortlink lain milik user
+      const userLinksSnap = await getDocs(collection(db, `users/${user.uid}/shortlinks`));
+      const duplicateCode = userLinksSnap.docs.some(doc => doc.id !== id && doc.data().code === editCode);
+      if (duplicateCode) {
+        setError("Kode sudah digunakan pada data Anda yang lain.");
+        setLoading(false);
+        return;
+      }
+      // Update shortlinks utama (jika kode berubah, hapus yang lama, buat baru)
+      const userLinkDoc = userLinksSnap.docs.find(doc => doc.id === id);
+      const oldCode = userLinkDoc?.data().code;
+      if (oldCode && oldCode !== editCode) {
+        // Hapus shortlink lama
+        await deleteDoc(doc(db, "shortlinks", oldCode));
+      }
       await setDoc(doc(db, "shortlinks", editCode), { url: editUrl, created: Date.now(), owner: user.uid, email: user.email });
       // Update di user
       await updateDoc(doc(db, `users/${user.uid}/shortlinks/${id}`), { code: editCode, url: editUrl });
+      // Update tabel tanpa reload
+      setUserLinks(userLinks.map(link => link.id === id ? { ...link, code: editCode, url: editUrl } : link));
       setEditId(null);
       showToast("Berhasil diupdate!", "success");
     } catch {
@@ -174,12 +199,12 @@ export default function UrlShortenerPage() {
   }
 
   // Copy to clipboard & toast state
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<string|false>(false);
   const [toast, setToast] = useState<{msg: string, type: "success"|"error"} | null>(null);
 
-  function copyToClipboard(text: string) {
+  function copyToClipboard(text: string, code?: string) {
     navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
+      if (code) setCopied(code);
       showToast("URL berhasil disalin ke clipboard!", "success");
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {
@@ -333,12 +358,51 @@ export default function UrlShortenerPage() {
                       <td className="px-3 py-2 font-mono text-green-600">{editId === link.id ? (
                         <input value={editCode} onChange={e => setEditCode(e.target.value)} className="border px-2 py-1 rounded-xl w-24" />
                       ) : link.code}</td>
-                      <td className="px-3 py-2 break-all text-black">{editId === link.id ? (
+                      <td className="px-3 py-2 text-black max-w-[120px] md:max-w-[300px] truncate" style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{editId === link.id ? (
                         <input value={editUrl} onChange={e => setEditUrl(e.target.value)} className="border px-2 py-1 rounded-xl w-full" />
                       ) : link.url}</td>
                       <td className="px-3 py-2 break-all">
-                        <a href={`/s/${link.code}`} target="_blank" rel="noopener noreferrer" className="text-yellow-600 underline">{window.location.origin + "/s/" + link.code}</a>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <a href={`/s/${link.code}`} target="_blank" rel="noopener noreferrer" className="text-yellow-600 underline break-all max-w-[120px] md:max-w-none truncate" style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{window.location.origin + "/s/" + link.code}</a>
+                            <button
+                              className={`bg-green-100 text-green-700 px-2 py-1 rounded shadow text-xs flex items-center justify-center ${copied === link.code ? 'bg-green-100' : 'hover:bg-green-200'}`}
+                              title="Salin URL Pendek"
+                              onClick={() => {
+                                copyToClipboard(window.location.origin + "/s/" + link.code, link.code);
+                              }}
+                              style={{minWidth:'32px',minHeight:'32px'}}
+                            >
+                              <span className="material-icons" style={{fontSize:'18px', color: copied === link.code ? '#22c55e' : undefined, transition: 'color 0.2s'}} aria-hidden="true">
+                                {copied === link.code ? 'check' : 'content_copy'}
+                              </span>
+                            </button>
+                        </div>
                       </td>
+      {/* Tambahan style untuk mobile table dan input */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+        .material-icons {
+          font-family: 'Material Icons';
+          font-weight: normal;
+          font-style: normal;
+          font-size: 18px;
+          line-height: 1;
+          letter-spacing: normal;
+          text-transform: none;
+          display: inline-block;
+          white-space: nowrap;
+          direction: ltr;
+          -webkit-font-feature-settings: 'liga';
+          -webkit-font-smoothing: antialiased;
+        }
+        @media (max-width: 600px) {
+          table th, table td { padding: 6px !important; }
+          table th { font-size: 13px !important; }
+          table td { font-size: 12px !important; }
+          .max-w-[120px] { max-width: 90px !important; }
+          input[type="text"] { font-size: 15px !important; padding-left: 12px !important; padding-right: 12px !important; }
+        }
+      `}</style>
                       <td className="px-3 py-2 text-xs text-green-600">{new Date(link.created).toLocaleString()}</td>
                       <td className="px-3 py-2 flex gap-2">
                         {editId === link.id ? (
