@@ -21,6 +21,10 @@ const defaultMeta: MetaData = {
 };
 
 export default function DeveloperPage() {
+  // Interval ID untuk auto-refresh poster
+  const [posterIntervalId, setPosterIntervalId] = useState<NodeJS.Timeout | null>(null);
+  // State untuk waktu poster expired berikutnya
+  const [nextPosterExpire, setNextPosterExpire] = useState<Date | null>(null);
   const [meta, setMeta] = useState<MetaData>(defaultMeta);
   const [show, setShow] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -40,20 +44,57 @@ export default function DeveloperPage() {
   const [posterDialog, setPosterDialog] = useState(false);
   // Load posters when tab is poster
   useEffect(() => {
-    if (tab === 'poster') {
+    async function refreshPosters() {
       setLoadingPosters(true);
-      getPosters().then((data: PosterConfig[]) => {
-        setPosters(data);
-        setLoadingPosters(false);
-      });
+      const data = await getPosters();
+      const now = new Date();
+      // Filter poster yang sudah expired
+      const expired = data.filter(p => p.endTime && p.endTime.toDate() < now && p.id);
+      // Hapus semua poster expired
+      for (const p of expired) {
+        await deletePoster(p.id!);
+      }
+      // Tampilkan hanya poster yang masih aktif
+      const active = data.filter(p => !(p.endTime && p.endTime.toDate() < now));
+      setPosters(active);
+      setLoadingPosters(false);
+      // Hitung waktu poster expired berikutnya
+      const futureEnds = active.map(p => p.endTime?.toDate()).filter(d => d && d > now) as Date[];
+      if (futureEnds.length > 0) {
+        const nextExpire = new Date(Math.min(...futureEnds.map(d => d.getTime())));
+        setNextPosterExpire(nextExpire);
+      } else {
+        setNextPosterExpire(null);
+      }
     }
+    if (tab === 'poster') {
+      refreshPosters();
+      // Bersihkan interval sebelumnya
+      if (posterIntervalId) clearInterval(posterIntervalId);
+      // Jika ada poster yang akan expired, set timeout untuk refresh tepat saat poster expired
+      if (nextPosterExpire) {
+        const now = new Date();
+        const ms = nextPosterExpire.getTime() - now.getTime();
+        if (ms > 0) {
+          const timeoutId = setTimeout(() => {
+            refreshPosters();
+          }, ms + 1000); // +1 detik buffer
+          setPosterIntervalId(timeoutId as unknown as NodeJS.Timeout);
+        }
+      }
+    }
+    // Bersihkan interval saat tab berubah
+    return () => {
+      if (posterIntervalId) clearTimeout(posterIntervalId);
+    };
   }, [tab]);
 
   // Poster CRUD handlers
   const handlePosterEdit = (item: PosterConfig, idx: number) => {
-    setEditPoster(item);
-    setEditPosterIdx(idx);
-    setPosterDialog(true);
+  // Pastikan id selalu ada di editPoster
+  setEditPoster({ ...item, id: item.id });
+  setEditPosterIdx(idx);
+  setPosterDialog(true);
   };
   const handlePosterAdd = () => {
     setEditPoster({ imageUrl: '', startTime: Timestamp.now(), endTime: Timestamp.now(), linkUrl: '' });
@@ -68,13 +109,20 @@ export default function DeveloperPage() {
     }
   };
   const handlePosterSave = async (poster: PosterConfig) => {
+    // Validasi field
+    if (!poster.imageUrl || !poster.startTime || !poster.endTime) {
+      alert('Semua field wajib diisi!');
+      return;
+    }
+    // Pastikan linkUrl tidak undefined
+    const safeLinkUrl = poster.linkUrl === undefined || poster.linkUrl === null ? '' : poster.linkUrl;
     if (editPosterIdx === null) {
       // Add
       await addPoster({
         imageUrl: poster.imageUrl,
         startTime: poster.startTime,
         endTime: poster.endTime,
-        linkUrl: poster.linkUrl,
+        linkUrl: safeLinkUrl,
       });
     } else if (poster.id) {
       // Update
@@ -82,11 +130,18 @@ export default function DeveloperPage() {
         imageUrl: poster.imageUrl,
         startTime: poster.startTime,
         endTime: poster.endTime,
-        linkUrl: poster.linkUrl,
+        linkUrl: safeLinkUrl,
       });
+    } else {
+      alert('Gagal edit: ID poster tidak ditemukan!');
+      return;
     }
     setPosterDialog(false);
-    setTab('poster'); // reload
+    // Refresh poster list after save
+    setLoadingPosters(true);
+    const data = await getPosters();
+    setPosters(data);
+    setLoadingPosters(false);
   };
   // Tipe untuk contact cards
   type ContactCard = {
@@ -423,8 +478,8 @@ export default function DeveloperPage() {
                     {posters.map((item, idx) => (
                       <tr key={item.id || idx} className="border-b last:border-b-0">
                         <td className="p-2"><img src={item.imageUrl} alt="Poster" className="h-16 w-28 object-cover rounded" /></td>
-                        <td className="p-2">{item.startTime?.toDate().toLocaleString()}</td>
-                        <td className="p-2">{item.endTime?.toDate().toLocaleString()}</td>
+                        <td className="p-2">{item.startTime?.toDate().toLocaleString('id-ID', { hour12: false })}</td>
+                        <td className="p-2">{item.endTime?.toDate().toLocaleString('id-ID', { hour12: false })}</td>
                         <td className="p-2 max-w-xs truncate">{item.linkUrl || '-'}</td>
                         <td className="p-2 flex gap-2">
                           <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded" onClick={() => handlePosterEdit(item, idx)}>Edit</button>
@@ -447,13 +502,106 @@ export default function DeveloperPage() {
                       <label className="block font-medium mb-1">Image URL</label>
                       <input type="text" className="w-full border rounded p-2" value={editPoster?.imageUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, imageUrl: e.target.value} : null)} required />
                     </div>
-                    <div>
-                      <label className="block font-medium mb-1">Start Time</label>
-                      <input type="datetime-local" className="w-full border rounded p-2" value={editPoster?.startTime ? editPoster.startTime.toDate().toISOString().slice(0,16) : ''} onChange={e => setEditPoster(editPoster ? {...editPoster, startTime: Timestamp.fromDate(new Date(e.target.value))} : null)} required />
+                    {/* Start Date & Time */}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block font-medium mb-1">Start Date</label>
+                        <input
+                          type="date"
+                          className="w-full border rounded p-2"
+                          value={editPoster?.startTime ? editPoster.startTime.toDate().toISOString().slice(0,10) : ''}
+                          onChange={e => {
+                            const dateVal = e.target.value;
+                            let timeVal = editPoster?.startTime ? editPoster.startTime.toDate().toISOString().slice(11,16) : '00:00';
+                            if (dateVal) {
+                              // Gabungkan tanggal dan jam secara manual agar tidak offset
+                              const [hour, minute] = timeVal.split(':');
+                              const dt = new Date(dateVal);
+                              dt.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+                              setEditPoster(editPoster ? { ...editPoster, startTime: Timestamp.fromDate(dt) } : null);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block font-medium mb-1">Start Time</label>
+                        <input
+                          type="time"
+                          className="w-full border rounded p-2"
+                          value={(() => {
+                            if (!editPoster?.startTime) return '';
+                            const d = editPoster.startTime.toDate();
+                            const h = String(d.getHours()).padStart(2, '0');
+                            const m = String(d.getMinutes()).padStart(2, '0');
+                            return `${h}:${m}`;
+                          })()}
+                          onChange={e => {
+                            const timeVal = e.target.value;
+                            let dateVal = editPoster?.startTime ? (() => {
+                              const d = editPoster.startTime.toDate();
+                              return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                            })() : '';
+                            if (dateVal && timeVal) {
+                              const [hour, minute] = timeVal.split(':');
+                              const dt = new Date(dateVal);
+                              dt.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+                              setEditPoster(editPoster ? { ...editPoster, startTime: Timestamp.fromDate(dt) } : null);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="block font-medium mb-1">End Time</label>
-                      <input type="datetime-local" className="w-full border rounded p-2" value={editPoster?.endTime ? editPoster.endTime.toDate().toISOString().slice(0,16) : ''} onChange={e => setEditPoster(editPoster ? {...editPoster, endTime: Timestamp.fromDate(new Date(e.target.value))} : null)} required />
+                    {/* End Date & Time */}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block font-medium mb-1">End Date</label>
+                        <input
+                          type="date"
+                          className="w-full border rounded p-2"
+                          value={editPoster?.endTime ? editPoster.endTime.toDate().toISOString().slice(0,10) : ''}
+                          onChange={e => {
+                            const dateVal = e.target.value;
+                            let timeVal = editPoster?.endTime ? editPoster.endTime.toDate().toISOString().slice(11,16) : '00:00';
+                            if (dateVal) {
+                              const [hour, minute] = timeVal.split(':');
+                              const dt = new Date(dateVal);
+                              dt.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+                              setEditPoster(editPoster ? { ...editPoster, endTime: Timestamp.fromDate(dt) } : null);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block font-medium mb-1">End Time</label>
+                        <input
+                          type="time"
+                          className="w-full border rounded p-2"
+                          value={(() => {
+                            if (!editPoster?.endTime) return '';
+                            const d = editPoster.endTime.toDate();
+                            const h = String(d.getHours()).padStart(2, '0');
+                            const m = String(d.getMinutes()).padStart(2, '0');
+                            return `${h}:${m}`;
+                          })()}
+                          onChange={e => {
+                            const timeVal = e.target.value;
+                            let dateVal = editPoster?.endTime ? (() => {
+                              const d = editPoster.endTime.toDate();
+                              return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                            })() : '';
+                            if (dateVal && timeVal) {
+                              const [hour, minute] = timeVal.split(':');
+                              const dt = new Date(dateVal);
+                              dt.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+                              setEditPoster(editPoster ? { ...editPoster, endTime: Timestamp.fromDate(dt) } : null);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
                     </div>
                     <div>
                       <label className="block font-medium mb-1">Link URL (optional)</label>
