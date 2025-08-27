@@ -1,5 +1,3 @@
-import { uploadPosterImage, deletePosterImage } from "@/lib/poster-upload";
-import { uploadToGithub, getGithubOAuthUrl, getStoredToken } from "@/lib/github-oauth";
 import { useState, useEffect } from "react";
 import { getMeta, setMeta as saveMeta, MetaData } from "@/lib/meta";
 import { getPosters, addPoster, updatePoster, deletePoster, PosterConfig } from "@/lib/poster";
@@ -69,44 +67,11 @@ export default function DeveloperPage() {
       setPosters(prev => prev.filter((_, i) => i !== idx));
     }
   };
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadMethod, setUploadMethod] = useState<'firebase'|'github'>('firebase');
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const handlePosterSave = async (poster: PosterConfig) => {
-    setUploadingImage(true);
-    let imageUrl = poster.imageUrl;
-    // If new image uploaded
-    if (imageFile) {
-      if (uploadMethod === 'firebase') {
-        // Delete previous image if editing
-        if (poster.id && poster.imageUrl && poster.imageUrl.startsWith("https://")) {
-          await deletePosterImage(poster.id);
-        }
-        // Upload new image
-        const id = poster.id || Math.random().toString(36).slice(2);
-        imageUrl = await uploadPosterImage(imageFile, id);
-      } else if (uploadMethod === 'github') {
-        // Upload to GitHub
-        if (!getStoredToken()) {
-          window.open(getGithubOAuthUrl(), '_blank');
-          alert('Silakan login dengan GitHub OAuth terlebih dahulu!');
-          setUploadingImage(false);
-          return;
-        }
-        const filename = `${Date.now()}_${imageFile.name}`;
-        try {
-          imageUrl = await uploadToGithub(imageFile, filename);
-        } catch (err: any) {
-          alert('Upload ke GitHub gagal: ' + (err?.message || err));
-          setUploadingImage(false);
-          return;
-        }
-      }
-    }
     if (editPosterIdx === null) {
       // Add
       await addPoster({
-        imageUrl,
+        imageUrl: poster.imageUrl,
         startTime: poster.startTime,
         endTime: poster.endTime,
         linkUrl: poster.linkUrl,
@@ -114,14 +79,12 @@ export default function DeveloperPage() {
     } else if (poster.id) {
       // Update
       await updatePoster(poster.id, {
-        imageUrl,
+        imageUrl: poster.imageUrl,
         startTime: poster.startTime,
         endTime: poster.endTime,
         linkUrl: poster.linkUrl,
       });
     }
-    setUploadingImage(false);
-    setImageFile(null);
     setPosterDialog(false);
     setTab('poster'); // reload
   };
@@ -480,26 +443,9 @@ export default function DeveloperPage() {
                   <button className="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-2xl font-bold" onClick={() => setPosterDialog(false)}>×</button>
                   <h3 className="text-lg font-bold mb-4">{editPosterIdx === null ? 'Tambah Poster' : 'Edit Poster'}</h3>
                   <form onSubmit={e => {e.preventDefault(); if(editPoster) handlePosterSave(editPoster);}} className="space-y-3">
-                  <div className="mb-2">
-                    <label className="block font-medium mb-1">Metode Upload</label>
-                    <select className="w-full border rounded p-2" value={uploadMethod} onChange={e => setUploadMethod(e.target.value as any)}>
-                      <option value="firebase">Firebase Storage</option>
-                      <option value="github">GitHub OAuth</option>
-                    </select>
-                  </div>
                     <div>
-                      <label className="block font-medium mb-1">Upload Gambar Poster</label>
-                      <input type="file" accept="image/*" className="w-full border rounded p-2" onChange={e => setImageFile(e.target.files?.[0] || null)} />
-                      {editPoster?.imageUrl && (
-                        <div className="mt-2">
-                          <img src={editPoster.imageUrl} alt="Preview" className="h-24 rounded shadow" />
-                          <div className="text-xs text-gray-500">Gambar saat ini</div>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <label className="block font-medium mb-1">Image URL (opsional/manual)</label>
-                      <input type="text" className="w-full border rounded p-2" value={editPoster?.imageUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, imageUrl: e.target.value} : null)} />
+                      <label className="block font-medium mb-1">Image URL</label>
+                      <input type="text" className="w-full border rounded p-2" value={editPoster?.imageUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, imageUrl: e.target.value} : null)} required />
                     </div>
                     <div>
                       <label className="block font-medium mb-1">Start Time</label>
@@ -513,7 +459,7 @@ export default function DeveloperPage() {
                       <label className="block font-medium mb-1">Link URL (optional)</label>
                       <input type="text" className="w-full border rounded p-2" value={editPoster?.linkUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, linkUrl: e.target.value} : null)} />
                     </div>
-                    <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700" disabled={uploadingImage}>{uploadingImage ? "Menyimpan..." : "Simpan"}</button>
+                    <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">Simpan</button>
                   </form>
                 </div>
               </div>
