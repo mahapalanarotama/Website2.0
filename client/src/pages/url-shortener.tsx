@@ -27,6 +27,7 @@ export default function UrlShortenerPage() {
   const [editId, setEditId] = useState<string|null>(null);
   const [editCode, setEditCode] = useState("");
   const [editUrl, setEditUrl] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
   const [isCustomResult, setIsCustomResult] = useState<boolean>(false);
 
   useEffect(() => {
@@ -355,12 +356,8 @@ export default function UrlShortenerPage() {
                     <tr><td colSpan={5} className="text-center py-4">Belum ada data.</td></tr>
                   ) : userLinks.map(link => (
                     <tr key={link.id} className="border-b hover:bg-green-50 transition">
-                      <td className="px-3 py-2 font-mono text-green-600">{editId === link.id ? (
-                        <input value={editCode} onChange={e => setEditCode(e.target.value)} className="border px-2 py-1 rounded-xl w-24" />
-                      ) : link.code}</td>
-                      <td className="px-3 py-2 text-black max-w-[120px] md:max-w-[300px] truncate" style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{editId === link.id ? (
-                        <input value={editUrl} onChange={e => setEditUrl(e.target.value)} className="border px-2 py-1 rounded-xl w-full" />
-                      ) : link.url}</td>
+                      <td className="px-3 py-2 font-mono text-green-600">{link.code}</td>
+                      <td className="px-3 py-2 text-black max-w-[120px] md:max-w-[300px] truncate" style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{link.url}</td>
                       <td className="px-3 py-2 break-all">
                         <div className="flex items-center gap-2 flex-wrap">
                           <a href={`/s/${link.code}`} target="_blank" rel="noopener noreferrer" className="text-yellow-600 underline break-all max-w-[120px] md:max-w-none truncate" style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{window.location.origin + "/s/" + link.code}</a>
@@ -405,18 +402,30 @@ export default function UrlShortenerPage() {
       `}</style>
                       <td className="px-3 py-2 text-xs text-green-600">{new Date(link.created).toLocaleString()}</td>
                       <td className="px-3 py-2 flex gap-2">
-                        {editId === link.id ? (
-                          <>
-                            <button className="bg-green-500 text-white px-2 py-1 rounded-xl shadow" onClick={() => handleEditLink(link.id)}><i className="fas fa-save"></i> Simpan</button>
-                            <button className="bg-gray-200 text-black px-2 py-1 rounded-xl shadow" onClick={() => setEditId(null)}><i className="fas fa-times"></i> Batal</button>
-                          </>
-                        ) : (
-                          <>
-                            <button className="bg-yellow-400 text-green-900 px-2 py-1 rounded-xl shadow" onClick={() => {setEditId(link.id);setEditCode(link.code);setEditUrl(link.url);}}><i className="fas fa-edit"></i> Edit</button>
-                            <button className="bg-red-400 text-white px-2 py-1 rounded-xl shadow" onClick={() => handleDeleteLink(link.id, link.code)}><i className="fas fa-trash"></i> Hapus</button>
-                          </>
-                        )}
+                        <button className="bg-yellow-400 text-green-900 px-2 py-1 rounded-xl shadow" onClick={() => {setEditId(link.id);setEditCode(link.code);setEditUrl(link.url);setShowEditModal(true);}}><i className="fas fa-edit"></i> Edit</button>
+                        <button className="bg-red-400 text-white px-2 py-1 rounded-xl shadow" onClick={() => handleDeleteLink(link.id, link.code)}><i className="fas fa-trash"></i> Hapus</button>
                       </td>
+      {/* Modal Edit Data */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 animate-fadeIn">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-green-300 relative">
+            <button className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl" onClick={() => {setShowEditModal(false);setEditId(null);}}><i className="fas fa-times"></i></button>
+            <h3 className="text-xl font-bold text-green-600 mb-4 flex items-center gap-2"><i className="fas fa-edit"></i> Edit Data URL</h3>
+            <div className="mb-3">
+              <label className="block text-green-700 font-semibold mb-1">Kode</label>
+              <input value={editCode} onChange={e => setEditCode(e.target.value)} className="w-full border border-green-300 rounded-xl px-4 py-2 focus:border-green-500 focus:shadow-lg transition bg-green-100 text-black" />
+            </div>
+            <div className="mb-3">
+              <label className="block text-green-700 font-semibold mb-1">URL Asli</label>
+              <input value={editUrl} onChange={e => setEditUrl(e.target.value)} className="w-full border border-green-300 rounded-xl px-4 py-2 focus:border-green-500 focus:shadow-lg transition bg-green-100 text-black" />
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button className="bg-green-500 text-white px-4 py-2 rounded-xl shadow font-bold" onClick={() => {handleEditLink(editId!);setShowEditModal(false);}}><i className="fas fa-save"></i> Simpan</button>
+              <button className="bg-gray-200 text-black px-4 py-2 rounded-xl shadow font-bold" onClick={() => {setShowEditModal(false);setEditId(null);}}><i className="fas fa-times"></i> Batal</button>
+            </div>
+          </div>
+        </div>
+      )}
                     </tr>
                   ))}
                 </tbody>
