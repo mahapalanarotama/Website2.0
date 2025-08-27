@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { getMemberByField } from "@/hooks/use-members";
 import { motion } from "framer-motion";

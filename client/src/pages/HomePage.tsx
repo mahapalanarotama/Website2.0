@@ -49,7 +49,7 @@ function VisiMisiFirestore() {
     </>
   );
 }
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ActivityCard } from "@/components/ActivityCard";
 import { LearningModule } from "@/components/LearningModule";
@@ -323,7 +323,7 @@ export default function HomePage() {
           )}
           
           <div className="text-center mt-10">
-            <Link href="/kegiatan">
+            <Link to="/kegiatan">
               <Button>
                 Lihat Semua Kegiatan
               </Button>
@@ -358,7 +358,7 @@ export default function HomePage() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <Link href="/pembelajaran">
+            <Link to="/pembelajaran">
               <Button>
                 Lihat Semua Pembelajaran
               </Button>
@@ -421,7 +421,7 @@ export default function HomePage() {
             <div className="text-center text-gray-500 py-10">Tidak ada data galeri.</div>
           )}
           <div className="text-center mt-10">
-            <Link href="/galeri">
+            <Link to="/galeri">
               <Button>
                 Lihat Galeri Lengkap
               </Button>
@@ -438,7 +438,7 @@ export default function HomePage() {
             Mari bergabung dalam misi kami untuk melestarikan alam dan mengeksplorasi keindahan Indonesia. Kami membuka pendaftaran anggota baru setiap awal tahun akademik.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/pendaftaran">
+            <Link to="/pendaftaran">
               <Button variant="secondary" className="bg-white text-primary hover:bg-gray-100">
                 Informasi Pendaftaran
               </Button>

@@ -17,7 +17,20 @@ export default function ShortRedirectPage() {
         if (snap.exists()) {
           const { url } = snap.data();
           if (url && typeof url === "string") {
-            window.location.replace(url);
+            // Jika url tujuan adalah internal (masih di domain ini), gunakan navigate agar SPA tetap berjalan
+            try {
+              const currentOrigin = window.location.origin;
+              const urlObj = new URL(url, currentOrigin);
+              if (urlObj.origin === currentOrigin) {
+                // Internal link, gunakan navigate agar SPA tetap berjalan
+                navigate(urlObj.pathname + urlObj.search + urlObj.hash, { replace: true });
+              } else {
+                // External link, lakukan full redirect
+                window.location.href = url;
+              }
+            } catch {
+              window.location.replace(url);
+            }
           } else {
             setError("Data URL tidak valid pada kode ini.");
           }

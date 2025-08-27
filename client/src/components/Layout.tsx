@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation } from "react-router-dom";
 import BacksoundPlayer from "@/components/BacksoundPlayer";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
@@ -40,9 +40,9 @@ export function Layout({ children }: LayoutProps) {
     }
   };
 
-  const [location] = useLocation();
+  const location = useLocation();
   // Cek path untuk pengecualian backsound
-  const hideBacksound = ["/admin", "/developer", "/offline", "/sejarahAdmin"].some((p) => location.startsWith(p));
+  const hideBacksound = ["/admin", "/developer", "/offline", "/sejarahAdmin"].some((p) => location.pathname.startsWith(p));
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
