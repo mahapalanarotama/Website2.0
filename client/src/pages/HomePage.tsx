@@ -1,3 +1,4 @@
+import { PosterPopup } from "@/components/PosterPopup";
 import ChatbotAssistant from "@/components/ChatbotAssistant";
 // Komponen VisiMisiFirestore di luar HomePage
 function VisiMisiFirestore() {
@@ -161,6 +162,7 @@ export default function HomePage() {
 
   return (
     <>
+      <PosterPopup />
       <BirthdayCountdownHome open={showBirthdayPopup} onClose={handleCloseBirthdayPopup} />
       {/* Hero Section */}
       <motion.section

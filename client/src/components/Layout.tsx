@@ -6,6 +6,8 @@ import { Footer } from "./Footer";
 import { CookieConsent } from "./ui/cookie-consent";
 import { useToast } from "@/hooks/use-toast";
 
+// import { PosterPopup } from "./PosterPopup";
+
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -48,7 +50,7 @@ export function Layout({ children }: LayoutProps) {
       <Navbar />
       <main className="flex-grow">{children}</main>
       <Footer />
-      <CookieConsent />
+  <CookieConsent />
       {!hideBacksound && <BacksoundPlayer />}
     </div>
   );

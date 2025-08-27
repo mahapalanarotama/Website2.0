@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { getMeta, setMeta as saveMeta, MetaData } from "@/lib/meta";
+import { getPosters, addPoster, updatePoster, deletePoster, PosterConfig } from "@/lib/poster";
+import { Timestamp } from "firebase/firestore";
 import { getCarouselContent, setCarouselContent, CarouselContentItem } from "@/lib/homepage";
 import { DEFAULT_CAROUSEL } from "../shared/carouselDefault";
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
@@ -29,7 +31,63 @@ export default function DeveloperPage() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'meta' | 'logadmin' | 'homepage' | 'visimisi' | 'contact'>('meta');
+  const [tab, setTab] = useState<'poster' | 'meta' | 'logadmin' | 'homepage' | 'visimisi' | 'contact'>('meta');
+  // Poster tab state
+  const [posters, setPosters] = useState<PosterConfig[]>([]);
+  const [loadingPosters, setLoadingPosters] = useState(false);
+  const [editPoster, setEditPoster] = useState<PosterConfig | null>(null);
+  const [editPosterIdx, setEditPosterIdx] = useState<number | null>(null);
+  const [posterDialog, setPosterDialog] = useState(false);
+  // Load posters when tab is poster
+  useEffect(() => {
+    if (tab === 'poster') {
+      setLoadingPosters(true);
+      getPosters().then((data: PosterConfig[]) => {
+        setPosters(data);
+        setLoadingPosters(false);
+      });
+    }
+  }, [tab]);
+
+  // Poster CRUD handlers
+  const handlePosterEdit = (item: PosterConfig, idx: number) => {
+    setEditPoster(item);
+    setEditPosterIdx(idx);
+    setPosterDialog(true);
+  };
+  const handlePosterAdd = () => {
+    setEditPoster({ imageUrl: '', startTime: Timestamp.now(), endTime: Timestamp.now(), linkUrl: '' });
+    setEditPosterIdx(null);
+    setPosterDialog(true);
+  };
+  const handlePosterDelete = async (idx: number) => {
+    if (window.confirm('Hapus poster ini?')) {
+      const poster = posters[idx];
+      if (poster.id) await deletePoster(poster.id);
+      setPosters(prev => prev.filter((_, i) => i !== idx));
+    }
+  };
+  const handlePosterSave = async (poster: PosterConfig) => {
+    if (editPosterIdx === null) {
+      // Add
+      await addPoster({
+        imageUrl: poster.imageUrl,
+        startTime: poster.startTime,
+        endTime: poster.endTime,
+        linkUrl: poster.linkUrl,
+      });
+    } else if (poster.id) {
+      // Update
+      await updatePoster(poster.id, {
+        imageUrl: poster.imageUrl,
+        startTime: poster.startTime,
+        endTime: poster.endTime,
+        linkUrl: poster.linkUrl,
+      });
+    }
+    setPosterDialog(false);
+    setTab('poster'); // reload
+  };
   // Tipe untuk contact cards
   type ContactCard = {
     title: string;
@@ -271,7 +329,15 @@ export default function DeveloperPage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-extrabold mb-8 text-center text-primary">Developer Tools</h1>
-  <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto scrollbar-hide px-1 -mx-2 whitespace-nowrap" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto scrollbar-hide px-1 -mx-2 whitespace-nowrap" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <button
+          className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'poster' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          data-active={tab === 'poster'}
+          onClick={() => setTab('poster')}
+        >
+          <span className="flex items-center justify-center p-0 sm:p-1"><svg width="22" height="22" className="sm:w-[26px] sm:h-[26px] text-green-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></span>
+          <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Poster</span>
+        </button>
         <button
           className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'meta' ? 'data-[active=true]' : 'data-[active=false]'}`}
           data-active={tab === 'meta'}
@@ -313,7 +379,79 @@ export default function DeveloperPage() {
           <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Contact</span>
         </button>
       </div>
-  <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
+      <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
+        {tab === 'poster' && (
+          <>
+            <h2 className="font-bold text-xl mb-4 text-green-900 flex items-center gap-2">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              Konfigurasi Poster Popup
+            </h2>
+            <div className="flex justify-end mb-4">
+              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow" onClick={handlePosterAdd}>Tambah Poster</button>
+            </div>
+            {loadingPosters ? (
+              <div className="text-center py-10 text-gray-500">Memuat data poster...</div>
+            ) : posters.length === 0 ? (
+              <div className="text-center py-10 text-gray-400">Belum ada data poster.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-green-100 text-green-900">
+                      <th className="p-2">Gambar</th>
+                      <th className="p-2">Start</th>
+                      <th className="p-2">End</th>
+                      <th className="p-2">Link</th>
+                      <th className="p-2">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {posters.map((item, idx) => (
+                      <tr key={item.id || idx} className="border-b last:border-b-0">
+                        <td className="p-2"><img src={item.imageUrl} alt="Poster" className="h-16 w-28 object-cover rounded" /></td>
+                        <td className="p-2">{item.startTime?.toDate().toLocaleString()}</td>
+                        <td className="p-2">{item.endTime?.toDate().toLocaleString()}</td>
+                        <td className="p-2 max-w-xs truncate">{item.linkUrl || '-'}</td>
+                        <td className="p-2 flex gap-2">
+                          <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded" onClick={() => handlePosterEdit(item, idx)}>Edit</button>
+                          <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handlePosterDelete(idx)}>Hapus</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {/* Dialog for add/edit poster */}
+            {posterDialog && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+                  <button className="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-2xl font-bold" onClick={() => setPosterDialog(false)}>×</button>
+                  <h3 className="text-lg font-bold mb-4">{editPosterIdx === null ? 'Tambah Poster' : 'Edit Poster'}</h3>
+                  <form onSubmit={e => {e.preventDefault(); if(editPoster) handlePosterSave(editPoster);}} className="space-y-3">
+                    <div>
+                      <label className="block font-medium mb-1">Image URL</label>
+                      <input type="text" className="w-full border rounded p-2" value={editPoster?.imageUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, imageUrl: e.target.value} : null)} required />
+                    </div>
+                    <div>
+                      <label className="block font-medium mb-1">Start Time</label>
+                      <input type="datetime-local" className="w-full border rounded p-2" value={editPoster?.startTime ? editPoster.startTime.toDate().toISOString().slice(0,16) : ''} onChange={e => setEditPoster(editPoster ? {...editPoster, startTime: Timestamp.fromDate(new Date(e.target.value))} : null)} required />
+                    </div>
+                    <div>
+                      <label className="block font-medium mb-1">End Time</label>
+                      <input type="datetime-local" className="w-full border rounded p-2" value={editPoster?.endTime ? editPoster.endTime.toDate().toISOString().slice(0,16) : ''} onChange={e => setEditPoster(editPoster ? {...editPoster, endTime: Timestamp.fromDate(new Date(e.target.value))} : null)} required />
+                    </div>
+                    <div>
+                      <label className="block font-medium mb-1">Link URL (optional)</label>
+                      <input type="text" className="w-full border rounded p-2" value={editPoster?.linkUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, linkUrl: e.target.value} : null)} />
+                    </div>
+                    <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">Simpan</button>
+                  </form>
+                </div>
+              </div>
+            )}
+          </>
+        )}
         {tab === 'contact' && (
           <>
             <h2 className="font-bold text-xl mb-4 text-blue-900 flex items-center gap-2">
