@@ -94,7 +94,7 @@ export const PosterPopup: React.FC = () => {
               key={poster.id}
               className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
             >
-              <div className="relative max-w-lg w-full p-4 bg-white rounded-lg shadow-lg flex flex-col items-center">
+              <div className="relative max-w-lg w-full p-4 rounded-lg shadow-lg flex flex-col items-center" style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)', border: '1.5px solid rgba(255,255,255,0.25)' }}>
                 <button
                   className="absolute top-2 left-2 text-red-600 hover:text-red-700 text-2xl font-bold drop-shadow-lg"
                   style={{ textShadow: '2px 2px 6px #fff, 0 0 2px #000' }}
