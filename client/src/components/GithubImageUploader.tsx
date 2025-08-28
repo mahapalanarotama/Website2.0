@@ -7,7 +7,7 @@ export interface GithubImageUploaderProps {
   repo?: string;
   path?: string;
   branch?: string;
-  onUpload?: (url: string) => void;
+  onUpload?: (url: string, githubPath?: string) => void;
   addToGallery?: boolean;
 }
 
