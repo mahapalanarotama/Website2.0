@@ -477,7 +477,26 @@ export default function DeveloperPage() {
                   <tbody>
                     {posters.map((item, idx) => (
                       <tr key={item.id || idx} className="border-b last:border-b-0">
-                        <td className="p-2"><img src={item.imageUrl} alt="Poster" className="h-16 w-28 object-cover rounded" /></td>
+                        <td className="p-2">
+                          <img
+                            src={(() => {
+                              // Google Drive
+                              if (/drive\.google\.com\/file\/d\/(.+?)\//.test(item.imageUrl)) {
+                                const match = item.imageUrl.match(/drive\.google\.com\/file\/d\/(.+?)\//);
+                                return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : item.imageUrl;
+                              }
+                              // Google Photos
+                              if (/photos\.google\.com\/share\/.+\?key=/.test(item.imageUrl)) {
+                                // Google Photos share links can't be embedded directly, but if user provides direct image link, use as is
+                                return item.imageUrl;
+                              }
+                              // Default
+                              return item.imageUrl;
+                            })()}
+                            alt="Poster"
+                            className="h-16 w-28 object-cover rounded"
+                          />
+                        </td>
                         <td className="p-2">{item.startTime?.toDate().toLocaleString('id-ID', { hour12: false })}</td>
                         <td className="p-2">{item.endTime?.toDate().toLocaleString('id-ID', { hour12: false })}</td>
                         <td className="p-2 max-w-xs truncate">{item.linkUrl || '-'}</td>
@@ -499,13 +518,13 @@ export default function DeveloperPage() {
                   <h3 className="text-lg font-bold mb-4">{editPosterIdx === null ? 'Tambah Poster' : 'Edit Poster'}</h3>
                   <form onSubmit={e => {e.preventDefault(); if(editPoster) handlePosterSave(editPoster);}} className="space-y-3">
                     <div>
-                      <label className="block font-medium mb-1">Image URL</label>
+                      <label className="block font-medium mb-1">Image URL <span className="text-red-600">*</span></label>
                       <input type="text" className="w-full border rounded p-2" value={editPoster?.imageUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, imageUrl: e.target.value} : null)} required />
                     </div>
                     {/* Start Date & Time */}
                     <div className="flex gap-2">
                       <div className="flex-1">
-                        <label className="block font-medium mb-1">Start Date</label>
+                        <label className="block font-medium mb-1">Start Date <span className="text-red-600">*</span></label>
                         <input
                           type="date"
                           className="w-full border rounded p-2"
@@ -525,7 +544,7 @@ export default function DeveloperPage() {
                         />
                       </div>
                       <div className="flex-1">
-                        <label className="block font-medium mb-1">Start Time</label>
+                        <label className="block font-medium mb-1">Start Time <span className="text-red-600">*</span></label>
                         <input
                           type="time"
                           className="w-full border rounded p-2"
@@ -556,7 +575,7 @@ export default function DeveloperPage() {
                     {/* End Date & Time */}
                     <div className="flex gap-2">
                       <div className="flex-1">
-                        <label className="block font-medium mb-1">End Date</label>
+                        <label className="block font-medium mb-1">End Date <span className="text-red-600">*</span></label>
                         <input
                           type="date"
                           className="w-full border rounded p-2"
@@ -575,7 +594,7 @@ export default function DeveloperPage() {
                         />
                       </div>
                       <div className="flex-1">
-                        <label className="block font-medium mb-1">End Time</label>
+                        <label className="block font-medium mb-1">End Time <span className="text-red-600">*</span></label>
                         <input
                           type="time"
                           className="w-full border rounded p-2"
