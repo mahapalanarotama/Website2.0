@@ -114,12 +114,13 @@ export function GithubImageUploader(props: GithubImageUploaderProps) {
           const data = await response.json();
           // Convert ke raw URL
           const imageUrl = data.content.download_url.replace("https://github.com/", "https://raw.githubusercontent.com/").replace("/blob/", "/");
+          const githubPath = filePath;
 
           setSuccess(`✅ Image uploaded successfully! URL: ${imageUrl}`);
           setFile(null);
 
           // Jangan simpan ke Firestore di sini. Penyimpanan dilakukan saat submit form galeri.
-          if (onUpload) onUpload(imageUrl);
+          if (onUpload) onUpload(imageUrl, githubPath);
 
           // Reset file input
           const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
