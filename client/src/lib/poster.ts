@@ -15,6 +15,8 @@ export interface PosterConfig {
   startTime: Timestamp;
   endTime: Timestamp;
   linkUrl?: string;
+  order?: number; // for drag-and-drop ordering
+  isFirst?: boolean; // for marking the first poster
 }
 
 export async function getPosters(): Promise<PosterConfig[]> {
@@ -27,7 +29,14 @@ export async function getPosters(): Promise<PosterConfig[]> {
       startTime: data.startTime,
       endTime: data.endTime,
       linkUrl: data.linkUrl || undefined,
+      order: data.order ?? 0,
+      isFirst: data.isFirst ?? false,
     };
+  }).sort((a, b) => {
+    // Sort by isFirst first, then by order
+    if (a.isFirst && !b.isFirst) return -1;
+    if (!a.isFirst && b.isFirst) return 1;
+    return (a.order ?? 0) - (b.order ?? 0);
   });
 }
 

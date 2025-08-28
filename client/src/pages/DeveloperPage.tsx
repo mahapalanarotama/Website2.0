@@ -125,6 +125,8 @@ export default function DeveloperPage() {
         startTime: poster.startTime,
         endTime: poster.endTime,
         linkUrl: safeLinkUrl,
+        order: posters.length, // new poster goes to end
+        isFirst: false,
       });
     } else if (poster.id) {
       // Update
@@ -133,6 +135,8 @@ export default function DeveloperPage() {
         startTime: poster.startTime,
         endTime: poster.endTime,
         linkUrl: safeLinkUrl,
+        order: poster.order ?? editPosterIdx,
+        isFirst: poster.isFirst ?? false,
       });
     } else {
       alert('Gagal edit: ID poster tidak ditemukan!');
@@ -469,6 +473,7 @@ export default function DeveloperPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-green-100 text-green-900">
+                      <th className="p-2">Urutan</th>
                       <th className="p-2">Gambar</th>
                       <th className="p-2">Start</th>
                       <th className="p-2">End</th>
@@ -478,7 +483,41 @@ export default function DeveloperPage() {
                   </thead>
                   <tbody>
                     {posters.map((item, idx) => (
-                      <tr key={item.id || idx} className="border-b last:border-b-0">
+                      <tr key={item.id || idx} className="border-b last:border-b-0 group hover:bg-green-50" draggable
+                        onDragStart={e => {
+                          e.dataTransfer.setData('posterIdx', String(idx));
+                        }}
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={async e => {
+                          const fromIdx = Number(e.dataTransfer.getData('posterIdx'));
+                          if (fromIdx === idx) return;
+                          const newPosters = [...posters];
+                          const [moved] = newPosters.splice(fromIdx, 1);
+                          newPosters.splice(idx, 0, moved);
+                          // Update order field
+                          for (let i = 0; i < newPosters.length; i++) {
+                            newPosters[i].order = i;
+                            if (newPosters[i].id) await updatePoster(newPosters[i].id!, { order: i });
+                          }
+                          setPosters(newPosters);
+                        }}
+                      >
+                        <td className="p-2 text-center">
+                          <span className="font-bold">{item.isFirst ? '★' : idx + 1}</span>
+                          <button
+                            className={`ml-2 px-2 py-1 rounded text-xs ${item.isFirst ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'} hover:bg-yellow-500`}
+                            title="Tandai sebagai poster utama"
+                            onClick={async e => {
+                              e.stopPropagation();
+                              // Unmark all others
+                              const newPosters = posters.map((p, i) => ({ ...p, isFirst: i === idx }));
+                              for (let i = 0; i < newPosters.length; i++) {
+                                if (newPosters[i].id) await updatePoster(newPosters[i].id!, { isFirst: i === idx });
+                              }
+                              setPosters(newPosters);
+                            }}
+                          >{item.isFirst ? 'Utama' : 'Jadikan Utama'}</button>
+                        </td>
                         <td className="p-2">
                           <img
                             src={(() => {
@@ -489,10 +528,8 @@ export default function DeveloperPage() {
                               }
                               // Google Photos
                               if (/photos\.google\.com\/share\/.+\?key=/.test(item.imageUrl)) {
-                                // Google Photos share links can't be embedded directly, but if user provides direct image link, use as is
                                 return item.imageUrl;
                               }
-                              // Default
                               return item.imageUrl;
                             })()}
                             alt="Poster"
@@ -510,6 +547,7 @@ export default function DeveloperPage() {
                     ))}
                   </tbody>
                 </table>
+                <div className="text-xs text-gray-500 mt-2">Seret baris untuk mengubah urutan poster. Klik "Jadikan Utama" untuk menandai poster utama (paling depan).</div>
               </div>
             )}
             {/* Dialog for add/edit poster */}

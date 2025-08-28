@@ -8,6 +8,8 @@ export interface Poster {
   startTime: Timestamp;
   endTime: Timestamp;
   linkUrl?: string;
+  order?: number;
+  isFirst?: boolean;
 }
 
 
@@ -35,8 +37,17 @@ export const PosterPopup: React.FC = () => {
             startTime: data.startTime,
             endTime: data.endTime,
             linkUrl: data.linkUrl || undefined,
+            order: data.order ?? 0,
+            isFirst: data.isFirst ?? false,
           });
         }
+      });
+
+      // Sort posters by isFirst and order
+      const sortedPosters = activePosters.sort((a, b) => {
+        if (a.isFirst && !b.isFirst) return -1;
+        if (!a.isFirst && b.isFirst) return 1;
+        return (a.order ?? 0) - (b.order ?? 0);
       });
 
       // Check localStorage for closed posters for today
@@ -47,8 +58,8 @@ export const PosterPopup: React.FC = () => {
       } catch {}
 
       // Only show posters not closed today
-      const visiblePosters = activePosters.filter(p => closed[p.id] !== today);
-      setPosters(activePosters);
+      const visiblePosters = sortedPosters.filter(p => closed[p.id] !== today);
+      setPosters(sortedPosters);
       setVisible(visiblePosters.map(p => p.id));
     };
     fetchPosters();
