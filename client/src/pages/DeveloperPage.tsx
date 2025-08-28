@@ -588,8 +588,8 @@ export default function DeveloperPage() {
                         <div style={{ minWidth: '220px', maxWidth: '100%' }}>
                           <ImageInputWithMode
                             value={editPoster?.imageUrl || ""}
-                            onChange={(newUrl: string) => {
-                              setEditPoster(editPoster ? { ...editPoster, imageUrl: newUrl } : null);
+                            onChange={(newUrl: string, githubPath?: string) => {
+                              setEditPoster(editPoster ? { ...editPoster, imageUrl: newUrl, githubPath: githubPath ?? editPoster.githubPath } : null);
                             }}
                             repo="mahapalanarotama/OfficialWebsite"
                             path="Img/poster"
