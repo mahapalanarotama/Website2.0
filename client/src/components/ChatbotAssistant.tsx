@@ -177,7 +177,7 @@ export default function ChatbotAssistant() {
       // Animasi mengetik karakter demi karakter untuk jawaban FAQ
       const answer = faq.a;
       for (let i = 1; i <= answer.length; i++) {
-        setTypingText(formatMarkdown(answer.slice(0, i)));
+        setTypingText(answer.slice(0, i));
         // eslint-disable-next-line no-await-in-loop
         await new Promise(res => setTimeout(res, 18));
       }
@@ -186,6 +186,12 @@ export default function ChatbotAssistant() {
       setTypingText('');
     } else {
       let answer = await fetchAIAnswer(sendText);
+      // Animasi mengetik karakter demi karakter untuk jawaban AI
+      for (let i = 1; i <= answer.length; i++) {
+        setTypingText(answer.slice(0, i));
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise(res => setTimeout(res, 18));
+      }
       setMessages(msgs => [...msgs, { from: 'bot', text: answer }]);
       setTyping(false);
       setTypingText('');
