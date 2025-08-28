@@ -59,7 +59,7 @@ export default function DeveloperPage() {
       }
       // Tampilkan hanya poster yang masih aktif
       const active = data.filter(p => !(p.endTime && p.endTime.toDate() < now));
-      setPosters(active);
+  setPosters(active);
       setLoadingPosters(false);
       // Hitung waktu poster expired berikutnya
       const futureEnds = active.map(p => p.endTime?.toDate()).filter(d => d && d > now) as Date[];
@@ -136,7 +136,6 @@ export default function DeveloperPage() {
         endTime: poster.endTime,
         linkUrl: safeLinkUrl,
         order: posters.length, // new poster goes to end
-        isFirst: false,
       };
       if (poster.githubPath) newPoster.githubPath = poster.githubPath;
       await addPoster(newPoster);
@@ -158,7 +157,6 @@ export default function DeveloperPage() {
         endTime: poster.endTime,
         linkUrl: safeLinkUrl,
         order: poster.order ?? editPosterIdx,
-        isFirst: poster.isFirst ?? false,
       };
       if (poster.githubPath) updateData.githubPath = poster.githubPath;
       await updatePoster(poster.id, updateData);
@@ -515,32 +513,21 @@ export default function DeveloperPage() {
                         onDrop={async e => {
                           const fromIdx = Number(e.dataTransfer.getData('posterIdx'));
                           if (fromIdx === idx) return;
-                          const newPosters = [...posters];
+                          let newPosters = [...posters];
                           const [moved] = newPosters.splice(fromIdx, 1);
                           newPosters.splice(idx, 0, moved);
-                          // Update order field
+                          // Urutan poster sesuai urutan array (order ascending)
+                          // Update order field sesuai urutan baru
+                          newPosters = newPosters.map((p, i) => ({ ...p, order: i }));
                           for (let i = 0; i < newPosters.length; i++) {
-                            newPosters[i].order = i;
                             if (newPosters[i].id) await updatePoster(newPosters[i].id!, { order: i });
                           }
                           setPosters(newPosters);
                         }}
                       >
                         <td className="p-2 text-center">
-                          <span className="font-bold">{item.isFirst ? '★' : idx + 1}</span>
-                          <button
-                            className={`ml-2 px-2 py-1 rounded text-xs ${item.isFirst ? 'bg-yellow-400 text-white' : 'bg-gray-200 text-gray-700'} hover:bg-yellow-500`}
-                            title="Tandai sebagai poster utama"
-                            onClick={async e => {
-                              e.stopPropagation();
-                              // Unmark all others
-                              const newPosters = posters.map((p, i) => ({ ...p, isFirst: i === idx }));
-                              for (let i = 0; i < newPosters.length; i++) {
-                                if (newPosters[i].id) await updatePoster(newPosters[i].id!, { isFirst: i === idx });
-                              }
-                              setPosters(newPosters);
-                            }}
-                          >{item.isFirst ? 'Utama' : 'Jadikan Utama'}</button>
+                          <span className="font-bold">{idx + 1}</span>
+                          {/* tombol utama dihapus */}
                         </td>
                         <td className="p-2">
                           <img

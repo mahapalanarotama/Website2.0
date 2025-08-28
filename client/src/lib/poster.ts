@@ -16,13 +16,13 @@ export interface PosterConfig {
   endTime: Timestamp;
   linkUrl?: string;
   order?: number; // for drag-and-drop ordering
-  isFirst?: boolean; // for marking the first poster
+  // isFirst dihapus
   githubPath?: string; // path gambar di GitHub
 }
 
 export async function getPosters(): Promise<PosterConfig[]> {
   const snapshot = await getDocs(collection(db, "posters"));
-  return snapshot.docs.map((docSnap) => {
+  const posters = snapshot.docs.map((docSnap) => {
     const data = docSnap.data();
     return {
       id: docSnap.id,
@@ -34,12 +34,13 @@ export async function getPosters(): Promise<PosterConfig[]> {
       isFirst: data.isFirst ?? false,
       githubPath: data.githubPath || undefined,
     };
-  }).sort((a, b) => {
-    // Sort by isFirst first, then by order
-    if (a.isFirst && !b.isFirst) return -1;
-    if (!a.isFirst && b.isFirst) return 1;
-    return (a.order ?? 0) - (b.order ?? 0);
   });
+  // Jika ada poster utama (isFirst) dan order=0, tampilkan di depan. Jika tidak, urutkan semua poster hanya berdasarkan order ascending
+  // Balik urutan: urutan pertama tampil terakhir (paling depan)
+  // Urutkan poster lain (selain utama) dari order ascending lalu reverse
+  // Urutkan poster non-utama (reverse)
+  // Urutkan poster berdasarkan order ascending (order=0 paling depan)
+  return [...posters].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 }
 
 export async function addPoster(poster: Omit<PosterConfig, "id">) {

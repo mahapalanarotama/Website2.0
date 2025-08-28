@@ -38,17 +38,12 @@ export const PosterPopup: React.FC = () => {
             endTime: data.endTime,
             linkUrl: data.linkUrl || undefined,
             order: data.order ?? 0,
-            isFirst: data.isFirst ?? false,
           });
         }
       });
 
       // Sort posters by isFirst and order
-      const sortedPosters = activePosters.sort((a, b) => {
-        if (a.isFirst && !b.isFirst) return -1;
-        if (!a.isFirst && b.isFirst) return 1;
-        return (a.order ?? 0) - (b.order ?? 0);
-      });
+  const sortedPosters = [...activePosters].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).reverse();
 
       // Check localStorage for closed posters for today
       const closedRaw = localStorage.getItem("closedPosters");
