@@ -65,13 +65,28 @@ function useScrollToTopVisible() {
 }
 
 export async function fetchAIAnswer(question: string): Promise<string> {
+  // Token default
+  let token = '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';
+  // Coba ambil token dari meta (Firestore)
+  try {
+    // Dynamic import agar tidak error SSR
+    const metaModule = await import('../lib/meta');
+    if (metaModule && metaModule.getMeta) {
+      const meta = await metaModule.getMeta();
+      if (meta && meta.chatbotToken) {
+        token = meta.chatbotToken;
+      }
+    }
+  } catch (err) {
+    // ignore, fallback ke token default
+  }
   try {
     const response = await fetch(
       "https://router.huggingface.co/v1/chat/completions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer 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`, // Token baru
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -93,6 +108,11 @@ export async function fetchAIAnswer(question: string): Promise<string> {
     // Parsing respons chat API
     if (data && data.choices && data.choices[0]?.message?.content) {
       return data.choices[0].message.content.trim();
+    }
+    // Jika error 401 (token expired), coba ulang dengan token dari meta
+    if (data && data.error && data.error.includes('401')) {
+      // Sudah fallback di atas, jadi return error
+      return 'Maaf, token chatbot expired. Silakan ganti token di tab meta halaman developer.';
     }
     return 'Maaf, AI tidak memberikan jawaban yang bisa ditampilkan.\n[DEBUG: ' + JSON.stringify(data) + ']';
   } catch (e) {

@@ -1081,6 +1081,10 @@ export default function DeveloperPage() {
                     <label className="block font-medium mb-1">Link Download Formulir</label>
                     <input className="w-full border rounded p-2" name="googleFormDownloadUrl" value={pendingMeta.googleFormDownloadUrl || ''} onChange={handleChange} placeholder="https://.../formulir.docx" />
                   </div>
+                  <div>
+                    <label className="block font-medium mb-1">Token Chatbot (ganti jika expired)</label>
+                    <input className="w-full border rounded p-2" name="chatbotToken" value={pendingMeta.chatbotToken || ''} onChange={handleChange} placeholder="Masukkan token chatbot..." />
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow" onClick={() => { setPendingSaveType('meta'); setGlobalConfirmOpen(true); }} type="button">Simpan</button>
