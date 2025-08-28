@@ -152,15 +152,16 @@ export default function DeveloperPage() {
         });
       }
       // Update
-      await updatePoster(poster.id, {
+      const updateData: any = {
         imageUrl: poster.imageUrl,
         startTime: poster.startTime,
         endTime: poster.endTime,
         linkUrl: safeLinkUrl,
         order: poster.order ?? editPosterIdx,
         isFirst: poster.isFirst ?? false,
-        githubPath: poster.githubPath,
-      });
+      };
+      if (poster.githubPath) updateData.githubPath = poster.githubPath;
+      await updatePoster(poster.id, updateData);
     } else {
       alert('Gagal edit: ID poster tidak ditemukan!');
       return;
