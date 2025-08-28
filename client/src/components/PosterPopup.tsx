@@ -79,14 +79,16 @@ export const PosterPopup: React.FC = () => {
             >
               <div className="relative max-w-lg w-full p-4 bg-white rounded-lg shadow-lg flex flex-col items-center">
                 <button
-                  className="absolute top-2 left-2 text-gray-600 hover:text-red-500 text-2xl font-bold"
+                  className="absolute top-2 left-2 text-red-600 hover:text-red-700 text-2xl font-bold drop-shadow-lg"
+                  style={{ textShadow: '2px 2px 6px #fff, 0 0 2px #000' }}
                   onClick={() => handleClose(poster.id)}
                   aria-label="Close poster"
                 >
                   ×
                 </button>
                 <button
-                  className="absolute top-2 right-2 text-gray-600 hover:text-blue-500 text-base font-semibold px-3 py-1 rounded"
+                  className="absolute top-2 right-2 text-blue-600 hover:text-blue-700 text-base font-bold drop-shadow-lg px-3 py-1 rounded"
+                  style={{ textShadow: '2px 2px 6px #fff, 0 0 2px #000' }}
                   onClick={() => setVisible(v => v.filter(vid => vid !== poster.id))}
                   aria-label="Lewati poster"
                 >
