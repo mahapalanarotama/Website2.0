@@ -71,7 +71,7 @@ export async function fetchAIAnswer(question: string): Promise<string> {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer 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`, // Token baru
+          Authorization: `Bearer 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`, // Token baru
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
