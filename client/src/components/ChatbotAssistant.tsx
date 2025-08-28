@@ -109,12 +109,11 @@ export async function fetchAIAnswer(question: string): Promise<string> {
     if (data && data.choices && data.choices[0]?.message?.content) {
       return data.choices[0].message.content.trim();
     }
-    // Jika error 401 (token expired), coba ulang dengan token dari meta
-    if (data && data.error && data.error.includes('401')) {
-      // Sudah fallback di atas, jadi return error
-      return 'Maaf, token chatbot expired. Silakan ganti token di tab meta halaman developer.';
+    // Jika error 401 (token expired) atau error lain
+    if (data && (data.error && (data.error.includes('401') || data.error.toLowerCase().includes('expired')))) {
+      return 'Maaf, token chatbot expired.';
     }
-    return 'Maaf, AI tidak memberikan jawaban yang bisa ditampilkan.\n[DEBUG: ' + JSON.stringify(data) + ']';
+    return 'Maaf, AI tidak memberikan jawaban yang bisa ditampilkan.';
   } catch (e) {
     return 'Maaf, terjadi kesalahan pada AI Assistant.';
   }
