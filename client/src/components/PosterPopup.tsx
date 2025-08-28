@@ -67,7 +67,7 @@ export const PosterPopup: React.FC = () => {
 
   const handleClose = (id: string) => {
     setVisible(v => v.filter(vid => vid !== id));
-    // Mark poster as closed for today
+    // Mark poster as closed for today (global, semua halaman)
     const closedRaw = localStorage.getItem("closedPosters");
     let closed: Record<string, string> = {};
     try {
@@ -77,7 +77,13 @@ export const PosterPopup: React.FC = () => {
     localStorage.setItem("closedPosters", JSON.stringify(closed));
   };
 
-  if (posters.length === 0 || visible.length === 0) return null;
+  // Lewati hanya berlaku di halaman saat ini (local state)
+  const handleSkip = (id: string) => {
+    setVisible(v => v.filter(vid => vid !== id));
+  };
+
+  // Jangan return null jika poster sudah di-close semua, biar halaman tetap render
+  if (posters.length === 0 || visible.length === 0) return <></>;
 
   return (
     <>
@@ -100,7 +106,7 @@ export const PosterPopup: React.FC = () => {
                 <button
                   className="absolute top-2 right-2 text-blue-600 hover:text-blue-700 text-base font-bold drop-shadow-lg px-3 py-1 rounded"
                   style={{ textShadow: '2px 2px 6px #fff, 0 0 2px #000' }}
-                  onClick={() => setVisible(v => v.filter(vid => vid !== poster.id))}
+                  onClick={() => handleSkip(poster.id)}
                   aria-label="Lewati poster"
                 >
                   Lewati
