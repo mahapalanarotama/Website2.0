@@ -3,7 +3,7 @@ import { GithubImageUploader } from "./GithubImageUploader";
 
 interface Props {
   value: string;
-  onChange: (url: string) => void;
+  onChange: (url: string, githubPath?: string) => void;
   repo: string;
   branch?: string;
   path: string;
@@ -12,9 +12,9 @@ interface Props {
 export default function ImageInputWithMode({ value, onChange, repo, branch = "main", path, addToGallery = false }: Props & { addToGallery?: boolean }) {
   const [mode, setMode] = useState<'link'|'github'>('link');
 
-  // Perbaiki agar onChange hanya satu argumen
-  const handleChange = (url: string) => {
-    onChange(url);
+  // Perbaiki agar onChange selalu dua argumen
+  const handleChange = (url: string, githubPath?: string) => {
+    onChange(url, githubPath);
   };
 
   return (
@@ -24,7 +24,7 @@ export default function ImageInputWithMode({ value, onChange, repo, branch = "ma
         <button type="button" className={`px-3 py-1 rounded ${mode==='github'?'bg-green-600 text-white':'bg-gray-200'}`} onClick={()=>setMode('github')}>Upload ke GitHub</button>
       </div>
       {mode==='link' ? (
-        <input type="text" className="border rounded px-2 py-1 w-full" value={value} onChange={e=>handleChange(e.target.value)} placeholder="Paste link gambar di sini" />
+        <input type="text" className="border rounded px-2 py-1 w-full" value={value} onChange={e=>handleChange(e.target.value, undefined)} placeholder="Paste link gambar di sini" />
       ) : (
         <GithubImageUploader repo={repo} branch={branch} path={path} onUpload={handleChange} addToGallery={addToGallery} />
       )}

@@ -130,15 +130,16 @@ export default function DeveloperPage() {
     const safeLinkUrl = poster.linkUrl === undefined || poster.linkUrl === null ? '' : poster.linkUrl;
     if (editPosterIdx === null) {
       // Add
-      await addPoster({
+      const newPoster: any = {
         imageUrl: poster.imageUrl,
         startTime: poster.startTime,
         endTime: poster.endTime,
         linkUrl: safeLinkUrl,
         order: posters.length, // new poster goes to end
         isFirst: false,
-        githubPath: poster.githubPath,
-      });
+      };
+      if (poster.githubPath) newPoster.githubPath = poster.githubPath;
+      await addPoster(newPoster);
     } else if (poster.id) {
       // Jika gambar diubah dan ada githubPath lama, hapus gambar lama di GitHub
       const oldPoster = posters[editPosterIdx];
