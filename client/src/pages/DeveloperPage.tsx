@@ -3,6 +3,7 @@ import ImageInputWithMode from "@/components/ImageInputWithMode";
 
 import { getMeta, setMeta as saveMeta, MetaData } from "@/lib/meta";
 import { getPosters, addPoster, updatePoster, deletePoster, PosterConfig } from "@/lib/poster";
+import { deleteGithubFile } from "@/lib/github-delete";
 import { Timestamp } from "firebase/firestore";
 import { getCarouselContent, setCarouselContent, CarouselContentItem } from "@/lib/homepage";
 import { DEFAULT_CAROUSEL } from "../shared/carouselDefault";
@@ -106,6 +107,15 @@ export default function DeveloperPage() {
   const handlePosterDelete = async (idx: number) => {
     if (window.confirm('Hapus poster ini?')) {
       const poster = posters[idx];
+      // Hapus gambar di GitHub jika ada githubPath
+      if (poster.githubPath) {
+        await deleteGithubFile({
+          repo: 'mahapalanarotama/OfficialWebsite',
+          path: poster.githubPath,
+          branch: 'main',
+          token: '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',
+        });
+      }
       if (poster.id) await deletePoster(poster.id);
       setPosters(prev => prev.filter((_, i) => i !== idx));
     }
@@ -127,8 +137,19 @@ export default function DeveloperPage() {
         linkUrl: safeLinkUrl,
         order: posters.length, // new poster goes to end
         isFirst: false,
+        githubPath: poster.githubPath,
       });
     } else if (poster.id) {
+      // Jika gambar diubah dan ada githubPath lama, hapus gambar lama di GitHub
+      const oldPoster = posters[editPosterIdx];
+      if (oldPoster.githubPath && oldPoster.githubPath !== poster.githubPath) {
+        await deleteGithubFile({
+          repo: 'mahapalanarotama/OfficialWebsite',
+          path: oldPoster.githubPath,
+          branch: 'main',
+          token: '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',
+        });
+      }
       // Update
       await updatePoster(poster.id, {
         imageUrl: poster.imageUrl,
@@ -137,6 +158,7 @@ export default function DeveloperPage() {
         linkUrl: safeLinkUrl,
         order: poster.order ?? editPosterIdx,
         isFirst: poster.isFirst ?? false,
+        githubPath: poster.githubPath,
       });
     } else {
       alert('Gagal edit: ID poster tidak ditemukan!');

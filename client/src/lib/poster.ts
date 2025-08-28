@@ -17,6 +17,7 @@ export interface PosterConfig {
   linkUrl?: string;
   order?: number; // for drag-and-drop ordering
   isFirst?: boolean; // for marking the first poster
+  githubPath?: string; // path gambar di GitHub
 }
 
 export async function getPosters(): Promise<PosterConfig[]> {
@@ -31,6 +32,7 @@ export async function getPosters(): Promise<PosterConfig[]> {
       linkUrl: data.linkUrl || undefined,
       order: data.order ?? 0,
       isFirst: data.isFirst ?? false,
+      githubPath: data.githubPath || undefined,
     };
   }).sort((a, b) => {
     // Sort by isFirst first, then by order
