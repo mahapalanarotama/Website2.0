@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import ImageInputWithMode from "@/components/ImageInputWithMode";
+
 import { getMeta, setMeta as saveMeta, MetaData } from "@/lib/meta";
 import { getPosters, addPoster, updatePoster, deletePoster, PosterConfig } from "@/lib/poster";
 import { Timestamp } from "firebase/firestore";
@@ -513,13 +515,27 @@ export default function DeveloperPage() {
             {/* Dialog for add/edit poster */}
             {posterDialog && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-                  <button className="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-2xl font-bold" onClick={() => setPosterDialog(false)}>×</button>
-                  <h3 className="text-lg font-bold mb-4">{editPosterIdx === null ? 'Tambah Poster' : 'Edit Poster'}</h3>
-                  <form onSubmit={e => {e.preventDefault(); if(editPoster) handlePosterSave(editPoster);}} className="space-y-3">
+                <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100 flex flex-col" style={{ maxHeight: '80vh', padding: 0 }}>
+                  <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3" style={{ position: 'sticky', top: 0, zIndex: 20, background: 'white' }}>
+                    <h3 className="text-lg font-bold m-0">{editPosterIdx === null ? 'Tambah Poster' : 'Edit Poster'}</h3>
+                    <button className="text-gray-600 hover:text-red-500 text-2xl font-bold p-0 m-0" onClick={() => setPosterDialog(false)} style={{ lineHeight: 1 }}>×</button>
+                  </div>
+                  <form onSubmit={e => {e.preventDefault(); if(editPoster) handlePosterSave(editPoster);}} className="space-y-3 px-4 pt-4 pb-4 flex-1">
                     <div>
-                      <label className="block font-medium mb-1">Image URL <span className="text-red-600">*</span></label>
-                      <input type="text" className="w-full border rounded p-2" value={editPoster?.imageUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, imageUrl: e.target.value} : null)} required />
+                      <label className="block font-medium mb-1">Poster Image <span className="text-red-600">*</span></label>
+                      {/* ImageInputWithMode: allow user to choose between link or upload to GitHub */}
+                      <div className="max-w-xs w-full mx-auto">
+                        <div style={{ minWidth: '220px', maxWidth: '100%' }}>
+                          <ImageInputWithMode
+                            value={editPoster?.imageUrl || ""}
+                            onChange={(newUrl: string) => {
+                              setEditPoster(editPoster ? { ...editPoster, imageUrl: newUrl } : null);
+                            }}
+                            repo="mahapalanarotama/OfficialWebsite"
+                            path="Img/poster"
+                          />
+                        </div>
+                      </div>
                     </div>
                     {/* Start Date & Time */}
                     <div className="flex gap-2">
@@ -626,7 +642,9 @@ export default function DeveloperPage() {
                       <label className="block font-medium mb-1">Link URL (optional)</label>
                       <input type="text" className="w-full border rounded p-2" value={editPoster?.linkUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, linkUrl: e.target.value} : null)} />
                     </div>
-                    <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">Simpan</button>
+                    <div className="flex justify-end border-t border-gray-200 px-4 py-3" style={{ position: 'sticky', bottom: 0, zIndex: 20, background: 'white' }}>
+                      <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">Simpan</button>
+                    </div>
                   </form>
                 </div>
               </div>
