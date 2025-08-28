@@ -1,3 +1,6 @@
+import { PosterPopup } from "@/components/PosterPopup";
+// ...existing code...
+<PosterPopup />
 import { useGallery } from "@/hooks/use-gallery";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";

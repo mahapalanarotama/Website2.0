@@ -1,3 +1,6 @@
+import { PosterPopup } from "@/components/PosterPopup";
+// ...existing code...
+<PosterPopup />
 import { useState, useEffect, useRef } from "react";
 import { LearningModule } from "@/components/LearningModule";
 import { useLearningModules } from "@/hooks/use-learning";
