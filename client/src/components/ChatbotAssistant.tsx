@@ -71,7 +71,7 @@ export async function fetchAIAnswer(question: string): Promise<string> {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer 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`, // Ganti dengan token Anda
+          Authorization: `Bearer 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`, // Token baru
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -176,10 +176,25 @@ export default function ChatbotAssistant() {
     if (faq) {
       // Animasi mengetik karakter demi karakter untuk jawaban FAQ
       const answer = faq.a;
+      // Deteksi markdown tabel, list, heading, blockquote, kode
+      const isTable = /\|.*\n.*---/.test(answer);
+      const isList = /^\s*[-*+]\s+/m.test(answer) || /^\s*\d+\.\s+/m.test(answer);
+      const isHeading = /^\s*#{1,6}\s+/m.test(answer);
+      const isBlockquote = /^\s*>/m.test(answer);
+      const isCode = /```/.test(answer);
+      if (isTable || isList || isHeading || isBlockquote || isCode) {
+        // Tampilkan langsung tanpa animasi
+        setTypingText('');
+        setMessages(msgs => [...msgs, { from: 'bot', text: answer }]);
+        setTyping(false);
+        return;
+      }
+      const delay = Math.max(18, Math.min(50, 600 / answer.length));
       for (let i = 1; i <= answer.length; i++) {
-        setTypingText(answer.slice(0, i));
+        // Render markdown langsung saat animasi
+        setTypingText(formatMarkdown(answer.slice(0, i)));
         // eslint-disable-next-line no-await-in-loop
-        await new Promise(res => setTimeout(res, 18));
+        await new Promise(res => setTimeout(res, delay));
       }
       setMessages(msgs => [...msgs, { from: 'bot', text: answer }]);
       setTyping(false);
@@ -262,7 +277,11 @@ export default function ChatbotAssistant() {
                 )}
                 <span className={msg.from === 'user' ? 'inline-block bg-blue-100 text-blue-800 rounded px-3 py-2 max-w-[70%]' : 'inline-block bg-gray-100 text-gray-800 rounded px-3 py-2 max-w-[70%]'}>
                   {msg.from === 'bot' ? (
-                    <span dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.text) }} />
+                    <span
+                      dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.text) }}
+                      style={{ display: 'block' }}
+                      className="chatbot-markdown"
+                    />
                   ) : (
                     msg.text
                   )}
@@ -276,12 +295,17 @@ export default function ChatbotAssistant() {
             ))}
             {typing && typingText && (
               <div className="text-left mb-2">
-                <span className="inline-block bg-gray-100 text-gray-800 rounded px-2 py-1 animate-pulse">
-                  {typingText}
+                <span className="inline-block bg-gray-100 text-gray-800 rounded px-2 py-1 animate-pulse chatbot-markdown">
+                  <span dangerouslySetInnerHTML={{ __html: typingText }} />
                   <span className="inline-block w-2 h-2 bg-gray-400 rounded-full ml-1 animate-bounce" />
                 </span>
               </div>
             )}
+<style>{`
+  .chatbot-markdown p { margin-bottom: 0.7em; }
+  .chatbot-markdown ul, .chatbot-markdown ol { margin-bottom: 0.7em; padding-left: 1.2em; }
+  .chatbot-markdown li { margin-bottom: 0.3em; }
+`}</style>
             {typing && !typingText && (
               <div className="text-gray-400 animate-pulse flex items-center gap-2 mt-2">
                 <span className="inline-block w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
