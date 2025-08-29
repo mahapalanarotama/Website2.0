@@ -409,8 +409,27 @@ export default function OfflinePage() {
     }
   };
 
+  // Status online/offline
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  useEffect(() => {
+    const updateOnlineStatus = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-green-50 py-8 px-2">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-green-50 py-8 px-2 relative">
+      {/* Indikator Online/Offline di pojok kanan atas */}
+      <div className="absolute top-4 right-4 z-50">
+        <span className={`px-3 py-1 rounded-full font-bold text-xs shadow ${isOnline ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}
+          title={isOnline ? 'Online' : 'Offline'}>
+          {isOnline ? 'Online' : 'Offline'}
+        </span>
+      </div>
       {/* Progress bar offline status */}
       <div className="max-w-xl mx-auto mb-4">
         {showProgress && (
@@ -424,6 +443,12 @@ export default function OfflinePage() {
             ) : (
               <div className="h-6 rounded-full transition-all duration-500" style={{ width: '33%', background: 'linear-gradient(90deg, #ef4444, #f59e42)' }}></div>
             )}
+          </div>
+        )}
+        {/* Notifikasi jika cache belum siap */}
+        {cacheStatus === 'error' && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-2 text-center font-semibold">
+            <span>Cache offline belum siap. Silakan akses aplikasi ini dalam kondisi online minimal sekali agar semua file penting tercache. Setelah itu, Anda bisa mengakses offline dan refresh tanpa blank.</span>
           </div>
         )}
         <style>{`

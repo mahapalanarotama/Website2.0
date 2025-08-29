@@ -36,7 +36,8 @@ self.addEventListener('message', async event => {
   }
 });
 // Service Worker untuk cache hanya halaman /offline dan asset terkait
-const CACHE_NAME = 'offline-cache-v1';
+const CACHE_VERSION = (self && self.registration && self.registration.scope) ? self.registration.scope : '';
+const CACHE_NAME = 'offline-cache-v1-' + CACHE_VERSION + '-' + Date.now();
 const OFFLINE_URL = '/offline';
 const ASSETS = [
   '/',
