@@ -329,6 +329,58 @@ const tipsSurvival = [
 ];
 
 export default function OfflinePage() {
+  const [cacheStatus, setCacheStatus] = useState<'checking'|'caching'|'ready'|'error'>('checking');
+  const [cacheError, setCacheError] = useState<string|null>(null);
+  const [showProgress, setShowProgress] = useState(true);
+  const [showStatus, setShowStatus] = useState(true);
+  useEffect(() => {
+    if (cacheStatus === 'ready') {
+      const progressTimeout = setTimeout(() => setShowProgress(false), 3000);
+      const statusTimeout = setTimeout(() => setShowStatus(false), 5000);
+      return () => {
+        clearTimeout(progressTimeout);
+        clearTimeout(statusTimeout);
+      };
+    } else {
+      setShowProgress(true);
+      setShowStatus(true);
+    }
+  }, [cacheStatus]);
+
+  useEffect(() => {
+    // Komunikasi dengan service worker + fallback polling
+    let listener: any;
+    let pollInterval: any;
+    function sendCheckCache() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+          if (reg.active) {
+            console.log('[OfflinePage] Sending CHECK_CACHE to SW');
+            reg.active.postMessage({ type: 'CHECK_CACHE' });
+          } else {
+            console.log('[OfflinePage] SW not active yet');
+          }
+        });
+      }
+    }
+    sendCheckCache();
+    pollInterval = setInterval(sendCheckCache, 2000); // Poll setiap 2 detik sampai status berubah
+    listener = (event: any) => {
+      if (event.data && event.data.type === 'CACHE_STATUS') {
+        console.log('[OfflinePage] Received CACHE_STATUS:', event.data);
+        setCacheStatus(event.data.status);
+        setCacheError(event.data.error || null);
+        if (event.data.status === 'ready' || event.data.status === 'error') {
+          clearInterval(pollInterval);
+        }
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', listener);
+    return () => {
+      if (listener) navigator.serviceWorker.removeEventListener('message', listener);
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, []);
   const [tab, setTab] = useState('fitur');
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -359,6 +411,44 @@ export default function OfflinePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-green-50 py-8 px-2">
+      {/* Progress bar offline status */}
+      <div className="max-w-xl mx-auto mb-4">
+        {showProgress && (
+          <div className="w-full bg-gray-200 rounded-full h-6 mb-2 overflow-hidden">
+            {cacheStatus === 'checking' ? (
+              <div className="h-6 rounded-full animate-progress-loading" style={{ width: '33%', background: 'linear-gradient(90deg, #ef4444, #f59e42, #3b82f6, #22c55e)' }}></div>
+            ) : cacheStatus === 'caching' ? (
+              <div className="h-6 rounded-full transition-all duration-500" style={{ width: '66%', background: 'linear-gradient(90deg, #ef4444, #f59e42, #22c55e)' }}></div>
+            ) : cacheStatus === 'ready' ? (
+              <div className="h-6 rounded-full transition-all duration-500" style={{ width: '100%', background: 'linear-gradient(90deg, #22c55e, #16a34a)' }}></div>
+            ) : (
+              <div className="h-6 rounded-full transition-all duration-500" style={{ width: '33%', background: 'linear-gradient(90deg, #ef4444, #f59e42)' }}></div>
+            )}
+          </div>
+        )}
+        <style>{`
+          @keyframes progress-loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+          }
+          .animate-progress-loading {
+            animation: progress-loading 1.2s linear infinite;
+          }
+        `}</style>
+        <div className="text-center text-sm font-semibold">
+          {cacheStatus==='ready' && showStatus && (
+            <span className="flex items-center justify-center gap-2 text-green-700">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.414 7.414a1 1 0 01-1.414 0l-3.414-3.414a1 1 0 111.414-1.414L8 11.586l6.707-6.707a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+              Aplikasi sudah siap untuk offline
+            </span>
+          )}
+          {cacheStatus==='caching' && 'Sedang menyiapkan cache offline...'}
+          {cacheStatus==='checking' && 'Memeriksa status cache offline...'}
+          {cacheStatus==='error' && (
+            <span className="text-red-600">Gagal cache offline. {cacheError ? cacheError : ''} Coba reload aplikasi dalam kondisi online, atau clear cache dan ulangi instalasi.</span>
+          )}
+        </div>
+      </div>
       <div className="max-w-xl mx-auto">
         {/* Tombol Install PWA */}
         <div className="flex justify-center mb-4">

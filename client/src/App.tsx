@@ -59,9 +59,25 @@ function App() {
   const [meta, setMeta] = React.useState<MetaData | null>(null);
 
   React.useEffect(() => {
-    getMeta().then((data) => {
-      if (data) setMeta(data);
-    });
+    getMeta()
+      .then((data) => {
+        if (data) setMeta(data);
+      })
+      .catch(() => {
+        // Jika offline, gunakan meta default dan tampilkan status offline
+        setMeta({
+          title: "Aplikasi Survival Offline",
+          description: "Aplikasi dapat digunakan tanpa koneksi internet.",
+          keywords: "survival, offline, pwa, gps, tracker",
+          image: "/OfflineApp.png",
+          favicon: "/favicon.ico",
+          faviconFallback: "/favicon.ico",
+          faviconPng: "/favicon.png",
+        });
+        if (window && window.navigator && !window.navigator.onLine) {
+          console.warn("Anda sedang offline, data meta default digunakan.");
+        }
+      });
   }, []);
 
   React.useEffect(() => {
