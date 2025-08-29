@@ -34,10 +34,10 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-  // Untuk navigasi (HTML), fallback ke offline page jika gagal
+  // Untuk navigasi (HTML), fallback ke index.html jika gagal agar SPA tetap bisa menampilkan halaman offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/offline'))
+      fetch(event.request).catch(() => caches.match('/index.html'))
     );
   }
 });
