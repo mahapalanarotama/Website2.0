@@ -6,15 +6,14 @@ import { BookOpen, Map, Phone, AlertTriangle } from "lucide-react"; // Merged im
 // --- Komponen Fitur Survival ---
 function DownloadPanduan({ url, label }: { url: string; label: string }) {
   return (
-    <a
-      href={url}
-      download
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-green-400 text-white font-semibold shadow hover:from-green-700 hover:to-green-500 transition mb-4"
+    <button
+      onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-green-400 text-white font-semibold shadow hover:from-green-700 hover:to-green-500 transition mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
       style={{ textDecoration: 'none' }}
     >
       <BookOpen className="w-5 h-5" />
       {label}
-    </a>
+    </button>
   );
 }
 
@@ -111,13 +110,24 @@ function NavigasiDarat() {
 
 function ChecklistSurvival() {
   const items = [
-    "Kompas", "Bivak/Shelter", "Peluit", "Pisau", "Senter/Headlamp", "Makanan Cadangan", "P3K", "Botol Air", "Jas Hujan", "Tali Paracord", "Pakaian Cadangan", "Korek Api/Firestarter"
+    { icon: '🧭', label: "Kompas" },
+    { icon: '🏕️', label: "Bivak/Shelter" },
+    { icon: '📯', label: "Peluit" },
+    { icon: '🔪', label: "Pisau" },
+    { icon: '💡', label: "Senter/Headlamp" },
+    { icon: '🍱', label: "Makanan Cadangan" },
+    { icon: '🩹', label: "P3K" },
+    { icon: '🚰', label: "Botol Air" },
+    { icon: '🌧️', label: "Jas Hujan" },
+    { icon: '🪢', label: "Tali Paracord" },
+    { icon: '👕', label: "Pakaian Cadangan" },
+    { icon: '🔥', label: "Korek Api/Firestarter" }
   ];
   const [checked, setChecked] = useState(() => {
     const saved = localStorage.getItem("survival_checklist");
     return saved ? JSON.parse(saved) : Array(items.length).fill(false);
   });
-  function toggle(idx: any) {
+  function toggle(idx: number) {
     const next = [...checked];
     next[idx] = !next[idx];
     setChecked(next);
@@ -131,16 +141,26 @@ function ChecklistSurvival() {
   return (
     <section className="bg-white/90 rounded-2xl shadow-xl p-6 mb-4 text-gray-800">
       <h2 className="text-2xl font-bold mb-3 text-green-800">Checklist Survival</h2>
-      <ul className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {items.map((item, i) => (
-          <li key={item} className="flex items-center gap-3">
-            <input type="checkbox" id={item} checked={checked[i]} onChange={() => toggle(i)} />
-            <label htmlFor={item} className="text-lg select-none">{item}</label>
-          </li>
+          <label key={item.label} htmlFor={item.label} className={`flex items-center gap-4 p-4 rounded-xl shadow transition-all cursor-pointer border-2 ${checked[i] ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white hover:bg-green-100'}`}>
+            <span className="text-3xl select-none" aria-label={item.label}>{item.icon}</span>
+            <span className={`flex-1 text-lg font-semibold select-none ${checked[i] ? 'text-green-700' : 'text-gray-700'}`}>{item.label}</span>
+            <input
+              type="checkbox"
+              id={item.label}
+              checked={checked[i]}
+              onChange={() => toggle(i)}
+              className="form-checkbox h-6 w-6 text-green-600 border-green-400 focus:ring-green-500 transition-all"
+              style={{ accentColor: '#22c55e' }}
+            />
+          </label>
         ))}
-      </ul>
-      <button className="btn-nav mt-4" onClick={resetChecklist}>Reset Checklist</button>
-      <p className="mt-2 text-green-200 text-sm">Checklist tersimpan otomatis di perangkat Anda.</p>
+      </div>
+      <button className="mt-6 px-6 py-2 rounded-full bg-gradient-to-r from-green-600 to-green-400 text-white font-bold shadow hover:from-green-700 hover:to-green-500 transition-all text-lg" onClick={resetChecklist}>
+        Reset Checklist
+      </button>
+      <p className="mt-2 text-green-400 text-sm text-center">Checklist tersimpan otomatis di perangkat Anda.</p>
     </section>
   );
 }
