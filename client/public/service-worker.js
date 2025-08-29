@@ -14,12 +14,26 @@ const ASSETS = [
   '/robots.txt',
   '/sitemap.xml',
   '/src/index.css',
-  // Tambahkan asset CSS/JS utama hasil build jika ada
+  // Semua file di /assets akan dicache otomatis
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(async cache => {
+      // Cache semua asset statis
+      await cache.addAll(ASSETS);
+      // Cache semua file di /assets (JS/CSS hasil build)
+      try {
+        const assetsResp = await fetch('/assets-manifest.json');
+        if (assetsResp.ok) {
+          const manifest = await assetsResp.json();
+          const assetFiles = Object.values(manifest).filter(f => typeof f === 'string' && f.startsWith('assets/'));
+          await Promise.all(assetFiles.map(f => cache.add('/' + f)));
+        }
+      } catch (e) {
+        // Jika gagal, abaikan
+      }
+    })
   );
 });
 
