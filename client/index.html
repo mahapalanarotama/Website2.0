@@ -30,6 +30,13 @@
   <!-- PWA Manifest -->
   <link rel="manifest" href="/manifest.json" />
 
+   <script>
+     // Redirect ke /offline jika dibuka sebagai PWA dan path adalah /
+     if (window.matchMedia('(display-mode: standalone)').matches && location.pathname === '/') {
+       location.replace('/offline');
+     }
+   </script>
+
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
       {
