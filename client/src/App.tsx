@@ -47,6 +47,7 @@ function App() {
         return false;
       }
     };
+          // Removed unused install prompt logic and variables
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu);
