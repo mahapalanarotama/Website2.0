@@ -1,30 +1,3 @@
-  // Blokir refresh manual saat offline, dan refresh otomatis saat online
-  useEffect(() => {
-    function blockRefresh(e: KeyboardEvent) {
-      if (!navigator.onLine) {
-        // F5, Ctrl+R, Cmd+R
-        if (
-          (e.key === 'F5') ||
-          (e.ctrlKey && e.key === 'r') ||
-          (e.metaKey && e.key === 'r')
-        ) {
-          e.preventDefault();
-          alert('Halaman tidak bisa direfresh saat offline. Silakan refresh saat online.');
-        }
-      }
-    }
-    function autoRefreshOnline() {
-      if (navigator.onLine) {
-        window.location.reload();
-      }
-    }
-    window.addEventListener('keydown', blockRefresh);
-    window.addEventListener('online', autoRefreshOnline);
-    return () => {
-      window.removeEventListener('keydown', blockRefresh);
-      window.removeEventListener('online', autoRefreshOnline);
-    };
-  }, []);
 import { saveGpsTrackerToFirestore, syncOfflineGpsToFirestore } from "@/lib/gpsFirestore";
 import { useState, useEffect, useRef } from "react";
 import { BookOpen, Map, Phone, AlertTriangle } from "lucide-react"; // Merged imports
@@ -450,9 +423,9 @@ export default function OfflinePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-green-50 py-8 px-2 relative">
-      {/* Indikator Online/Offline di pojok kanan atas */}
-      <div className="absolute top-4 right-4 z-50">
-        <span className={`px-3 py-1 rounded-full font-bold text-xs shadow ${isOnline ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}
+      {/* Indikator Online/Offline sticky di bawah navbar utama */}
+  <div className="sticky top-0 z-40 w-full flex justify-end">
+        <span className={`mx-4 my-2 px-3 py-1 rounded-full font-bold text-xs shadow ${isOnline ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}
           title={isOnline ? 'Online' : 'Offline'}>
           {isOnline ? 'Online' : 'Offline'}
         </span>
