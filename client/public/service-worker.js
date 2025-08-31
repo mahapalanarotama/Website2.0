@@ -25,7 +25,7 @@ self.addEventListener('message', async event => {
 });
 
 const CACHE_NAME = 'offline-cache-v1-' + Date.now();
-const ASSETS = [
+let ASSETS = [
   '/',
   '/index.html',
   '/offline',
@@ -36,17 +36,39 @@ const ASSETS = [
   '/navigasi-darat.pdf',
   '/ppgd.pdf',
   '/robots.txt',
-  '/sitemap.xml',
-  '/assets/backsound-BBcioZr7.mp3',
-  '/assets/index-14VCckBn.css',
-  '/assets/index-BGOrKOQc.js',
-  '/assets/index-BJ_22dnw.css',
-  '/assets/index-bWXjXQwU.js',
-  '/assets/index-CfFcCRyT.css',
-  '/assets/index-CVdhqAZu.js',
-  '/assets/index-iazrxU6o.css',
-  '/assets/index-UbqMtLHe.js'
+  '/sitemap.xml'
 ];
+
+// Dynamically load assets from assets-manifest.json
+self.addEventListener('install', event => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const manifestResponse = await fetch('/assets-manifest.json');
+        if (manifestResponse.ok) {
+          const manifestAssets = await manifestResponse.json();
+          ASSETS = ASSETS.concat(manifestAssets);
+        }
+      } catch (e) {
+        // If manifest fetch fails, continue with static ASSETS
+      }
+      const cache = await caches.open(CACHE_NAME);
+      let loaded = 0;
+      for (const asset of ASSETS) {
+        try {
+          await cache.add(asset);
+        } catch (e) {}
+        loaded++;
+        const progress = Math.round((loaded / ASSETS.length) * 100);
+        const allClients = await self.clients.matchAll();
+        for (const client of allClients) {
+          client.postMessage({ type: 'CACHE_PROGRESS', progress });
+        }
+      }
+    })()
+  );
+  self.skipWaiting();
+});
 
 self.addEventListener('install', event => {
   event.waitUntil(
