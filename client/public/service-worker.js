@@ -37,7 +37,7 @@ self.addEventListener('message', async event => {
 });
 // Service Worker untuk cache hanya halaman /offline dan asset terkait
 const CACHE_VERSION = (self && self.registration && self.registration.scope) ? self.registration.scope : '';
-const CACHE_NAME = 'offline-cache-v1-' + CACHE_VERSION + '-' + Date.now();
+const CACHE_NAME = 'offline-cache-v1'; // Versi stabil, jangan pakai Date.now()
 const OFFLINE_URL = '/offline';
 const ASSETS = [
   '/',
@@ -72,6 +72,10 @@ self.addEventListener('install', event => {
   })());
 });
 
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   // Cache first untuk semua asset (JS, CSS, PDF, audio, gambar, dll)
@@ -88,24 +92,22 @@ self.addEventListener('fetch', event => {
     url.pathname.endsWith('.mp3')
   ) {
     event.respondWith(
-      caches.match(event.request).then(response => response || fetch(event.request))
+      caches.match(event.request).then(response => {
+        if (response) return response;
+        // Fallback ke cache lain jika ada
+        return caches.keys().then(keys => {
+          return Promise.any(keys.map(k => caches.open(k).then(c => c.match(event.request)))).catch(() => fetch(event.request));
+        });
+      })
     );
     return;
   }
-  // Untuk navigasi SPA, fallback ke /offline jika gagal
+  // Untuk navigasi SPA, fallback ke /index.html jika gagal
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
-        .catch(() => caches.match('/offline'))
+        .catch(() => caches.match('/index.html'))
     );
     return;
   }
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
-  );
 });
