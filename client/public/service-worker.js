@@ -36,8 +36,7 @@ self.addEventListener('message', async event => {
   }
 });
 // Service Worker untuk cache hanya halaman /offline dan asset terkait
-const CACHE_VERSION = (self && self.registration && self.registration.scope) ? self.registration.scope : '';
-const CACHE_NAME = 'offline-cache-v1-' + CACHE_VERSION + '-' + Date.now();
+const CACHE_NAME = 'offline-cache-v1';
 const OFFLINE_URL = '/offline';
 const ASSETS = [
   '/',
@@ -65,8 +64,8 @@ self.addEventListener('install', event => {
         const assetsResp = await fetch('/assets-manifest.json');
         if (assetsResp.ok) {
           const manifest = await assetsResp.json();
-          const assetFiles = Object.values(manifest).filter(f => typeof f === 'string' && f.startsWith('assets/'));
-          await Promise.all(assetFiles.map(f => cache.add('/' + f)));
+          const assetFiles = Array.isArray(manifest) ? manifest : Object.values(manifest);
+          await Promise.all(assetFiles.map(f => cache.add(f)));
         }
       } catch (e) {
         // Jika gagal, abaikan
@@ -77,21 +76,22 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  // Untuk semua request asset di ASSETS, cache duluan
-  if (ASSETS.includes(url.pathname)) {
-    event.respondWith(
-      caches.match(event.request).then(response =>
-        response || fetch(event.request)
-      )
-    );
-    return;
-  }
-  // Untuk navigasi (HTML), fallback ke index.html jika gagal agar SPA tetap bisa menampilkan halaman offline
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match('/index.html'))
-    );
-  }
+  // Serve semua file dari cache jika offline
+  event.respondWith(
+    caches.match(event.request).then(response => {
+      // Jika ada di cache, return cache
+      if (response) return response;
+      // Jika online, fetch dari network
+      return fetch(event.request).catch(() => {
+        // Jika offline dan tidak ada di cache, fallback ke index.html untuk navigasi SPA
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
+        // Jika offline dan file tidak ada di cache, return undefined
+        return undefined;
+      });
+    })
+  );
 });
 
 self.addEventListener('activate', event => {
