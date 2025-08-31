@@ -42,6 +42,7 @@ const OFFLINE_URL = '/offline';
 const ASSETS = [
   '/',
   '/index.html',
+  '/dist/index.html',
   '/offline',
   '/favicon.ico',
   '/manifest.json',
@@ -86,10 +87,14 @@ self.addEventListener('fetch', event => {
     );
     return;
   }
-  // Untuk navigasi (HTML), fallback ke index.html jika gagal agar SPA tetap bisa menampilkan halaman offline
+  // Untuk navigasi (HTML), fallback ke index.html atau /dist/index.html jika gagal agar SPA tetap bisa menampilkan halaman offline
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/index.html'))
+      fetch(event.request).catch(() =>
+        caches.match('/index.html').then(res =>
+          res || caches.match('/dist/index.html')
+        )
+      )
     );
   }
 });
