@@ -1,23 +1,3 @@
-  // Blokir refresh manual saat offline
-  useEffect(() => {
-    function blockRefresh(e: KeyboardEvent) {
-      if (!navigator.onLine) {
-        // F5, Ctrl+R, Cmd+R
-        if (
-          (e.key === 'F5') ||
-          (e.ctrlKey && e.key === 'r') ||
-          (e.metaKey && e.key === 'r')
-        ) {
-          e.preventDefault();
-          alert('Halaman tidak bisa direfresh saat offline. Silakan refresh saat online.');
-        }
-      }
-    }
-    window.addEventListener('keydown', blockRefresh);
-    return () => {
-      window.removeEventListener('keydown', blockRefresh);
-    };
-  }, []);
 import { saveGpsTrackerToFirestore, syncOfflineGpsToFirestore } from "@/lib/gpsFirestore";
 import { useState, useEffect, useRef } from "react";
 import { BookOpen, Map, Phone, AlertTriangle } from "lucide-react"; // Merged imports

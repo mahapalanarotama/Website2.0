@@ -36,7 +36,8 @@ self.addEventListener('message', async event => {
   }
 });
 // Service Worker untuk cache hanya halaman /offline dan asset terkait
-const CACHE_NAME = 'offline-cache-v1';
+const CACHE_VERSION = (self && self.registration && self.registration.scope) ? self.registration.scope : '';
+const CACHE_NAME = 'offline-cache-v1-' + CACHE_VERSION + '-' + Date.now();
 const OFFLINE_URL = '/offline';
 const ASSETS = [
   '/',
@@ -55,43 +56,50 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      // Cache semua asset statis
-      await cache.addAll(ASSETS);
-      // Cache semua file di /assets (JS/CSS hasil build)
-      try {
-        const assetsResp = await fetch('/assets-manifest.json');
-        if (assetsResp.ok) {
-          const manifest = await assetsResp.json();
-          const assetFiles = Array.isArray(manifest) ? manifest : Object.values(manifest);
-          await Promise.all(assetFiles.map(f => cache.add(f)));
-        }
-      } catch (e) {
-        // Jika gagal, abaikan
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    // Cache semua asset statis
+    await cache.addAll(ASSETS);
+    // Cache semua file di /assets (JS/CSS hasil build, audio, dll)
+    try {
+      const assetsResp = await fetch('/assets-manifest.json');
+      if (assetsResp.ok) {
+        const manifest = await assetsResp.json();
+        const assetFiles = Array.isArray(manifest) ? manifest : Object.values(manifest);
+        await Promise.all(assetFiles.map(f => cache.add(f)));
       }
-    })
-  );
+    } catch (e) {}
+  })());
 });
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  // Serve semua file dari cache jika offline
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      // Jika ada di cache, return cache
-      if (response) return response;
-      // Jika online, fetch dari network
-      return fetch(event.request).catch(() => {
-        // Jika offline dan tidak ada di cache, fallback ke index.html untuk navigasi SPA
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-        // Jika offline dan file tidak ada di cache, return undefined
-        return undefined;
-      });
-    })
-  );
+  // Cache first untuk semua asset (JS, CSS, PDF, audio, gambar, dll)
+  if (
+    url.pathname.startsWith('/assets/') ||
+    ASSETS.includes(url.pathname) ||
+    url.pathname.endsWith('.js') ||
+    url.pathname.endsWith('.css') ||
+    url.pathname.endsWith('.pdf') ||
+    url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.jpeg') ||
+    url.pathname.endsWith('.svg') ||
+    url.pathname.endsWith('.mp3')
+  ) {
+    event.respondWith(
+      caches.match(event.request).then(response => response || fetch(event.request))
+    );
+    return;
+  }
+  // Untuk navigasi SPA, fallback ke /offline jika gagal
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => caches.match('/offline'))
+    );
+    return;
+  }
 });
 
 self.addEventListener('activate', event => {
