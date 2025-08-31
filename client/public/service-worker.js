@@ -1,8 +1,42 @@
+// Listen for messages from client to report cache status and progress
+self.addEventListener('message', async event => {
+  if (event.data && event.data.type === 'CHECK_CACHE') {
+    let status = 'checking';
+    let error = null;
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      const cachedRequests = await cache.keys();
+      const cachedPaths = cachedRequests.map(req => new URL(req.url).pathname);
+      const missing = ASSETS.filter(asset => !cachedPaths.includes(asset));
+      if (missing.length === 0) {
+        status = 'ready';
+      } else if (missing.length < ASSETS.length) {
+        status = 'caching';
+      } else {
+        status = 'error';
+        error = 'Beberapa file penting belum tercache.';
+      }
+    } catch (e) {
+      status = 'error';
+      error = e.message;
+    }
+    event.source.postMessage({ type: 'CACHE_STATUS', status, error });
+  }
+});
 
 const CACHE_NAME = 'offline-cache-v1-' + Date.now();
 const ASSETS = [
-  '/', '/index.html', '/offline', '/favicon.ico', '/manifest.json', '/OfflineApp.png',
-  '/panduan-survival.pdf', '/navigasi-darat.pdf', '/ppgd.pdf', '/robots.txt', '/sitemap.xml',
+  '/',
+  '/index.html',
+  '/offline',
+  '/favicon.ico',
+  '/manifest.json',
+  '/OfflineApp.png',
+  '/panduan-survival.pdf',
+  '/navigasi-darat.pdf',
+  '/ppgd.pdf',
+  '/robots.txt',
+  '/sitemap.xml',
   '/assets/backsound-BBcioZr7.mp3',
   '/assets/index-14VCckBn.css',
   '/assets/index-BGOrKOQc.js',
@@ -16,7 +50,24 @@ const ASSETS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+      let loaded = 0;
+      for (const asset of ASSETS) {
+        try {
+          await cache.add(asset);
+        } catch (e) {
+          // Ignore failed asset
+        }
+        loaded++;
+        // Send progress to all clients
+        const progress = Math.round((loaded / ASSETS.length) * 100);
+        const allClients = await self.clients.matchAll();
+        for (const client of allClients) {
+          client.postMessage({ type: 'CACHE_PROGRESS', progress });
+        }
+      }
+    })()
   );
   self.skipWaiting();
 });
@@ -32,15 +83,15 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Only handle requests to own origin (avoid external resources)
-  if (event.request.url.startsWith(self.location.origin)) {
+  const url = new URL(event.request.url);
+  if (ASSETS.includes(url.pathname)) {
     event.respondWith(
       caches.match(event.request).then(response =>
         response || fetch(event.request)
       )
     );
   }
-  // For external requests, do nothing (let browser handle them)
+  // For other requests, do nothing (do not call event.respondWith)
 });
 
 self.addEventListener('activate', event => {
