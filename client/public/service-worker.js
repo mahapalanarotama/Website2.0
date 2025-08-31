@@ -1,129 +1,42 @@
-// Handler untuk progress bar offline status
-self.addEventListener('message', async event => {
-  if (event.data && event.data.type === 'CHECK_CACHE') {
-    let status = 'checking';
-    let error = null;
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      // Cek semua asset utama
-      const allAssets = [...ASSETS];
-      try {
-        const assetsResp = await fetch('/assets-manifest.json');
-        if (assetsResp.ok) {
-          const manifest = await assetsResp.json();
-          const assetFiles = Object.values(manifest).filter(f => typeof f === 'string' && f.startsWith('assets/'));
-          allAssets.push(...assetFiles.map(f => '/' + f));
-        }
-      } catch (e) {}
-      let cachedCount = 0;
-      for (const asset of allAssets) {
-        const res = await cache.match(asset);
-        if (res) cachedCount++;
-      }
-      if (cachedCount === allAssets.length) {
-        status = 'ready';
-      } else if (cachedCount > 0) {
-        status = 'caching';
-      } else {
-        status = 'error';
-        error = 'Tidak ada file yang tercache.';
-      }
-    } catch (e) {
-      status = 'error';
-      error = e.message || 'Gagal cek cache.';
-    }
-    event.source && event.source.postMessage({ type: 'CACHE_STATUS', status, error });
-  }
-});
-// Service Worker untuk cache hanya halaman /offline dan asset terkait
-const CACHE_VERSION = (self && self.registration && self.registration.scope) ? self.registration.scope : '';
-const CACHE_NAME = 'offline-cache-v1-' + CACHE_VERSION + '-' + Date.now();
-const OFFLINE_URL = '/offline';
+
+const CACHE_NAME = 'offline-cache-v1-' + Date.now();
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/dist/index.html',
-  '/offline',
-  '/favicon.ico',
-  '/manifest.json',
-  '/OfflineApp.png',
-  '/panduan-survival.pdf',
-  '/navigasi-darat.pdf',
-  '/ppgd.pdf',
-  '/robots.txt',
-  '/sitemap.xml',
-  '/src/index.css',
-  // Semua file di /assets akan dicache otomatis
+  '/', '/index.html', '/offline', '/favicon.ico', '/manifest.json', '/OfflineApp.png',
+  '/panduan-survival.pdf', '/navigasi-darat.pdf', '/ppgd.pdf', '/robots.txt', '/sitemap.xml',
+  '/assets/backsound-BBcioZr7.mp3',
+  '/assets/index-14VCckBn.css',
+  '/assets/index-BGOrKOQc.js',
+  '/assets/index-BJ_22dnw.css',
+  '/assets/index-bWXjXQwU.js',
+  '/assets/index-CfFcCRyT.css',
+  '/assets/index-CVdhqAZu.js',
+  '/assets/index-iazrxU6o.css',
+  '/assets/index-UbqMtLHe.js'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      await cache.addAll(ASSETS);
-      // Cache semua file di /assets (JS/CSS hasil build) langsung dari dist jika manifest tidak tersedia
-      try {
-        // Coba fetch manifest
-        const assetsResp = await fetch('/assets-manifest.json');
-        if (assetsResp.ok) {
-          const manifest = await assetsResp.json();
-          for (const file of manifest) {
-            await cache.add(file.startsWith('/') ? file : '/' + file);
-          }
-        } else {
-          // Fallback: cache semua file di /assets dari dist
-          const assetFiles = [
-            '/assets/backsound-BBcioZr7.mp3',
-            '/assets/index-14VCckBn.css',
-            '/assets/index-BGOrKOQc.js',
-            '/assets/index-BJ_22dnw.css',
-            '/assets/index-bWXjXQwU.js',
-            '/assets/index-CfFcCRyT.css',
-            '/assets/index-CVdhqAZu.js',
-            '/assets/index-iazrxU6o.css',
-            '/assets/index-UbqMtLHe.js'
-          ];
-          await Promise.all(assetFiles.map(f => cache.add(f)));
-        }
-      } catch (e) {
-        // Fallback: cache semua file di /assets dari dist
-        const assetFiles = [
-          '/assets/backsound-BBcioZr7.mp3',
-          '/assets/index-14VCckBn.css',
-          '/assets/index-BGOrKOQc.js',
-          '/assets/index-BJ_22dnw.css',
-          '/assets/index-bWXjXQwU.js',
-          '/assets/index-CfFcCRyT.css',
-          '/assets/index-CVdhqAZu.js',
-          '/assets/index-iazrxU6o.css',
-          '/assets/index-UbqMtLHe.js'
-        ];
-        await Promise.all(assetFiles.map(f => cache.add(f)));
-      }
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)));
+      self.clients.claim();
+    })()
   );
 });
 
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-  // Untuk semua request asset di ASSETS, cache duluan
-  if (ASSETS.includes(url.pathname)) {
-    event.respondWith(
-      caches.match(event.request).then(response =>
-        response || fetch(event.request)
-      )
-    );
-    return;
-  }
-  // Untuk navigasi (HTML), fallback ke index.html atau /dist/index.html jika gagal agar SPA tetap bisa menampilkan halaman offline
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() =>
-        caches.match('/index.html').then(res =>
-          res || caches.match('/dist/index.html')
-        )
-      )
-    );
-  }
+  event.respondWith(
+    caches.match(event.request).then(response =>
+      response || fetch(event.request)
+    )
+  );
 });
 
 self.addEventListener('activate', event => {
