@@ -1,44 +1,5 @@
-// Handler untuk progress bar offline status
-self.addEventListener('message', async event => {
-  if (event.data && event.data.type === 'CHECK_CACHE') {
-    let status = 'checking';
-    let error = null;
-    try {
-      const cache = await caches.open(CACHE_NAME);
-      // Cek semua asset utama
-      const allAssets = [...ASSETS];
-      try {
-        const assetsResp = await fetch('/assets-manifest.json');
-        if (assetsResp.ok) {
-          const manifest = await assetsResp.json();
-          const assetFiles = Object.values(manifest).filter(f => typeof f === 'string' && f.startsWith('assets/'));
-          allAssets.push(...assetFiles.map(f => '/' + f));
-        }
-      } catch (e) {}
-      let cachedCount = 0;
-      for (const asset of allAssets) {
-        const res = await cache.match(asset);
-        if (res) cachedCount++;
-      }
-      if (cachedCount === allAssets.length) {
-        status = 'ready';
-      } else if (cachedCount > 0) {
-        status = 'caching';
-      } else {
-        status = 'error';
-        error = 'Tidak ada file yang tercache.';
-      }
-    } catch (e) {
-      status = 'error';
-      error = e.message || 'Gagal cek cache.';
-    }
-    event.source && event.source.postMessage({ type: 'CACHE_STATUS', status, error });
-  }
-});
-// Service Worker untuk cache hanya halaman /offline dan asset terkait
-const CACHE_VERSION = (self && self.registration && self.registration.scope) ? self.registration.scope : '';
-const CACHE_NAME = 'offline-cache-v1'; // Versi stabil, jangan pakai Date.now()
-const OFFLINE_URL = '/offline';
+// Service Worker: Pokedex.org style offline support
+const CACHE_NAME = 'offline-cache-v1';
 const ASSETS = [
   '/',
   '/index.html',
@@ -58,9 +19,7 @@ const ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
-    // Cache semua asset statis
     await cache.addAll(ASSETS);
-    // Cache semua file di /assets (JS/CSS hasil build, audio, dll)
     try {
       const assetsResp = await fetch('/assets-manifest.json');
       if (assetsResp.ok) {
