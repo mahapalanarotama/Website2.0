@@ -59,18 +59,45 @@ const ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      // Cache semua asset statis
       await cache.addAll(ASSETS);
-      // Cache semua file di /assets (JS/CSS hasil build)
+      // Cache semua file di /assets (JS/CSS hasil build) langsung dari dist jika manifest tidak tersedia
       try {
+        // Coba fetch manifest
         const assetsResp = await fetch('/assets-manifest.json');
         if (assetsResp.ok) {
           const manifest = await assetsResp.json();
-          const assetFiles = Object.values(manifest).filter(f => typeof f === 'string' && f.startsWith('assets/'));
-          await Promise.all(assetFiles.map(f => cache.add('/' + f)));
+          for (const file of manifest) {
+            await cache.add(file.startsWith('/') ? file : '/' + file);
+          }
+        } else {
+          // Fallback: cache semua file di /assets dari dist
+          const assetFiles = [
+            '/assets/backsound-BBcioZr7.mp3',
+            '/assets/index-14VCckBn.css',
+            '/assets/index-BGOrKOQc.js',
+            '/assets/index-BJ_22dnw.css',
+            '/assets/index-bWXjXQwU.js',
+            '/assets/index-CfFcCRyT.css',
+            '/assets/index-CVdhqAZu.js',
+            '/assets/index-iazrxU6o.css',
+            '/assets/index-UbqMtLHe.js'
+          ];
+          await Promise.all(assetFiles.map(f => cache.add(f)));
         }
       } catch (e) {
-        // Jika gagal, abaikan
+        // Fallback: cache semua file di /assets dari dist
+        const assetFiles = [
+          '/assets/backsound-BBcioZr7.mp3',
+          '/assets/index-14VCckBn.css',
+          '/assets/index-BGOrKOQc.js',
+          '/assets/index-BJ_22dnw.css',
+          '/assets/index-bWXjXQwU.js',
+          '/assets/index-CfFcCRyT.css',
+          '/assets/index-CVdhqAZu.js',
+          '/assets/index-iazrxU6o.css',
+          '/assets/index-UbqMtLHe.js'
+        ];
+        await Promise.all(assetFiles.map(f => cache.add(f)));
       }
     })
   );
