@@ -32,11 +32,15 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response =>
-      response || fetch(event.request)
-    )
-  );
+  // Only handle requests to own origin (avoid external resources)
+  if (event.request.url.startsWith(self.location.origin)) {
+    event.respondWith(
+      caches.match(event.request).then(response =>
+        response || fetch(event.request)
+      )
+    );
+  }
+  // For external requests, do nothing (let browser handle them)
 });
 
 self.addEventListener('activate', event => {
