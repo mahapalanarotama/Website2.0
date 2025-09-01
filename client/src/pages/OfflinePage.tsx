@@ -415,13 +415,14 @@ export default function OfflinePage() {
     const updateOnlineStatus = () => {
       setIsOnline(navigator.onLine);
       
-      // Jika offline dan di React component, redirect ke standalone page
-      if (!navigator.onLine) {
+      // Jika offline dan di React component, tawarkan pindah ke standalone page
+      if (!navigator.onLine && isOnline) {
+        // Hanya show dialog jika baru saja kehilangan koneksi
         setTimeout(() => {
-          if (confirm('Koneksi terputus. Pindah ke mode offline standalone?')) {
+          if (confirm('Koneksi terputus. Pindah ke mode offline standalone untuk pengalaman yang lebih optimal?')) {
             window.location.href = '/offline-standalone.html';
           }
-        }, 2000);
+        }, 3000);
       }
     };
     

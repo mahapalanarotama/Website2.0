@@ -777,14 +777,14 @@
                 statusEl.textContent = 'Online';
                 statusEl.className = 'status-badge online';
                 
-                // Auto redirect saat online ke React component
-                setTimeout(() => {
-                    if (confirm('Internet tersambung. Kembali ke aplikasi React?')) {
-                        // Force reload untuk memastikan service worker menggunakan network
-                        window.location.href = '/offline?online=true';
-                        setTimeout(() => window.location.reload(), 100);
-                    }
-                }, 1000);
+                // Auto redirect saat online ke React component - hanya jika tidak diakses langsung
+                if (!window.location.pathname.includes('offline-standalone.html')) {
+                    setTimeout(() => {
+                        if (confirm('Internet tersambung. Kembali ke aplikasi React?')) {
+                            window.location.href = '/offline';
+                        }
+                    }, 1000);
+                }
             } else {
                 statusEl.textContent = 'Offline';
                 statusEl.className = 'status-badge offline';

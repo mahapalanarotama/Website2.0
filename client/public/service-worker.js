@@ -65,20 +65,18 @@ self.addEventListener('fetch', event => {
     (async () => {
       // Khusus untuk route /offline
       if (url.pathname === '/offline') {
-        // Jika online, coba network dulu (akan menampilkan React component)
-        if (navigator.onLine) {
-          try {
-            const response = await fetch(event.request);
-            if (response.ok) {
-              console.log('[SW] 🌐 Serving online /offline route from network');
-              return response;
-            }
-          } catch (networkError) {
-            console.log('[SW] 📡 Network failed for /offline, falling back to offline page');
+        // Selalu coba network dulu untuk mendapatkan React app
+        try {
+          const response = await fetch(event.request);
+          if (response.ok) {
+            console.log('[SW] 🌐 Serving React /offline route from network');
+            return response;
           }
+        } catch (networkError) {
+          console.log('[SW] 📡 Network failed for /offline, falling back to offline standalone page');
         }
         
-        // Jika offline atau network gagal, serve standalone offline page
+        // Hanya jika network benar-benar gagal, baru serve standalone offline page
         const cache = await caches.open(CACHE_NAME);
         const offlineResponse = await cache.match('/offline-standalone.html');
         
