@@ -846,7 +846,7 @@
         }
 
         /* Cookie Consent Overlay */
-        .cookie-overlay {
+        /* .cookie-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.5);
@@ -855,9 +855,9 @@
             justify-content: center;
             z-index: 50;
             padding: 1rem;
-        }
+        } */
 
-        .cookie-dialog {
+        /* .cookie-dialog {
             background: white;
             border-radius: 0.5rem;
             padding: 1.5rem;
@@ -865,9 +865,9 @@
             width: 100%;
             box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
             animation: cookieSlideIn 0.3s ease-out;
-        }
+        } */
 
-        @keyframes cookieSlideIn {
+        /* @keyframes cookieSlideIn {
             from {
                 opacity: 0;
                 transform: scale(0.95) translateY(20px);
@@ -876,7 +876,7 @@
                 opacity: 1;
                 transform: scale(1) translateY(0);
             }
-        }
+        } */
 
         .cookie-title {
             font-size: 1.125rem;
@@ -1799,42 +1799,42 @@
 
 
         // Cookie Consent Functions - Fixed to work properly
-        function showCookieConsent() {
-            const hasConsented = localStorage.getItem('cookieConsent');
-            console.log('Cookie consent check:', hasConsented);
+        // function showCookieConsent() {
+        //     const hasConsented = localStorage.getItem('cookieConsent');
+        //     console.log('Cookie consent check:', hasConsented);
             
-            if (!hasConsented) {
-                const cookieDialog = document.getElementById('cookie-consent');
-                if (cookieDialog) {
-                    cookieDialog.classList.remove('hidden');
-                    console.log('Cookie consent dialog shown');
-                } else {
-                    console.error('Cookie consent element not found');
-                }
-            } else {
-                console.log('User already consented to cookies');
-            }
-        }
+        //     if (!hasConsented) {
+        //         const cookieDialog = document.getElementById('cookie-consent');
+        //         if (cookieDialog) {
+        //             cookieDialog.classList.remove('hidden');
+        //             console.log('Cookie consent dialog shown');
+        //         } else {
+        //             console.error('Cookie consent element not found');
+        //         }
+        //     } else {
+        //         console.log('User already consented to cookies');
+        //     }
+        // }
 
-        function handleCookieAccept() {
-            console.log('Cookie consent accepted');
-            localStorage.setItem('cookieConsent', 'true');
+        // function handleCookieAccept() {
+        //     console.log('Cookie consent accepted');
+        //     localStorage.setItem('cookieConsent', 'true');
             
-            const cookieDialog = document.getElementById('cookie-consent');
-            if (cookieDialog) {
-                cookieDialog.classList.add('hidden');
-            }
-        }
+        //     const cookieDialog = document.getElementById('cookie-consent');
+        //     if (cookieDialog) {
+        //         cookieDialog.classList.add('hidden');
+        //     }
+        // }
 
-        function handleCookieDecline() {
-            console.log('Cookie consent declined');
-            localStorage.setItem('cookieConsent', 'false');
+        // function handleCookieDecline() {
+        //     console.log('Cookie consent declined');
+        //     localStorage.setItem('cookieConsent', 'false');
             
-            const cookieDialog = document.getElementById('cookie-consent');
-            if (cookieDialog) {
-                cookieDialog.classList.add('hidden');
-            }
-        }
+        //     const cookieDialog = document.getElementById('cookie-consent');
+        //     if (cookieDialog) {
+        //         cookieDialog.classList.add('hidden');
+        //     }
+        // }
 
         // Initialize - Fixed initialization order and debugging
         document.addEventListener('DOMContentLoaded', function() {
