@@ -1,218 +1,228 @@
-const CACHE_NAME = 'offline-cache-v3';
-let ASSETS = [
+const CACHE_NAME = 'mpn-offline-v5';
+
+// Critical assets yang harus di-cache
+const CRITICAL_ASSETS = [
   '/',
   '/index.html',
   '/offline',
-  '/offline-static.html',
+  '/offline-standalone.html',
   '/favicon.ico',
   '/manifest.json',
   '/OfflineApp.png',
   '/panduan-survival.pdf',
   '/navigasi-darat.pdf',
-  '/ppgd.pdf',
-  '/robots.txt',
-  '/sitemap.xml',
-  '/Logo%20Mpn.png'
+  '/ppgd.pdf'
 ];
 
-// Install event - cache all assets
+// Install - cache semua assets
 self.addEventListener('install', event => {
+  console.log('[SW] Installing...');
   event.waitUntil(
     (async () => {
-      try {
-        // Load dynamic assets from manifest
-        const manifestResponse = await fetch('/assets-manifest.json');
-        if (manifestResponse.ok) {
-          const manifestAssets = await manifestResponse.json();
-          ASSETS = ASSETS.concat(manifestAssets);
-        }
-      } catch (e) {
-        console.log('[SW] Could not load assets manifest, using static assets only');
-      }
-
-      // Cache the main page first to get all linked assets
       const cache = await caches.open(CACHE_NAME);
       
-      // First cache the index.html to discover all linked assets
-      try {
-        await cache.add('/');
-        const indexResponse = await cache.match('/');
-        if (indexResponse) {
-          const htmlText = await indexResponse.text();
-          
-          // Extract CSS and JS links from HTML
-          const cssMatches = htmlText.match(/href="([^"]*\.css[^"]*)"/g) || [];
-          const jsMatches = htmlText.match(/src="([^"]*\.js[^"]*)"/g) || [];
-          
-          cssMatches.forEach(match => {
-            const url = match.match(/href="([^"]*)"/)?.[1];
-            if (url && !ASSETS.includes(url)) {
-              ASSETS.push(url);
-            }
-          });
-          
-          jsMatches.forEach(match => {
-            const url = match.match(/src="([^"]*)"/)?.[1];
-            if (url && !ASSETS.includes(url)) {
-              ASSETS.push(url);
-            }
-          });
-        }
-      } catch (e) {
-        console.warn('[SW] Failed to analyze index.html for assets');
-      }
-      
-      let loaded = 0;
-      
-      for (const asset of ASSETS) {
+      // Cache critical assets first
+      for (const asset of CRITICAL_ASSETS) {
         try {
           await cache.add(asset);
+          console.log('[SW] Cached:', asset);
         } catch (e) {
-          console.warn('[SW] Failed to cache asset:', asset, e);
-        }
-        loaded++;
-        
-        // Send progress to clients
-        const progress = Math.round((loaded / ASSETS.length) * 100);
-        const allClients = await self.clients.matchAll();
-        for (const client of allClients) {
-          client.postMessage({ type: 'CACHE_PROGRESS', progress });
+          console.warn('[SW] Failed to cache:', asset);
         }
       }
-      
-      console.log('[SW] All assets cached successfully, total:', ASSETS.length);
+
+      // Try to cache additional assets from manifest
+      try {
+        const manifestResponse = await fetch('/assets-manifest.json');
+        if (manifestResponse.ok) {
+          const additionalAssets = await manifestResponse.json();
+          for (const asset of additionalAssets) {
+            try {
+              await cache.add(asset);
+              console.log('[SW] Cached additional:', asset);
+            } catch (e) {
+              console.warn('[SW] Failed to cache additional:', asset);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[SW] Could not load assets manifest');
+      }
+
+      console.log('[SW] Installation complete');
     })()
   );
   self.skipWaiting();
 });
 
-// Activate event - clean old caches
+// Activate - clean old caches
 self.addEventListener('activate', event => {
+  console.log('[SW] Activating...');
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys.filter(key => key !== CACHE_NAME).map(key => {
+          console.log('[SW] Deleting old cache:', key);
+          return caches.delete(key);
+        })
       );
       await self.clients.claim();
+      console.log('[SW] Activated');
     })()
   );
 });
 
-// Fetch event - serve from cache when offline
+// Fetch - serve from cache when offline
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
   
-  // Handle navigation requests (HTML pages)
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .catch(async () => {
+  // Skip chrome-extension and other non-http requests
+  if (!event.request.url.startsWith('http')) return;
+  
+  event.respondWith(
+    (async () => {
+      try {
+        // Try network first
+        const response = await fetch(event.request);
+        
+        // Cache successful responses for future offline use
+        if (response.ok) {
           const cache = await caches.open(CACHE_NAME);
+          try {
+            cache.put(event.request, response.clone());
+          } catch (e) {
+            // Ignore cache errors
+          }
+        }
+        
+        return response;
+      } catch (networkError) {
+        // Network failed, try cache
+        const cache = await caches.open(CACHE_NAME);
+        const cachedResponse = await cache.match(event.request);
+        
+        if (cachedResponse) {
+          console.log('[SW] Served from cache:', event.request.url);
+          return cachedResponse;
+        }
+        
+        // No cache hit - handle based on request type
+        const url = new URL(event.request.url);
+        
+        // For navigation requests, serve appropriate page
+        if (event.request.mode === 'navigate') {
+          // If requesting /offline specifically, serve standalone offline page
+          if (url.pathname === '/offline') {
+            const offlineResponse = await cache.match('/offline-standalone.html');
+            if (offlineResponse) {
+              console.log('[SW] Served offline-standalone.html');
+              return offlineResponse;
+            }
+          }
           
-          // Always serve index.html for SPA routing when offline
-          // This allows React Router to handle the /offline route properly
+          // For other navigation, try index.html first
           const indexResponse = await cache.match('/index.html');
           if (indexResponse) {
+            console.log('[SW] Served index.html for navigation:', url.pathname);
             return indexResponse;
           }
           
-          // Fallback to static offline page if index.html not cached
-          const offlineResponse = await cache.match('/offline-static.html');
+          // Fallback to standalone offline page
+          const offlineResponse = await cache.match('/offline-standalone.html');
           if (offlineResponse) {
+            console.log('[SW] Served offline-standalone.html as fallback');
             return offlineResponse;
           }
-          
-          // Last resort fallback
-          return new Response('Aplikasi tidak tersedia offline', { 
-            status: 503,
-            headers: { 'Content-Type': 'text/html; charset=utf-8' }
-          });
-        })
-    );
-    return;
-  }
-  
-  // Handle asset requests
-  event.respondWith(
-    caches.match(event.request)
-      .then(async response => {
-        if (response) {
-          return response;
         }
         
-        // Try to find similar assets in cache if exact match fails
-        const cache = await caches.open(CACHE_NAME);
-        const cachedRequests = await cache.keys();
-        
-        // For CSS files, try to find any cached CSS file
-        if (url.pathname.includes('.css')) {
-          for (const req of cachedRequests) {
-            if (req.url.includes('.css')) {
-              const cachedResponse = await cache.match(req);
-              if (cachedResponse) return cachedResponse;
+        // For assets, return appropriate fallbacks
+        if (url.pathname.endsWith('.css')) {
+          return new Response(`
+            /* Offline fallback CSS */
+            body { 
+              font-family: Arial, sans-serif; 
+              background: linear-gradient(135deg, #f3f4f6 0%, #e5f3e5 100%);
+              margin: 0;
+              padding: 20px;
             }
-          }
-        }
-        
-        // For JS files, try to find any cached JS file
-        if (url.pathname.includes('.js')) {
-          for (const req of cachedRequests) {
-            if (req.url.includes('.js') && !req.url.includes('service-worker')) {
-              const cachedResponse = await cache.match(req);
-              if (cachedResponse) return cachedResponse;
+            .offline-message {
+              text-align: center;
+              padding: 40px;
+              background: white;
+              border-radius: 15px;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+              max-width: 500px;
+              margin: 50px auto;
             }
-          }
-        }
-        
-        return fetch(event.request);
-      })
-      .catch(() => {
-        // If it's an asset and we can't fetch it, return a minimal fallback
-        if (event.request.destination === 'style') {
-          return new Response('/* Offline fallback CSS */', { 
+          `, {
             headers: { 'Content-Type': 'text/css' }
           });
         }
-        if (event.request.destination === 'script') {
-          return new Response('console.log("Offline fallback JS");', { 
+        
+        if (url.pathname.endsWith('.js')) {
+          return new Response(`
+            console.log('Offline mode - limited functionality');
+            // Fallback for offline
+            if (typeof window !== 'undefined') {
+              window.addEventListener('load', function() {
+                if (!navigator.onLine) {
+                  document.body.innerHTML = '<div class="offline-message"><h1>Mode Offline</h1><p>Beberapa fitur mungkin terbatas saat offline.</p><button onclick="window.location.reload()">Coba Lagi</button></div>';
+                }
+              });
+            }
+          `, {
             headers: { 'Content-Type': 'text/javascript' }
           });
         }
-        if (event.request.destination === 'image') {
-          return new Response('', { status: 404 });
-        }
-        return new Response('Offline', { status: 503 });
-      })
+        
+        // Last resort - return error
+        return new Response('Offline - Resource not available', {
+          status: 503,
+          statusText: 'Service Unavailable'
+        });
+      }
+    })()
   );
 });
 
-// Message handler for cache status checks
+// Message handler
 self.addEventListener('message', async event => {
   if (event.data && event.data.type === 'CHECK_CACHE') {
-    let status = 'checking';
-    let error = null;
-    
     try {
       const cache = await caches.open(CACHE_NAME);
       const cachedRequests = await cache.keys();
-      const cachedPaths = cachedRequests.map(req => new URL(req.url).pathname);
-      const missing = ASSETS.filter(asset => !cachedPaths.includes(asset));
       
-      if (missing.length === 0) {
-        status = 'ready';
-      } else if (missing.length < ASSETS.length) {
-        status = 'caching';
-        error = `Missing: ${missing.slice(0, 3).join(', ')}${missing.length > 3 ? '...' : ''}`;
-      } else {
-        status = 'error';
-        error = 'Cache belum siap';
+      let status = 'ready';
+      let error = null;
+      
+      // Check if critical assets are cached
+      const criticalMissing = [];
+      for (const asset of CRITICAL_ASSETS) {
+        const cached = await cache.match(asset);
+        if (!cached) {
+          criticalMissing.push(asset);
+        }
       }
+      
+      if (criticalMissing.length > 0) {
+        status = 'error';
+        error = `Missing critical assets: ${criticalMissing.join(', ')}`;
+      }
+      
+      event.source.postMessage({ 
+        type: 'CACHE_STATUS', 
+        status, 
+        error,
+        cachedCount: cachedRequests.length 
+      });
     } catch (e) {
-      status = 'error';
-      error = e.message;
+      event.source.postMessage({ 
+        type: 'CACHE_STATUS', 
+        status: 'error', 
+        error: e.message 
+      });
     }
-    
-    event.source.postMessage({ type: 'CACHE_STATUS', status, error });
   }
 });
