@@ -508,33 +508,57 @@
             box-shadow: 0 0 0 2px #16a34a;
         }
 
-        /* Tables */
+        /* Tables - Mobile Responsive */
         .table-container {
             overflow-x: auto;
             background: #f0fdf4;
             border-radius: 0.5rem;
             padding: 0.5rem;
             font-size: clamp(0.625rem, 2.5vw, 0.75rem);
+            max-width: 100%;
+            margin: 0 auto;
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 500px;
+            min-width: 280px;
         }
 
         .table th,
         .table td {
-            padding: 0.5rem;
+            padding: 0.25rem 0.5rem;
             text-align: left;
             border-bottom: 1px solid #d1d5db;
-            white-space: nowrap;
+            font-size: clamp(0.5rem, 2vw, 0.75rem);
+            word-break: break-word;
+            max-width: 80px;
         }
 
         .table th {
             font-weight: bold;
             background: #dcfce7;
-            font-size: clamp(0.625rem, 2.5vw, 0.75rem);
+            font-size: clamp(0.5rem, 2vw, 0.75rem);
+            position: sticky;
+            top: 0;
+        }
+
+        /* Mobile specific table adjustments */
+        @media (max-width: 640px) {
+            .table th,
+            .table td {
+                padding: 0.25rem;
+                font-size: 0.625rem;
+                max-width: 60px;
+            }
+            
+            .table th:nth-child(2),
+            .table td:nth-child(2),
+            .table th:nth-child(3),
+            .table td:nth-child(3) {
+                max-width: 70px;
+                font-size: 0.5rem;
+            }
         }
 
         /* Status badges */
@@ -556,18 +580,19 @@
             font-weight: bold;
         }
 
-        /* Checklist */
+        /* Checklist - Mobile Responsive */
         .checklist-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.75rem;
+            padding: 0 0.5rem;
         }
 
         .checklist-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1rem;
+            gap: 0.75rem;
+            padding: 0.75rem;
             border-radius: 0.75rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             transition: all 0.2s;
@@ -586,16 +611,18 @@
         }
 
         .checklist-emoji {
-            font-size: 1.875rem;
+            font-size: 1.5rem;
             user-select: none;
+            flex-shrink: 0;
         }
 
         .checklist-label {
             flex: 1;
-            font-size: clamp(1rem, 3.5vw, 1.125rem);
+            font-size: clamp(0.875rem, 3vw, 1rem);
             font-weight: 600;
             color: #374151;
             user-select: none;
+            line-height: 1.2;
         }
 
         .checklist-item.checked .checklist-label {
@@ -603,9 +630,37 @@
         }
 
         .checklist-checkbox {
-            width: 1.5rem;
-            height: 1.5rem;
+            width: 1.25rem;
+            height: 1.25rem;
             accent-color: #22c55e;
+            flex-shrink: 0;
+        }
+
+        /* Mobile checklist adjustments */
+        @media (max-width: 640px) {
+            .checklist-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                padding: 0;
+            }
+            
+            .checklist-item {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+            
+            .checklist-emoji {
+                font-size: 1.25rem;
+            }
+            
+            .checklist-label {
+                font-size: 0.875rem;
+            }
+            
+            .checklist-checkbox {
+                width: 1rem;
+                height: 1rem;
+            }
         }
 
         /* Highlight boxes */
@@ -837,6 +892,45 @@
         }
         .bg-orange-600:hover {
             background: #d97706;
+        }
+
+        /* GPS Controls Mobile Responsive */
+        .gps-controls-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .gps-control-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .gps-controls-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .gps-control-btn {
+                width: 100%;
+                min-width: auto;
+                margin: 0.25rem 0;
+            }
+            
+            .form-input {
+                width: 100%;
+                max-width: none;
+            }
         }
 
 
@@ -1132,11 +1226,13 @@
 
                 <!-- GPS Controls -->
                 <div id="gps-controls" class="hidden">
-                    <button class="btn-nav" id="start-gps" onclick="startTracking()" disabled>Aktifkan Pelacakan</button>
-                    <button class="btn-nav ml-2" onclick="resetTrack()">Reset Data Lokasi</button>
-                    <button class="btn-nav ml-2 bg-red-600 hover:bg-red-700" id="stop-gps" onclick="stopTracking()" disabled>Matikan GPS</button>
-                    <button class="btn-nav ml-2 bg-purple-600 hover:bg-purple-700" id="background-gps" onclick="enableBackgroundGps()" disabled>Aktifkan Background GPS</button>
-                    <div id="gps-status" class="mb-2 text-green text-small"></div>
+                    <div class="gps-controls-container">
+                        <button class="btn-nav gps-control-btn" id="start-gps" onclick="startTracking()" disabled>Aktifkan Pelacakan</button>
+                        <button class="btn-nav gps-control-btn" onclick="resetTrack()">Reset Data Lokasi</button>
+                        <button class="btn-nav gps-control-btn bg-red-600" id="stop-gps" onclick="stopTracking()" disabled>Matikan GPS</button>
+                        <button class="btn-nav gps-control-btn bg-purple-600" id="background-gps" onclick="enableBackgroundGps()" disabled>Aktifkan Background GPS</button>
+                    </div>
+                    <div id="gps-status" class="mb-2 text-green text-small text-center"></div>
                     <div class="table-container">
                         <table class="table">
                             <thead>
@@ -1151,7 +1247,7 @@
                             <tbody id="gps-table-body"></tbody>
                         </table>
                     </div>
-                    <p class="mt-2 text-green text-xs">Data lokasi tersimpan lokal & dikirim ke server jika online.</p>
+                    <p class="mt-2 text-green text-xs text-center">Data lokasi tersimpan lokal & dikirim ke server jika online.</p>
                 </div>
             </div>
         </div>
@@ -1268,8 +1364,9 @@
         let deferredPrompt = null;
         let isInstalled = false;
 
-        // GPS Tracker Variables
-        let gpsTracking = false;
+        // GPS Tracker Variables with persistence
+        let gpsTracking = localStorage.getItem('gps_tracking_active') === 'true' || false;
+        let gpsBackgroundActive = localStorage.getItem('gps_background_active') === 'true' || false;
         let gpsInterval = null;
         let gpsPositions = [];
         let userName = localStorage.getItem('gps_nama') || '';
@@ -1317,13 +1414,54 @@
             }
         }
 
-        // Initialize GPS components
-        if (userName) {
-            document.getElementById('nama-form').style.display = 'none';
-            document.getElementById('gps-controls').style.display = 'block';
-            checkGpsPermission();
-        } else {
-            updateGpsStatus("📝 Masukkan nama untuk memulai pelacakan GPS");
+        // Initialize GPS components with state restoration
+        async function initializeGpsState() {
+            if (userName) {
+                document.getElementById('nama-form').style.display = 'none';
+                document.getElementById('gps-controls').style.display = 'block';
+                await checkGpsPermission();
+                
+                // Restore GPS state after permission check
+                if (gpsPermissionGranted) {
+                    restoreGpsState();
+                }
+            } else {
+                updateGpsStatus("📝 Masukkan nama untuk memulai pelacakan GPS");
+            }
+        }
+
+        // Restore GPS tracking state after page refresh
+        function restoreGpsState() {
+            const startBtn = document.getElementById('start-gps');
+            const stopBtn = document.getElementById('stop-gps');
+            const bgBtn = document.getElementById('background-gps');
+
+            if (gpsTracking && gpsPermissionGranted) {
+                // Restore active tracking state
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.textContent = 'GPS Aktif';
+                    startBtn.classList.add('bg-green-600');
+                }
+                if (stopBtn) stopBtn.disabled = false;
+                if (bgBtn) bgBtn.disabled = false;
+
+                // Restart tracking interval
+                gpsInterval = setInterval(trackLocation, 5000);
+                updateGpsStatus("✅ GPS tracking dipulihkan setelah refresh");
+            }
+
+            if (gpsBackgroundActive && gpsPermissionGranted) {
+                // Restore background GPS state
+                if (bgBtn) {
+                    bgBtn.textContent = 'Matikan Background GPS';
+                    bgBtn.onclick = disableBackgroundGps;
+                    bgBtn.classList.add('bg-orange-600');
+                    bgBtn.classList.remove('bg-purple-600');
+                }
+                // Re-enable background GPS
+                setTimeout(() => enableBackgroundGps(), 1000);
+            }
         }
 
 
@@ -1336,6 +1474,7 @@
             loadChecklist();
             initCompass();
             setupPWA();
+            initializeGpsState(); // Initialize GPS state with persistence
 
             // Set current year
             document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -1576,6 +1715,8 @@
 
             if (gpsPermissionGranted) {
                 updateGpsStatus("✅ Siap untuk pelacakan GPS");
+                // Restore state after setting name
+                restoreGpsState();
             } else {
                 updateGpsStatus("❌ Izin lokasi diperlukan - aktifkan di pengaturan browser");
             }
@@ -1653,6 +1794,7 @@
                 });
 
                 gpsTracking = true;
+                localStorage.setItem('gps_tracking_active', 'true'); // Save state
 
                 // Update UI
                 const startBtn = document.getElementById('start-gps');
@@ -1697,6 +1839,7 @@
 
                 updateGpsStatus(errorMsg);
                 gpsTracking = false;
+                localStorage.setItem('gps_tracking_active', 'false'); // Save state
             }
         }
 
@@ -1755,9 +1898,24 @@
 
         function stopTracking() {
             gpsTracking = false;
+            gpsBackgroundActive = false;
+            localStorage.setItem('gps_tracking_active', 'false'); // Save state
+            localStorage.setItem('gps_background_active', 'false'); // Save state
+            
             if (gpsInterval) {
                 clearInterval(gpsInterval);
                 gpsInterval = null;
+            }
+
+            // Stop background GPS if active
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    if (registration && registration.active) {
+                        registration.active.postMessage({
+                            type: 'STOP_GPS_BACKGROUND'
+                        });
+                    }
+                });
             }
 
             // Update button states
@@ -1793,6 +1951,8 @@
             gpsPositions = [];
             localStorage.removeItem('gps_track');
             localStorage.removeItem('gps_offline_queue'); // Also clear any queued items
+            localStorage.removeItem('gps_tracking_active'); // Clear tracking state
+            localStorage.removeItem('gps_background_active'); // Clear background state
             updateGpsTable();
             updateGpsStatus('🗑️ Data lokasi telah direset.');
         }
@@ -2027,6 +2187,9 @@
                     userName: userName
                 });
 
+                gpsBackgroundActive = true;
+                localStorage.setItem('gps_background_active', 'true'); // Save state
+
                 // Update UI
                 updateGpsStatus("✅ Background GPS tracking diaktifkan");
                 const bgButton = document.getElementById('background-gps');
@@ -2041,6 +2204,8 @@
             } catch (error) {
                 console.error("Error enabling background GPS:", error);
                 updateGpsStatus("❌ Background GPS gagal diaktifkan: " + error.message);
+                gpsBackgroundActive = false;
+                localStorage.setItem('gps_background_active', 'false');
             }
         }
 
@@ -2056,6 +2221,9 @@
                         });
                     }
                 }
+
+                gpsBackgroundActive = false;
+                localStorage.setItem('gps_background_active', 'false'); // Save state
 
                 // Update UI
                 updateGpsStatus("⏹️ Background GPS tracking dimatikan");
