@@ -845,6 +845,112 @@
             display: none;
         }
 
+        /* Cookie Consent Overlay */
+        .cookie-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+        }
+
+        .cookie-dialog {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 425px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            animation: cookieSlideIn 0.3s ease-out;
+        }
+
+        @keyframes cookieSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .cookie-title {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            color: #111827;
+        }
+
+        .cookie-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .cookie-list {
+            margin-bottom: 1rem;
+        }
+
+        .cookie-list h4 {
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            color: #111827;
+        }
+
+        .cookie-list ul {
+            list-style: disc;
+            list-style-position: inside;
+            font-size: 0.75rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .cookie-list li {
+            margin-bottom: 0.25rem;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .cookie-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .cookie-btn-outline {
+            border: 1px solid #d1d5db;
+            background: white;
+            color: #374151;
+        }
+
+        .cookie-btn-outline:hover {
+            background: #f9fafb;
+        }
+
+        .cookie-btn-primary {
+            background: #16a34a;
+            color: white;
+        }
+
+        .cookie-btn-primary:hover {
+            background: #15803d;
+        }
+
         /* Utilities */
         .text-center {
             text-align: center;
@@ -1043,26 +1149,26 @@
     </header>
 
     <!-- Cookie Consent Dialog -->
-    <div id="cookie-consent" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
-            <h3 class="text-lg font-bold mb-3 text-gray-900">Preferensi Cookie</h3>
-            <p class="text-sm text-gray-600 mb-4">
+    <div id="cookie-consent" class="cookie-overlay hidden">
+        <div class="cookie-dialog">
+            <h3 class="cookie-title">Preferensi Cookie</h3>
+            <p class="cookie-description">
                 Kami menggunakan cookie untuk meningkatkan pengalaman browsing Anda, menyajikan konten yang dipersonalisasi, dan menganalisis lalu lintas kami. Website ini menggunakan cookie yang diperlukan untuk fungsionalitas dan cookie pihak ketiga untuk analitik serta fitur media sosial.
             </p>
-            <div class="mb-4">
-                <h4 class="font-medium text-sm mb-2">Kami menggunakan cookie untuk:</h4>
-                <ul class="text-xs text-gray-500 list-disc list-inside space-y-1">
+            <div class="cookie-list">
+                <h4>Kami menggunakan cookie untuk:</h4>
+                <ul>
                     <li>Fungsionalitas website penting</li>
                     <li>Autentikasi dan keamanan</li>
                     <li>Analitik dan performa</li>
                     <li>Integrasi media sosial</li>
                 </ul>
             </div>
-            <div class="flex gap-2 justify-end">
-                <button onclick="handleCookieDecline()" class="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+            <div class="cookie-buttons">
+                <button onclick="handleCookieDecline()" class="cookie-btn cookie-btn-outline">
                     Penting Saja
                 </button>
-                <button onclick="handleCookieAccept()" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                <button onclick="handleCookieAccept()" class="cookie-btn cookie-btn-primary">
                     Terima Semua
                 </button>
             </div>
@@ -1418,6 +1524,10 @@
         let userName = localStorage.getItem('gps_nama') || '';
         let gpsPermissionGranted = false;
 
+        // RJP Variables
+        let rjpStarted = false;
+        let rjpCount = 0;
+
         // Check GPS permission and user name on load
         async function checkGpsPermission() {
             try {
@@ -1688,38 +1798,74 @@
         }
 
 
-        // Cookie Consent Functions
+        // Cookie Consent Functions - Fixed to work properly
         function showCookieConsent() {
             const hasConsented = localStorage.getItem('cookieConsent');
+            console.log('Cookie consent check:', hasConsented);
+            
             if (!hasConsented) {
-                document.getElementById('cookie-consent').classList.remove('hidden');
+                const cookieDialog = document.getElementById('cookie-consent');
+                if (cookieDialog) {
+                    cookieDialog.classList.remove('hidden');
+                    console.log('Cookie consent dialog shown');
+                } else {
+                    console.error('Cookie consent element not found');
+                }
+            } else {
+                console.log('User already consented to cookies');
             }
         }
 
         function handleCookieAccept() {
+            console.log('Cookie consent accepted');
             localStorage.setItem('cookieConsent', 'true');
-            document.getElementById('cookie-consent').classList.add('hidden');
+            
+            const cookieDialog = document.getElementById('cookie-consent');
+            if (cookieDialog) {
+                cookieDialog.classList.add('hidden');
+            }
         }
 
         function handleCookieDecline() {
+            console.log('Cookie consent declined');
             localStorage.setItem('cookieConsent', 'false');
-            document.getElementById('cookie-consent').classList.add('hidden');
+            
+            const cookieDialog = document.getElementById('cookie-consent');
+            if (cookieDialog) {
+                cookieDialog.classList.add('hidden');
+            }
         }
 
-        // Initialize
+        // Initialize - Fixed initialization order and debugging
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            
+            // Core initialization
             updateStatus();
             initializePage();
+            
+            // PWA setup - must be early to catch install events
+            setupPWA();
+            
+            // Load saved data
             loadUserName();
             loadGpsData();
             loadChecklist();
+            
+            // Initialize components
             initCompass();
-            setupPWA();
             initializeGpsState(); // Initialize GPS state with persistence
-            showCookieConsent(); // Show cookie consent if needed
+            
+            // Show cookie consent - delay slightly to ensure DOM is ready
+            setTimeout(() => {
+                showCookieConsent();
+            }, 100);
 
             // Set current year
-            document.getElementById('current-year').textContent = new Date().getFullYear();
+            const yearElement = document.getElementById('current-year');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+            }
 
             // Check if background permissions were previously granted
             backgroundPermissionGranted = localStorage.getItem('backgroundPermissionGranted') === 'true';
@@ -1731,7 +1877,7 @@
                 }, 500);
             }
 
-            // Event listeners
+            // Event listeners - register these early
             window.addEventListener('online', updateStatus);
             window.addEventListener('offline', updateStatus);
             window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -1739,6 +1885,8 @@
             
             // Handle page visibility change for background app
             document.addEventListener('visibilitychange', handleVisibilityChange);
+            
+            console.log('App initialization complete');
         });
 
         // Firebase GPS functions - diperbaiki untuk dapat mengirim ke Firestore
@@ -1898,36 +2046,78 @@
             return tabNames[tabName] || tabName;
         }
 
-        // PWA Installation
+        // PWA Installation - Fixed functionality
         function handleBeforeInstallPrompt(e) {
+            console.log('PWA install prompt available');
             e.preventDefault();
             deferredPrompt = e;
-            document.getElementById('install-container').style.display = 'flex';
+            
+            const installContainer = document.getElementById('install-container');
+            if (installContainer) {
+                installContainer.style.display = 'flex';
+            }
         }
 
         function handleAppInstalled() {
+            console.log('PWA installed successfully');
             isInstalled = true;
-            document.getElementById('install-container').style.display = 'none';
+            const installContainer = document.getElementById('install-container');
+            if (installContainer) {
+                installContainer.style.display = 'none';
+            }
         }
 
         function setupPWA() {
             // Check if already installed
             if (window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('App already running in standalone mode');
                 isInstalled = true;
-                document.getElementById('install-container').style.display = 'none';
+                const installContainer = document.getElementById('install-container');
+                if (installContainer) {
+                    installContainer.style.display = 'none';
+                }
+                return;
+            }
+
+            // Check if running as PWA
+            if (window.navigator.standalone) {
+                console.log('App running as iOS PWA');
+                isInstalled = true;
+                const installContainer = document.getElementById('install-container');
+                if (installContainer) {
+                    installContainer.style.display = 'none';
+                }
+                return;
+            }
+
+            // Show install button if not installed
+            const installContainer = document.getElementById('install-container');
+            if (installContainer && !isInstalled) {
+                installContainer.style.display = 'flex';
             }
         }
 
         function handleInstall() {
+            console.log('Install button clicked');
+            
             if (deferredPrompt) {
+                console.log('Using deferred prompt');
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((result) => {
+                    console.log('User choice:', result.outcome);
                     if (result.outcome === 'accepted') {
                         isInstalled = true;
-                        document.getElementById('install-container').style.display = 'none';
+                        const installContainer = document.getElementById('install-container');
+                        if (installContainer) {
+                            installContainer.style.display = 'none';
+                        }
                     }
                     deferredPrompt = null;
                 });
+            } else {
+                console.log('No deferred prompt available');
+                // Fallback: Show manual install instructions
+                alert('Untuk menginstall aplikasi ini:\n\n1. Buka menu browser (⋮)\n2. Pilih "Tambahkan ke layar utama"\n3. Atau "Install app" jika tersedia');
             }
         }
 
