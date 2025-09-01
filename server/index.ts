@@ -72,6 +72,19 @@ app.get('/offline', (req, res) => {
   res.sendFile(offlinePath);
 });
 
+// API endpoint untuk GPS sync dari background
+app.post('/api/gps-sync', express.json(), (req, res) => {
+  // Forward ke Firebase atau handle GPS data sync
+  console.log('GPS background sync received:', req.body);
+  res.json({ success: true });
+});
+
+app.post('/api/gps-tracker', express.json(), (req, res) => {
+  // Forward ke Firebase atau handle GPS tracking
+  console.log('GPS tracker data received:', req.body);
+  res.json({ success: true });
+});
+
 // Catch-all handler: send back React's index.html file for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
