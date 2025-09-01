@@ -1,678 +1,759 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mode Offline - Mahapala Narotama</title>
+    <title>Survival Tools - Mahapala Narotama</title>
+    <link rel="manifest" href="/manifest.json">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(to bottom, #f9fafb, #f0fdf4);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            padding: 32px 8px;
+            color: #1f2937;
         }
-
-        /*Navbar Styles */
-        .navbar {
-            background: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        
+        .container {
+            max-width: 576px;
+            margin: 0 auto;
+        }
+        
+        .status-indicator {
             position: sticky;
             top: 0;
-            z-index: 1000;
-        }
-
-        .navbar-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 12px 16px;
+            z-index: 40;
+            width: 100%;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 16px;
         }
-
-        .navbar-logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: #16a34a;
-        }
-
-        .navbar-logo img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border: 2px solid #16a34a;
-            background: white;
-        }
-
-        .navbar-title {
-            font-weight: bold;
-            font-size: 20px;
-            letter-spacing: 1px;
-        }
-
-        .navbar-title .accent {
-            color: #dc2626;
-            font-weight: bold;
-        }
-
-        .navbar-nav {
-            display: flex;
-            gap: 24px;
-            list-style: none;
-        }
-
-        .navbar-nav a {
-            text-decoration: none;
-            color: #16a34a;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .navbar-nav a:hover {
-            color: #dc2626;
-            background: rgba(220, 38, 38, 0.1);
-        }
-
-        .navbar-nav a.active {
-            color: #dc2626;
-            background: rgba(220, 38, 38, 0.1);
-        }
-
-        /* Mobile Menu */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #16a34a;
-            cursor: pointer;
-        }
-
-        .mobile-nav {
-            display: none;
-            background: white;
-            padding: 16px;
-            border-radius: 0 0 16px 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .mobile-nav a {
-            display: block;
-            padding: 12px 16px;
-            text-decoration: none;
-            color: #16a34a;
-            font-weight: 500;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            transition: all 0.3s ease;
-        }
-
-        .mobile-nav a:hover {
-            background: rgba(220, 38, 38, 0.1);
-            color: #dc2626;
-        }
-
-        @media (max-width: 768px) {
-            .navbar-nav {
-                display: none;
-            }
-
-            .mobile-menu-btn {
-                display: block;
-            }
-        }
-
-        /* Status Badge */
-        .status-indicator {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            z-index: 1000;
-        }
-
+        
         .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
+            margin: 8px 16px;
+            padding: 4px 12px;
+            border-radius: 9999px;
             font-weight: bold;
             font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-
-        .status-badge.online {
-            background: #10b981;
-            color: white;
+        
+        .online { background: #16a34a; color: white; }
+        .offline { background: #dc2626; color: white; }
+        
+        .progress-container {
+            margin-bottom: 16px;
         }
-
-        .status-badge.offline {
-            background: #ef4444;
-            color: white;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
+        
+        .progress-bar {
             width: 100%;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            height: 24px;
+            margin-bottom: 8px;
+            overflow: hidden;
         }
-
+        
+        .progress-fill {
+            height: 24px;
+            border-radius: 9999px;
+            transition: all 0.5s;
+        }
+        
+        .progress-checking {
+            width: 33%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #3b82f6, #22c55e);
+            animation: progress-loading 1.2s linear infinite;
+        }
+        
+        .progress-caching {
+            width: 66%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+        }
+        
+        .progress-ready {
+            width: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+        }
+        
+        .progress-error {
+            width: 33%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b);
+        }
+        
+        @keyframes progress-loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+        }
+        
         .card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
             border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 16px;
         }
-
-        .nav-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        
+        .card h1 {
+            color: #166534;
+            margin-bottom: 16px;
+            font-size: 32px;
+            text-align: center;
         }
-
-        .nav-tab {
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.7);
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            color: #374151;
+        
+        .card h2 {
+            color: #166534;
+            margin-bottom: 12px;
+            font-size: 24px;
+            font-weight: bold;
         }
-
-        .nav-tab:hover {
-            background: rgba(34, 197, 94, 0.1);
-            color: #16a34a;
-        }
-
-        .nav-tab.active {
-            background: #16a34a;
-            color: white;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Button Styles */
+        
         .btn {
-            background: linear-gradient(135deg, #16a34a, #15803d);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
             margin: 4px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-danger:hover {
-            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
-        }
-
-        /* Input Styles */
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
+            font-weight: bold;
             font-size: 16px;
-            transition: border-color 0.3s ease;
-            margin-bottom: 12px;
+            transition: all 0.2s;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #16a34a;
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-
-        /* Table Styles */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
+        
+        .btn:disabled {
+            opacity: 0.5;
+            transform: none;
+            cursor: not-allowed;
+        }
+        
+        .btn-red {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        }
+        
+        .btn-red:hover {
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+        }
+        
+        .install-btn {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            box-shadow: 0 4px 24px rgba(34, 197, 94, 0.33);
+            border: 2px solid #15803d;
+            min-width: 220px;
+            min-height: 56px;
+            font-size: 18px;
+            animation: bounce-install 1.6s infinite;
+        }
+        
+        @keyframes bounce-install {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .nav-tab {
+            padding: 8px 16px;
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-top: 16px;
+            background: #166534;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            font-weight: 500;
+            margin: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
-        .data-table th {
-            background: #f8fafc;
-            padding: 12px 8px;
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 2px solid #e5e7eb;
-            font-size: 12px;
+        
+        .nav-tab:hover,
+        .nav-tab.active {
+            background: #22c55e;
+            color: #14532d;
         }
-
-        .data-table td {
-            padding: 10px 8px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 11px;
+        
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
         }
-
-        .data-table tr:hover {
-            background: #f8fafc;
+        
+        @media (min-width: 640px) {
+            .checklist-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-
-        /* Checklist Styles */
+        
         .checklist-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .checklist-item:hover {
-            background: #e2e8f0;
-        }
-
-        .checklist-item.checked {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .checklist-item input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            gap: 16px;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid #e5e7eb;
+            background: white;
         }
-
-        /* Emergency Styles */
-        .emergency-card {
-            background: linear-gradient(135deg, #fee2e2, #fecaca);
-            border: 2px solid #ef4444;
-            color: #7f1d1d;
+        
+        .checklist-item:hover {
+            background: #f0fdf4;
         }
-
-        .emergency-number {
+        
+        .checklist-item.checked {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
+        
+        .checklist-icon {
             font-size: 24px;
+            user-select: none;
+        }
+        
+        .checklist-label {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 600;
+            user-select: none;
+        }
+        
+        .checklist-item.checked .checklist-label {
+            color: #15803d;
+        }
+        
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            accent-color: #22c55e;
+        }
+        
+        .emergency-list {
+            list-style: none;
+            margin: 0;
+        }
+        
+        .emergency-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .emergency-number {
             font-weight: bold;
             color: #dc2626;
-            margin: 8px 0;
         }
-
-        /* Footer Styles */
-        .footer {
-            background: #1f2937;
-            color: white;
-            padding: 48px 20px 24px;
-            margin-top: auto;
+        
+        .emergency-number a {
+            color: #1d4ed8;
+            text-decoration: underline;
         }
-
-        .footer-container {
-            max-width: 1200px;
-            margin: 0 auto;
+        
+        .survival-tips {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
         }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 32px;
-            margin-bottom: 32px;
+        
+        .survival-tips h3 {
+            color: #92400e;
+            margin-bottom: 12px;
+            font-size: 18px;
         }
-
-        .footer-section h3 {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 16px;
-            color: white;
-        }
-
-        .footer-section p {
-            color: #d1d5db;
-            margin-bottom: 16px;
+        
+        .survival-tips ul {
+            color: #1f2937;
+            font-size: 16px;
             line-height: 1.6;
         }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section ul li {
+        
+        .survival-tips li {
             margin-bottom: 8px;
         }
-
-        .footer-section ul li a {
-            color: #d1d5db;
-            text-decoration: none;
-            transition: color 0.3s ease;
+        
+        .simulation-box {
+            background: #f0fdf4;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-
-        .footer-section ul li a:hover {
-            color: white;
+        
+        .simulation-box h3 {
+            color: #15803d;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
-
-        .social-links {
-            display: flex;
-            gap: 16px;
+        
+        .gps-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 12px;
+            background: #f0fdf4;
+            border-radius: 8px;
+            overflow: hidden;
         }
-
-        .social-links a {
-            color: #d1d5db;
-            font-size: 20px;
-            transition: color 0.3s ease;
+        
+        .gps-table th,
+        .gps-table td {
+            border: 1px solid #d1fae5;
+            padding: 8px;
+            text-align: left;
         }
-
-        .social-links a:hover {
-            color: white;
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 24px;
-            border-top: 1px solid #374151;
-            color: #9ca3af;
-        }
-
-        /* RJP Counter */
-        .rjp-counter {
-            font-size: 48px;
+        
+        .gps-table th {
+            background: #dcfce7;
             font-weight: bold;
+        }
+        
+        .input-field {
+            padding: 10px;
+            border: 1px solid #22c55e;
+            border-radius: 6px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .input-field:focus {
+            box-shadow: 0 0 0 2px #16a34a;
+        }
+        
+        .status-text {
+            color: #15803d;
+            font-size: 14px;
+            margin: 8px 0;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        @media (min-width: 640px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .feature-card {
+            display: block;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 16px;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .feature-card:hover {
+            background: #f0fdf4;
+        }
+        
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            color: #2563eb;
+        }
+        
+        .feature-title {
+            font-weight: bold;
+            color: #14532d;
+            font-size: 18px;
+        }
+        
+        .feature-desc {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .feature-link {
+            color: #15803d;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+        
+        .info-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .info-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .info-list {
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .info-list li {
+            margin-bottom: 4px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .progress-status {
             text-align: center;
-            margin: 20px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .status-ready {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #15803d;
+        }
+        
+        .status-error {
             color: #dc2626;
         }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 10px;
-            }
-
-            .nav-tabs {
-                flex-direction: column;
-            }
-
-            .nav-tab {
-                text-align: center;
-            }
-
-            .data-table {
-                font-size: 10px;
-            }
-
-            .data-table th,
-            .data-table td {
-                padding: 6px 4px;
-            }
+        
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #b91c1c;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+        
+        .install-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        
+        .app-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #bbf7d0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .compass-display {
+            font-size: 18px;
+            color: #1f2937;
+        }
+        
+        .compass-note {
+            color: #16a34a;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        
+        .rjp-counter {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .rjp-complete {
+            color: #15803d;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        
+        .online-status { color: #22c55e; }
+        .offline-status { color: #ef4444; }
+        
+        .gps-status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .gps-online {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .gps-offline {
+            background: #6b7280;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <!--Navbar -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <a href="/" class="navbar-logo">
-                <img src="/Logo%20Mpn.png" alt="Logo Mahapala">
-                <span class="navbar-title">
-                    MAHAPALA <span class="accent">NAROTAMA</span>
-                </span>
-            </a>
-            <ul class="navbar-nav">
-                <li><a href="/">Beranda</a></li>
-                <li><a href="/kegiatan">Kegiatan</a></li>
-                <li><a href="/pembelajaran">Pembelajaran</a></li>
-                <li><a href="/sejarah">Sejarah</a></li>
-                <li><a href="/pendaftaran">Informasi Pendaftaran</a></li>
-                <li><a href="/scan-anggota">👥 Anggota</a></li>
-            </ul>
-            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
-        </div>
-        <div class="mobile-nav" id="mobile-nav">
-            <a href="/">Beranda</a>
-            <a href="/kegiatan">Kegiatan</a>
-            <a href="/pembelajaran">Pembelajaran</a>
-            <a href="/sejarah">Sejarah</a>
-            <a href="/pendaftaran">Informasi Pendaftaran</a>
-            <a href="/scan-anggota">👥 Anggota</a>
-        </div>
-    </nav>
-
-    <!-- Status Indicator -->
     <div class="status-indicator">
         <div id="status" class="status-badge offline">Offline</div>
     </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
+    
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar">
+                <div class="progress-fill progress-checking" id="progress-fill"></div>
+            </div>
+            <div class="progress-status">
+                <div id="progress-status">Memeriksa status cache offline...</div>
+            </div>
+        </div>
+        
+        <!-- Install PWA Button -->
+        <div class="install-container" id="install-container" style="display: none;">
+            <button class="btn install-btn" id="install-btn">
+                <img src="/OfflineApp.png" alt="App Icon" class="app-icon">
+                <span>Install di Layar Utama</span>
+            </button>
+        </div>
+        
         <!-- Header -->
         <div class="card">
             <h1>🏕️ Mode Offline & Survival Tools</h1>
-            <p style="color: #6b7280; margin-top: 12px;">Tetap siap di alam bebas! Semua fitur berikut dapat diakses tanpa internet.</p>
+            <p class="subtitle">Tetap siap di alam bebas! Semua fitur berikut dapat diakses tanpa internet.</p>
         </div>
-
+        
         <!-- Navigation Tabs -->
         <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('survival')">📚 Panduan</button>
-            <button class="nav-tab" onclick="showTab('checklist')">✅ Checklist</button>
-            <button class="nav-tab" onclick="showTab('emergency')">🚨 Darurat</button>
-            <button class="nav-tab" onclick="showTab('gps')">📍 GPS Tracker</button>
+            <button class="nav-tab active" onclick="showTab('fitur')">Fitur Survival</button>
+            <button class="nav-tab" onclick="showTab('survival')">Panduan Survival</button>
+            <button class="nav-tab" onclick="showTab('ppgd')">PPGD</button>
+            <button class="nav-tab" onclick="showTab('navigasi')">Navigasi Darat</button>
+            <button class="nav-tab" onclick="showTab('checklist')">Checklist</button>
+            <button class="nav-tab" onclick="showTab('gps')">Pelacak GPS</button>
         </div>
-
-        <!-- Tab Content: Survival Guide -->
-        <div id="tab-survival" class="tab-content active">
+        
+        <!-- Tab: Fitur Survival -->
+        <div id="tab-fitur" class="tab-content active">
+            <div class="feature-grid">
+                <a href="/panduan-survival.pdf" class="feature-card">
+                    <div class="feature-header">
+                        <span class="feature-icon">📖</span>
+                        <span class="feature-title">Panduan Survival Offline</span>
+                    </div>
+                    <div class="feature-desc">Akses panduan survival, P3GD, dan navigasi darat tanpa internet.</div>
+                    <div class="feature-link">Buka Panduan Survival</div>
+                </a>
+                <a href="/navigasi-darat.pdf" class="feature-card">
+                    <div class="feature-header">
+                        <span class="feature-icon">🗺️</span>
+                        <span class="feature-title">Navigasi Darat PDF</span>
+                    </div>
+                    <div class="feature-desc">Pelajari teknik navigasi darat dan orientasi peta-kompas.</div>
+                    <div class="feature-link">Buka Navigasi Darat</div>
+                </a>
+            </div>
+            
+            <div class="info-box">
+                <div class="info-header">
+                    <span style="color: #7c3aed;">📞</span>
+                    <span class="info-title" style="color: #6b21a8;">Nomor Darurat Penting</span>
+                </div>
+                <ul class="info-list">
+                    <li><span style="font-weight: 600;">SAR Nasional (Basarnas):</span> <a href="tel:115" style="color: #1d4ed8; text-decoration: underline;">115</a></li>
+                    <li><span style="font-weight: 600;">BPBD Surabaya:</span> <a href="tel:031-8499909" style="color: #1d4ed8; text-decoration: underline;">031-8499909</a></li>
+                    <li><span style="font-weight: 600;">Polisi:</span> <a href="tel:110" style="color: #1d4ed8; text-decoration: underline;">110</a></li>
+                    <li><span style="font-weight: 600;">Ambulans:</span> <a href="tel:118" style="color: #1d4ed8; text-decoration: underline;">118</a></li>
+                    <li><span style="font-weight: 600;">RSU Dr. Soetomo:</span> <a href="tel:031-5501078" style="color: #1d4ed8; text-decoration: underline;">031-5501078</a></li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <div class="info-header">
+                    <span style="color: #dc2626;">⚠️</span>
+                    <span class="info-title" style="color: #991b1b;">Tips Bertahan Hidup</span>
+                </div>
+                <ul class="info-list" style="list-style: disc; padding-left: 20px;">
+                    <li>Selalu bawa peluit, senter, dan korek api cadangan.</li>
+                    <li>Jangan panik, tetap tenang dan hemat energi.</li>
+                    <li>Cari sumber air bersih dan buat perlindungan sederhana.</li>
+                    <li>Gunakan sinyal darurat (asap, peluit, cermin) untuk menarik perhatian.</li>
+                    <li>Kenali tanaman dan hewan berbahaya di sekitar.</li>
+                    <li>Lakukan pertolongan pertama pada luka ringan sebelum mencari bantuan.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Tab: Panduan Survival -->
+        <div id="tab-survival" class="tab-content">
             <div class="card">
-                <h2>📚 Panduan Survival</h2>
-                <p style="margin-bottom: 20px;">Download panduan lengkap untuk survival di alam bebas:</p>
-
                 <button class="btn" onclick="window.open('/panduan-survival.pdf', '_blank')">
-                    📖 Download Panduan Survival
+                    📖 Download Buku Panduan Survival
                 </button>
-
-                <button class="btn" onclick="window.open('/navigasi-darat.pdf', '_blank')">
-                    🧭 Download Panduan Navigasi Darat
-                </button>
-
-                <button class="btn" onclick="window.open('/ppgd.pdf', '_blank')">
-                    🏥 Download Panduan P3K/PPGD
-                </button>
-
-                <div style="margin-top: 20px; padding: 16px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                    <h3 style="color: #92400e; margin-bottom: 8px;">💡 Tips Menggunakan Offline:</h3>
-                    <ul style="color: #92400e; margin-left: 20px;">
-                        <li>Semua panduan PDF tersedia offline</li>
-                        <li>GPS tracker menyimpan data lokal</li>
-                        <li>Checklist survival tersimpan otomatis</li>
-                        <li>Saat online kembali, data akan sinkron</li>
+                <h2>📚 Panduan Survival Dasar</h2>
+                <div class="survival-tips">
+                    <h3>Tips Dasar Survival:</h3>
+                    <ul>
+                        <li>Tenang, jangan panik. Analisa situasi dan sumber daya sekitar.</li>
+                        <li>Cari sumber air bersih dan buat perlindungan (bivak/shelter).</li>
+                        <li>Jaga suhu tubuh, hindari hipotermia/heatstroke.</li>
+                        <li>Gunakan api untuk sinyal, hangat, dan memasak.</li>
+                        <li>Manfaatkan alat survival: kompas, pisau, peluit, senter, dsb.</li>
+                        <li>Catat lokasi terakhir dan buat tanda jejak jika berpindah.</li>
                     </ul>
                 </div>
             </div>
         </div>
-
-        <!-- Tab Content: Checklist -->
+        
+        <!-- Tab: PPGD -->
+        <div id="tab-ppgd" class="tab-content">
+            <div class="card">
+                <button class="btn" onclick="window.open('/ppgd.pdf', '_blank')">
+                    🏥 Download Buku PPGD
+                </button>
+                <h2>🏥 PPGD (Pertolongan Pertama Gawat Darurat)</h2>
+                <ol style="list-style: decimal; padding-left: 20px; margin-bottom: 16px; font-size: 16px; line-height: 1.6;">
+                    <li>Pastikan keamanan lokasi sebelum menolong.</li>
+                    <li>Periksa respons korban: sadar/tidak, napas, denyut nadi.</li>
+                    <li>Lakukan RJP (Resusitasi Jantung Paru) jika perlu.</li>
+                    <li>Hentikan perdarahan, atasi syok, imobilisasi patah tulang.</li>
+                    <li>Gunakan alat P3K, jaga kebersihan luka.</li>
+                    <li>Segera cari bantuan medis jika kondisi berat.</li>
+                </ol>
+                <div class="simulation-box">
+                    <h3>Simulasi RJP</h3>
+                    <div id="rjp-container">
+                        <button class="btn" onclick="startRJP()">Mulai Simulasi RJP</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Navigasi Darat -->
+        <div id="tab-navigasi" class="tab-content">
+            <div class="card">
+                <button class="btn" onclick="window.open('/navigasi-darat.pdf', '_blank')">
+                    🧭 Download Buku Navigasi Darat
+                </button>
+                <h2>🧭 Navigasi Darat</h2>
+                <ul style="list-style: disc; padding-left: 20px; margin-bottom: 16px; font-size: 16px; line-height: 1.6;">
+                    <li>Gunakan peta topografi dan kompas untuk orientasi.</li>
+                    <li>Kenali tanda alam: matahari, bintang, arah angin, vegetasi.</li>
+                    <li>Buat rencana perjalanan dan catat titik penting di jalur.</li>
+                    <li>Hindari berjalan sendirian, selalu informasikan posisi ke tim.</li>
+                    <li>Gunakan GPS jika tersedia, tapi tetap siapkan navigasi manual.</li>
+                </ul>
+                <div class="simulation-box">
+                    <h3>Simulasi Kompas</h3>
+                    <div class="compass-display">Arah Utara: <span id="compass-direction">Tidak tersedia</span></div>
+                    <div class="compass-note">(Fitur ini hanya akurat di HP dengan sensor kompas)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Checklist -->
         <div id="tab-checklist" class="tab-content">
             <div class="card">
-                <h2>✅ Checklist Perlengkapan Survival</h2>
-                <p style="margin-bottom: 20px;">Pastikan semua perlengkapan penting sudah siap:</p>
-                <div id="checklist-container"></div>
-            </div>
-        </div>
-
-        <!-- Tab Content: Emergency -->
-        <div id="tab-emergency" class="tab-content">
-            <div class="card emergency-card">
-                <h2>🚨 Nomor Darurat</h2>
-
-                <div style="display: grid; gap: 16px; margin: 20px 0;">
-                    <div>
-                        <strong>🚑 Ambulans/Medis:</strong>
-                        <div class="emergency-number">118 / 119</div>
-                    </div>
-
-                    <div>
-                        <strong>🚓 Polisi:</strong>
-                        <div class="emergency-number">110</div>
-                    </div>
-
-                    <div>
-                        <strong>🚒 Pemadam Kebakaran:</strong>
-                        <div class="emergency-number">113</div>
-                    </div>
-
-                    <div>
-                        <strong>🏔️ SAR (Search and Rescue):</strong>
-                        <div class="emergency-number">115</div>
-                    </div>
-                </div>
-
-                <div style="background: white; padding: 16px; border-radius: 8px; margin-top: 20px;">
-                    <h3 style="color: #dc2626; margin-bottom: 12px;">🫁 Simulator RJP (Resusitasi Jantung Paru)</h3>
-                    <p style="color: #374151; margin-bottom: 12px;">Latihan ritme kompresi dada 30:2 (30 kompresi, 2 nafas buatan)</p>
-
-                    <div class="rjp-counter" id="rjp-counter">0</div>
-
-                    <div style="text-align: center;">
-                        <button class="btn" id="rjp-btn" onclick="startRJP()">Mulai Latihan RJP</button>
-                        <button class="btn btn-danger" onclick="stopRJP()">Stop</button>
-                    </div>
-
-                    <div id="rjp-status" style="text-align: center; margin-top: 12px; font-weight: bold;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Content: GPS Tracker -->
-        <div id="tab-gps" class="tab-content">
-            <div class="card">
-                <h2>📍 Pelacak Lokasi GPS</h2>
-
-                <!-- Input Nama -->
-                <div id="gps-input" style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Masukkan Nama Anda:</label>
-                    <input type="text" id="nama" class="form-input" placeholder="Nama Lengkap" style="max-width: 300px;">
-                    <button class="btn" onclick="setNama()">Simpan Nama</button>
-                </div>
-
-                <!-- GPS Controls -->
-                <div id="gps-controls" style="display: none; margin-bottom: 20px;">
-                    <button class="btn" id="start-gps" onclick="startGPS()">📡 Aktifkan Pelacakan</button>
-                    <button class="btn btn-danger" id="stop-gps" onclick="stopGPS()" disabled>⏹️ Matikan GPS</button>
-                    <button class="btn" onclick="resetGPS()">🗑️ Reset Data</button>
-                </div>
-
-                <!-- GPS Status -->
-                <div id="gps-status" style="margin-bottom: 16px; padding: 12px; background: #f3f4f6; border-radius: 8px; font-weight: 600;"></div>
-
-                <!-- GPS Data Table -->
-                <div style="overflow-x: auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Waktu</th>
-                                <th>Nama</th>
-                                <th>Latitude</th>
-                                <th>Longitude</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="gps-tbody"></tbody>
-                    </table>
-                </div>
-
-                <p style="margin-top: 16px; color: #6b7280; font-size: 14px;">
-                    💾 Data lokasi tersimpan lokal & akan dikirim ke server saat online kembali.
+                <h2>✅ Checklist Survival</h2>
+                <div class="checklist-grid" id="checklist-container"></div>
+                <button class="btn" onclick="resetChecklist()">Reset Checklist</button>
+                <p style="margin-top: 8px; color: #22c55e; font-size: 12px; text-align: center;">
+                    Checklist tersimpan otomatis di perangkat Anda.
                 </p>
             </div>
         </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-grid">
-                <div class="footer-section">
-                    <h3>Tentang Kami</h3>
-                    <p>Mahapala Narotama adalah organisasi yang bergerak di bidang eksplorasi alam dan pelestarian lingkungan.</p>
-                    <div class="social-links">
-                        <a href="https://www.instagram.com/mahapalanarotama" target="_blank">📷</a>
-                        <a href="https://www.youtube.com/@mahapalanarotama1216" target="_blank">📺</a>
-                        <a href="https://tiktok.com/" target="_blank">🎵</a>
-                    </div>
+        
+        <!-- Tab: GPS -->
+        <div id="tab-gps" class="tab-content">
+            <div class="card">
+                <h2>📍 Pelacak Lokasi GPS</h2>
+                <div id="gps-input">
+                    <label style="display: block; margin-bottom: 8px; color: #166534; font-weight: 600;">Masukkan Nama Anda:</label>
+                    <input type="text" id="nama-input" class="input-field" placeholder="Nama Lengkap">
+                    <button class="btn" onclick="setNama()">Simpan Nama</button>
                 </div>
-
-                <div class="footer-section">
-                    <h3>Link Terkait</h3>
-                    <ul>
-                        <li><a href="https://narotama.ac.id/" target="_blank">Universitas Narotama</a></li>
-                        <li><a href="https://wartapalaindonesia.com/">WARTAPALA Indonesia</a></li>
-                        <li><a href="/kegiatan">Daftar Kegiatan</a></li>
-                        <li><a href="/galeri">Galeri Foto</a></li>
-                        <li><a href="/url-shortener">URL Shortener</a></li>
-                    </ul>
+                <div id="gps-controls" style="display: none;">
+                    <button class="btn" id="start-gps" onclick="startGPS()">Aktifkan Pelacakan</button>
+                    <button class="btn" onclick="resetGPS()">Reset Data Lokasi</button>
+                    <button class="btn btn-red" id="stop-gps" onclick="stopGPS()" disabled>Matikan GPS</button>
+                    <div id="gps-status" class="status-text"></div>
+                    <table class="gps-table">
+                        <thead>
+                            <tr><th>Waktu</th><th>Lat</th><th>Lon</th><th>Nama</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="gps-tbody"></tbody>
+                    </table>
+                    <p style="margin-top: 8px; color: #15803d; font-size: 12px;">
+                        Data lokasi tersimpan lokal & dikirim ke server jika online.
+                    </p>
                 </div>
-
-                <div class="footer-section">
-                    <h3>Hubungi Kami</h3>
-                    <p>📍 Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</p>
-                    <p>📞 (031) 34133 2882</p>
-                    <p>✉️ ukm.mahapala@narotama.ac.id</p>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2024 Mahapala Narotama. All rights reserved.</p>
             </div>
         </div>
-    </footer>
-
+    </div>
+    
     <script>
         // Global variables
         let gpsInterval = null;
         let rjpCount = 0;
         let rjpStarted = false;
-        let rjpInterval = null;
-
+        let deferredPrompt = null;
+        let cacheStatus = 'checking';
+        
         // Checklist items
         const checklistItems = [
             { icon: '🧭', label: 'Kompas' },
@@ -688,206 +769,227 @@
             { icon: '👕', label: 'Pakaian Cadangan' },
             { icon: '🔥', label: 'Korek Api/Firestarter' }
         ];
-
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const mobileNav = document.getElementById('mobile-nav');
-            mobileNav.style.display = mobileNav.style.display === 'block' ? 'none' : 'block';
-        }
-
+        
         // Update online/offline status
         function updateStatus() {
             const statusEl = document.getElementById('status');
             if (navigator.onLine) {
                 statusEl.textContent = 'Online';
                 statusEl.className = 'status-badge online';
-
-                // Auto redirect saat online ke React component - hanya jika tidak diakses langsung
-                if (!window.location.pathname.includes('offline-standalone.html')) {
-                    setTimeout(() => {
-                        if (confirm('Internet tersambung. Kembali ke aplikasi React?')) {
-                            window.location.href = '/offline';
-                        }
-                    }, 1000);
-                }
+                
+                // Auto redirect saat online ke React component
+                setTimeout(() => {
+                    if (confirm('Internet tersambung. Kembali ke aplikasi React?')) {
+                        // Force reload untuk memastikan service worker menggunakan network
+                        window.location.href = '/offline?online=true';
+                        setTimeout(() => window.location.reload(), 100);
+                    }
+                }, 1000);
             } else {
                 statusEl.textContent = 'Offline';
                 statusEl.className = 'status-badge offline';
             }
         }
-
-        // Tab switching
+        
+        // Tab functionality
         function showTab(tabName) {
             // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
-
+            
             // Remove active class from all nav tabs
             document.querySelectorAll('.nav-tab').forEach(tab => {
                 tab.classList.remove('active');
             });
-
+            
             // Show selected tab
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
             // Add active class to clicked nav tab
             event.target.classList.add('active');
         }
-
-        // Initialize checklist
+        
+        // PWA Install functionality
+        function initPWAInstall() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('install-container').style.display = 'flex';
+            });
+            
+            document.getElementById('install-btn').addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        document.getElementById('install-container').style.display = 'none';
+                        deferredPrompt = null;
+                    }
+                }
+            });
+            
+            // Check if already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                document.getElementById('install-container').style.display = 'none';
+            }
+        }
+        
+        // Cache status management
+        function updateCacheStatus(status, error = null) {
+            cacheStatus = status;
+            const progressFill = document.getElementById('progress-fill');
+            const statusText = document.getElementById('progress-status');
+            
+            switch (status) {
+                case 'checking':
+                    progressFill.className = 'progress-fill progress-checking';
+                    statusText.innerHTML = 'Memeriksa status cache offline...';
+                    break;
+                case 'caching':
+                    progressFill.className = 'progress-fill progress-caching';
+                    statusText.innerHTML = 'Sedang menyiapkan cache offline...';
+                    break;
+                case 'ready':
+                    progressFill.className = 'progress-fill progress-ready';
+                    statusText.innerHTML = `
+                        <div class="status-ready">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.414 7.414a1 1 0 01-1.414 0l-3.414-3.414a1 1 0 111.414-1.414L8 11.586l6.707-6.707a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            Aplikasi sudah siap untuk offline
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        document.querySelector('.progress-container').style.display = 'none';
+                    }, 3000);
+                    break;
+                case 'error':
+                    progressFill.className = 'progress-fill progress-error';
+                    statusText.innerHTML = `
+                        <div class="status-error">
+                            Gagal cache offline. ${error || ''} Coba reload aplikasi dalam kondisi online, atau clear cache dan ulangi instalasi.
+                        </div>
+                    `;
+                    break;
+            }
+        }
+        
+        // Service Worker communication
+        function initServiceWorkerCommunication() {
+            let pollInterval;
+            
+            function sendCheckCache() {
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.ready.then(reg => {
+                        if (reg.active) {
+                            console.log('[OfflinePage] Sending CHECK_CACHE to SW');
+                            reg.active.postMessage({ type: 'CHECK_CACHE' });
+                        }
+                    });
+                }
+            }
+            
+            sendCheckCache();
+            pollInterval = setInterval(() => {
+                if (cacheStatus === 'ready' || cacheStatus === 'error') {
+                    clearInterval(pollInterval);
+                } else {
+                    sendCheckCache();
+                }
+            }, 2000);
+            
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'CACHE_STATUS') {
+                    console.log('[OfflinePage] Received CACHE_STATUS:', event.data);
+                    updateCacheStatus(event.data.status, event.data.error);
+                }
+            });
+        }
+        
+        // Checklist functionality
         function initChecklist() {
             const container = document.getElementById('checklist-container');
-            const saved = JSON.parse(localStorage.getItem('survival_checklist') || '{}');
-
+            const saved = JSON.parse(localStorage.getItem('survival_checklist') || '[]');
+            
             container.innerHTML = '';
-            checklistItems.forEach((item, index) => {
+            checklistItems.forEach((item, i) => {
+                const checked = saved[i] || false;
                 const div = document.createElement('div');
-                div.className = `checklist-item ${saved[index] ? 'checked' : ''}`;
+                div.className = `checklist-item ${checked ? 'checked' : ''}`;
+                div.onclick = () => toggleChecklist(i);
                 div.innerHTML = `
-                    <input type="checkbox" ${saved[index] ? 'checked' : ''} 
-                           onchange="toggleChecklistItem(${index})">
-                    <span style="font-size: 20px;">${item.icon}</span>
-                    <span style="flex: 1;">${item.label}</span>
+                    <span class="checklist-icon">${item.icon}</span>
+                    <span class="checklist-label">${item.label}</span>
+                    <input type="checkbox" class="checkbox" ${checked ? 'checked' : ''} onclick="event.stopPropagation()">
                 `;
                 container.appendChild(div);
             });
         }
-
-        // Toggle checklist item
-        function toggleChecklistItem(index) {
-            const saved = JSON.parse(localStorage.getItem('survival_checklist') || '{}');
+        
+        function toggleChecklist(index) {
+            const saved = JSON.parse(localStorage.getItem('survival_checklist') || '[]');
+            while (saved.length <= index) saved.push(false);
             saved[index] = !saved[index];
             localStorage.setItem('survival_checklist', JSON.stringify(saved));
             initChecklist();
         }
-
-        // RJP Functions
-        function startRJP() {
-            if (rjpStarted) return;
-
-            rjpStarted = true;
-            rjpCount = 0;
-            document.getElementById('rjp-btn').textContent = 'Sedang Latihan...';
-            document.getElementById('rjp-btn').disabled = true;
-
-            // Rhythm: 100-120 compressions per minute = ~500-600ms interval
-            rjpInterval = setInterval(() => {
-                rjpCount++;
-                document.getElementById('rjp-counter').textContent = rjpCount;
-
-                // Status feedback
-                const statusEl = document.getElementById('rjp-status');
-                if (rjpCount <= 30) {
-                    statusEl.textContent = `Kompresi ${rjpCount}/30`;
-                    statusEl.style.color = '#dc2626';
-                } else if (rjpCount === 31) {
-                    statusEl.textContent = 'Berikan 2 nafas buatan!';
-                    statusEl.style.color = '#2563eb';
-                } else if (rjpCount === 32) {
-                    statusEl.textContent = 'Siklus selesai! Ulangi...';
-                    statusEl.style.color = '#16a34a';
-                    rjpCount = 0; // Reset untuk siklus berikutnya
-                }
-            }, 550); // ~109 BPM
+        
+        function resetChecklist() {
+            localStorage.removeItem('survival_checklist');
+            initChecklist();
         }
-
-        function stopRJP() {
-            if (rjpInterval) {
-                clearInterval(rjpInterval);
-                rjpInterval = null;
-            }
-            rjpStarted = false;
-            rjpCount = 0;
-            document.getElementById('rjp-counter').textContent = '0';
-            document.getElementById('rjp-btn').textContent = 'Mulai Latihan RJP';
-            document.getElementById('rjp-btn').disabled = false;
-            document.getElementById('rjp-status').textContent = '';
-        }
-
-        // GPS Functions
+        
+        // GPS functionality
         function setNama() {
-            const nama = document.getElementById('nama').value.trim();
+            const nama = document.getElementById('nama-input').value.trim();
             if (!nama) {
-                alert('Silakan masukkan nama terlebih dahulu!');
+                alert('Masukkan nama Anda');
                 return;
             }
-
             localStorage.setItem('gps_nama', nama);
             document.getElementById('gps-input').style.display = 'none';
             document.getElementById('gps-controls').style.display = 'block';
-            document.getElementById('gps-status').textContent = `Siap melacak untuk: ${nama}`;
+            updateGPSTable();
         }
-
+        
         function startGPS() {
-            const nama = localStorage.getItem('gps_nama');
-            if (!nama) {
-                alert('Nama belum diset!');
-                return;
-            }
-
             if (!navigator.geolocation) {
-                alert('GPS tidak didukung di browser ini!');
+                document.getElementById('gps-status').textContent = 'Geolocation tidak didukung browser.';
                 return;
             }
-
+            
             document.getElementById('start-gps').disabled = true;
             document.getElementById('stop-gps').disabled = false;
-            document.getElementById('gps-status').textContent = 'Memulai pelacakan GPS...';
-
-            // Tracking setiap 10 detik
+            document.getElementById('gps-status').textContent = 'Pelacakan aktif...';
+            
             gpsInterval = setInterval(() => {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-                        const time = new Date().toLocaleString('id-ID');
-                        const online = navigator.onLine;
-
+                    pos => {
+                        const nama = localStorage.getItem('gps_nama');
                         const data = {
+                            time: new Date().toLocaleString(),
+                            lat: pos.coords.latitude.toFixed(6),
+                            lon: pos.coords.longitude.toFixed(6),
                             nama: nama,
-                            lat: lat,
-                            lon: lon,
-                            time: time,
-                            online: online
+                            online: navigator.onLine
                         };
-
-                        // Simpan ke localStorage
-                        let saved = JSON.parse(localStorage.getItem('gps_data') || '[]');
+                        
+                        const saved = JSON.parse(localStorage.getItem('gps_data') || '[]');
                         saved.push(data);
-
-                        // Batasi maksimal 100 record terakhir
-                        if (saved.length > 100) {
-                            saved = saved.slice(-100);
-                        }
-
                         localStorage.setItem('gps_data', JSON.stringify(saved));
-
-                        // Update status
-                        document.getElementById('gps-status').textContent = 
-                            `Pelacakan aktif - Lokasi: ${lat.toFixed(6)}, ${lon.toFixed(6)} | Status: ${online ? 'Online' : 'Offline'}`;
-
-                        // Update table
                         updateGPSTable();
-
-                        // Sync ke server jika online
-                        if (online) {
-                            syncToServer(data);
-                        }
+                        
+                        document.getElementById('gps-status').textContent = navigator.onLine ? 'Online' : 'Mode Offline: Menyimpan data lokal';
                     },
-                    (error) => {
-                        document.getElementById('gps-status').textContent = 
-                            `Error GPS: ${error.message}`;
+                    err => {
+                        document.getElementById('gps-status').textContent = 'Gagal mendapatkan lokasi: ' + err.message;
                     },
-                    { 
-                        enableHighAccuracy: true, 
-                        timeout: 10000, 
-                        maximumAge: 0 
-                    }
+                    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
                 );
             }, 10000);
         }
-
+        
         function stopGPS() {
             if (gpsInterval) {
                 clearInterval(gpsInterval);
@@ -896,12 +998,13 @@
             document.getElementById('start-gps').disabled = false;
             document.getElementById('stop-gps').disabled = true;
             document.getElementById('gps-status').textContent = 'Pelacakan dimatikan dan data dihapus.';
-
+            
             // Clear data
             localStorage.removeItem('gps_data');
+            localStorage.removeItem('gps_tracker');
             updateGPSTable();
         }
-
+        
         function resetGPS() {
             if (gpsInterval) {
                 clearInterval(gpsInterval);
@@ -910,40 +1013,24 @@
             document.getElementById('start-gps').disabled = false;
             document.getElementById('stop-gps').disabled = true;
             localStorage.removeItem('gps_data');
-            document.getElementById('gps-status').textContent = 'Data GPS telah direset.';
+            localStorage.removeItem('gps_tracker');
             updateGPSTable();
         }
-
+        
         function updateGPSTable() {
             const tbody = document.getElementById('gps-tbody');
             const saved = JSON.parse(localStorage.getItem('gps_data') || '[]');
-
+            
             tbody.innerHTML = '';
-
-            if (saved.length === 0) {
-                const tr = document.createElement('tr');
-                tr.innerHTML = '<td colspan="5" style="text-align: center; color: #9ca3af;">Belum ada data GPS</td>';
-                tbody.appendChild(tr);
-                return;
-            }
-
-            // Tampilkan 10 data terakhir
             saved.slice(-10).forEach(data => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${data.time}</td>
-                    <td>${data.nama}</td>
-                    <td>${data.lat.toFixed(6)}</td>
-                    <td>${data.lon.toFixed(6)}</td>
+                    <td>${data.lat}</td>
+                    <td>${data.lon}</td>
+                    <td>${data.nama || ''}</td>
                     <td>
-                        <span style="
-                            padding: 4px 8px; 
-                            border-radius: 12px; 
-                            font-size: 10px; 
-                            font-weight: bold;
-                            background: ${data.online ? '#dcfce7' : '#fee2e2'};
-                            color: ${data.online ? '#166534' : '#dc2626'};
-                        ">
+                        <span class="gps-status-badge ${data.online ? 'gps-online' : 'gps-offline'}">
                             ${data.online ? 'Online' : 'Offline'}
                         </span>
                     </td>
@@ -951,38 +1038,73 @@
                 tbody.appendChild(tr);
             });
         }
-
-        // Sync data to server (dummy function)
-        async function syncToServer(data) {
-            try {
-                // Simulasi sync ke server
-                console.log('Syncing GPS data to server:', data);
-                // Di implementasi nyata, kirim ke API endpoint
-                // await fetch('/api/gps-tracker', { method: 'POST', body: JSON.stringify(data) });
-            } catch (error) {
-                console.error('Sync error:', error);
+        
+        // RJP Simulation
+        function startRJP() {
+            rjpStarted = true;
+            rjpCount = 0;
+            const container = document.getElementById('rjp-container');
+            container.innerHTML = `
+                <div class="rjp-counter">Tekan tombol di bawah ini sebanyak 30x untuk simulasi kompresi dada!</div>
+                <button class="btn" onclick="tekanDada()">Tekan Dada (<span id="rjp-count">0</span>/30)</button>
+                <div id="rjp-complete" class="rjp-complete" style="display: none;">
+                    Simulasi selesai! Segera lakukan napas bantuan.
+                </div>
+            `;
+        }
+        
+        function tekanDada() {
+            rjpCount++;
+            document.getElementById('rjp-count').textContent = rjpCount;
+            
+            if (rjpCount >= 30) {
+                document.getElementById('rjp-complete').style.display = 'block';
             }
         }
-
-        // Event listeners
-        window.addEventListener('online', updateStatus);
-        window.addEventListener('offline', updateStatus);
-
-        // Initialize
-        window.addEventListener('load', () => {
+        
+        // Compass simulation
+        function initCompass() {
+            function handleOrientation(e) {
+                if (e.absolute && typeof e.alpha === 'number') {
+                    const deg = Math.round(e.alpha);
+                    document.getElementById('compass-direction').textContent = `${deg}° (Utara: 0°)`;
+                }
+            }
+            
+            window.addEventListener('deviceorientationabsolute', handleOrientation);
+            window.addEventListener('deviceorientation', handleOrientation);
+        }
+        
+        // Initialize everything
+        function init() {
+            // Set up event listeners
+            window.addEventListener('online', updateStatus);
+            window.addEventListener('offline', updateStatus);
             updateStatus();
+            
+            // Initialize components
+            initPWAInstall();
+            initServiceWorkerCommunication();
             initChecklist();
-            updateGPSTable();
-
-            // Check if nama already saved
+            initCompass();
+            
+            // Restore GPS name if saved
             const savedNama = localStorage.getItem('gps_nama');
             if (savedNama) {
-                document.getElementById('nama').value = savedNama;
+                document.getElementById('nama-input').value = savedNama;
                 document.getElementById('gps-input').style.display = 'none';
                 document.getElementById('gps-controls').style.display = 'block';
-                document.getElementById('gps-status').textContent = `Siap melacak untuk: ${savedNama}`;
+                updateGPSTable();
             }
-        });
+            
+            // Update cache status
+            setTimeout(() => {
+                updateCacheStatus('ready');
+            }, 3000);
+        }
+        
+        // Start when page loads
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
