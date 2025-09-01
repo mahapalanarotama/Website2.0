@@ -63,28 +63,9 @@ self.addEventListener('fetch', event => {
   
   event.respondWith(
     (async () => {
-      // Khusus untuk route /offline - langsung serve offline page tanpa coba network
+      // Skip service worker untuk route /offline - biarkan server handle langsung
       if (url.pathname === '/offline') {
-        const cache = await caches.open(CACHE_NAME);
-        const offlineResponse = await cache.match('/offline-standalone.html');
-        
-        if (offlineResponse) {
-          console.log('[SW] 🎯 Serving standalone offline page');
-          return offlineResponse;
-        }
-        
-        // Jika offline page tidak ter-cache, fallback ke response sederhana
-        return new Response(`
-          <!DOCTYPE html>
-          <html><head><title>Offline</title></head>
-          <body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1>🏕️ Mode Offline</h1>
-            <p>Fitur survival sedang dimuat...</p>
-            <button onclick="location.reload()">Muat Ulang</button>
-          </body></html>
-        `, {
-          headers: { 'Content-Type': 'text/html' }
-        });
+        return fetch(event.request);
       }
       
       // Untuk request lainnya, coba network dulu

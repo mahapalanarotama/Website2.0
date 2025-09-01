@@ -63,9 +63,13 @@ app.post('/api/github-oauth', async (req, res) => {
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Special route for offline page - serve standalone HTML directly
+// Special route for offline page - always serve standalone HTML directly
 app.get('/offline', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'offline-standalone.html'));
+  const offlinePath = path.join(__dirname, 'public', 'offline-standalone.html');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(offlinePath);
 });
 
 // Catch-all handler: send back React's index.html file for all other routes
