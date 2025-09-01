@@ -36,7 +36,8 @@ let ASSETS = [
   '/navigasi-darat.pdf',
   '/ppgd.pdf',
   '/robots.txt',
-  '/sitemap.xml'
+  '/sitemap.xml',
+  '/Logo%20Mpn.png'
 ];
 
 // Dynamically load assets from assets-manifest.json
