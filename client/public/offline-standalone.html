@@ -7,7 +7,25 @@
     <title>MPN Offline - Survival Tools</title>
     <link rel="icon" href="/favicon.ico">
     <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        /* CSS Variables untuk konsistensi */
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 20 14.3% 4.1%;
+            --primary: 142 66% 34%;
+            --primary-foreground: 211 100% 99%;
+            --secondary: 140 45% 22%;
+            --accent: 45 93% 47%;
+            --muted: 60 4.8% 95.9%;
+            --muted-foreground: 25 5.3% 44.7%;
+            --border: 20 5.9% 90%;
+            --ring: 142 66% 34%;
+            --radius: 0.5rem;
+        }
+
         /* Reset dan base styles */
         * {
             margin: 0;
@@ -16,21 +34,27 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Open Sans', sans-serif;
             line-height: 1.6;
             background: linear-gradient(to bottom, #f9fafb, #ecfdf5);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
         }
         
-        /* Navbar Styles */
+        /* Navbar Styles - persis seperti React component */
         .navbar {
             position: sticky;
             top: 0;
             z-index: 50;
             background: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
         }
         
@@ -41,6 +65,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
         
         .navbar-brand {
@@ -49,6 +74,8 @@
             gap: 0.75rem;
             text-decoration: none;
             color: inherit;
+            position: relative;
+            z-index: 10;
         }
         
         .navbar-logo {
@@ -56,21 +83,25 @@
             height: 2.5rem;
             border-radius: 50%;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 2px solid #0b3d2e;
+            border: 2px solid hsl(var(--primary));
             background: white;
+            animation: navbarLogo 1.2s cubic-bezier(0.4,0,0.2,1);
         }
         
         .navbar-title {
+            font-family: 'Poppins', sans-serif;
             font-weight: bold;
             font-size: 1.5rem;
-            letter-spacing: 0.1em;
-            color: #0b3d2e;
+            letter-spacing: 0.25em;
+            color: hsl(var(--primary));
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            animation: navbarLogo 1.2s cubic-bezier(0.4,0,0.2,1);
         }
         
         .navbar-accent {
-            color: #16a34a;
+            color: hsl(var(--accent));
             font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
         
         .navbar-nav {
@@ -83,12 +114,13 @@
             padding: 0.25rem 0.5rem;
             font-weight: 500;
             text-decoration: none;
-            color: #0b3d2e;
+            color: hsl(var(--primary));
             transition: color 0.3s;
+            z-index: 10;
         }
         
         .navbar-link:hover {
-            color: #16a34a;
+            color: hsl(var(--accent));
         }
         
         .navbar-link::after {
@@ -98,7 +130,7 @@
             bottom: 0;
             width: 100%;
             height: 2px;
-            background: #16a34a;
+            background: hsl(var(--accent));
             border-radius: 1px;
             transform: scaleX(0);
             transition: transform 0.3s;
@@ -112,9 +144,16 @@
             display: block;
             background: none;
             border: none;
-            color: #0b3d2e;
+            color: hsl(var(--primary));
             font-size: 1.5rem;
             cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: background 0.2s;
+        }
+        
+        .mobile-menu-btn:hover {
+            background: rgba(0,0,0,0.05);
         }
         
         .mobile-menu {
@@ -123,26 +162,78 @@
             border-radius: 0 0 1rem 1rem;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             padding: 1rem;
+            position: relative;
         }
         
         .mobile-menu.active {
             display: block;
+            animation: navbarMobile 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+        
+        .mobile-close-btn {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.5rem;
         }
         
         .mobile-menu-item {
             display: block;
             padding: 0.75rem 1rem;
             text-decoration: none;
-            color: #0b3d2e;
+            color: hsl(var(--primary));
             font-weight: 600;
             border-radius: 0.5rem;
             transition: all 0.3s;
             margin-bottom: 0.5rem;
+            font-size: 1.125rem;
         }
         
         .mobile-menu-item:hover {
             background: rgba(22, 163, 74, 0.1);
-            color: #16a34a;
+            color: hsl(var(--accent));
+        }
+
+        /* Animasi awan di navbar */
+        .navbar-clouds {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 2rem;
+            overflow: hidden;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.7;
+            animation: cloudMove 30s linear infinite;
+        }
+
+        .cloud:nth-child(1) {
+            width: 4rem;
+            height: 2rem;
+            animation-delay: 0s;
+            filter: blur(2px);
+        }
+
+        .cloud:nth-child(2) {
+            width: 6rem;
+            height: 2.5rem;
+            animation-delay: 2s;
+            filter: blur(3px);
+            opacity: 0.6;
+        }
+
+        .cloud:nth-child(3) {
+            width: 5rem;
+            height: 2rem;
+            animation-delay: 4s;
+            filter: blur(1px);
+            opacity: 0.5;
         }
         
         /* Status Badge */
@@ -161,6 +252,7 @@
             font-weight: bold;
             font-size: 0.75rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 0.5rem 1rem;
         }
         
         .status-badge.online {
@@ -195,24 +287,9 @@
             transition: all 0.5s;
         }
         
-        .progress-checking {
-            width: 33%;
-            background: linear-gradient(90deg, #ef4444, #f59e42, #3b82f6, #22c55e);
-        }
-        
-        .progress-caching {
-            width: 66%;
-            background: linear-gradient(90deg, #ef4444, #f59e42, #22c55e);
-        }
-        
         .progress-ready {
             width: 100%;
             background: linear-gradient(90deg, #22c55e, #16a34a);
-        }
-        
-        .progress-error {
-            width: 33%;
-            background: linear-gradient(90deg, #ef4444, #f59e42);
         }
         
         .progress-status {
@@ -229,15 +306,11 @@
             gap: 0.5rem;
         }
         
-        .progress-status.error {
-            color: #dc2626;
-        }
-        
         /* Main Container */
         .container {
             max-width: 36rem;
             margin: 0 auto;
-            padding: 0 1rem;
+            padding: 2rem 0.5rem;
             flex: 1;
         }
         
@@ -293,6 +366,7 @@
             padding: 1.5rem;
             margin-bottom: 1rem;
             color: #374151;
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .card h1 {
@@ -333,7 +407,7 @@
         }
         
         .btn-nav {
-            background: #166534;
+            background: hsl(var(--primary));
             color: white;
             font-size: 1rem;
             border-radius: 0.5rem;
@@ -342,14 +416,14 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             border: none;
             margin: 0.2rem;
-            transition: background 0.2s;
+            transition: all 0.2s;
             cursor: pointer;
         }
         
         .btn-nav:hover,
         .btn-nav.active {
-            background: #22c55e;
-            color: #14532d;
+            background: hsl(var(--accent));
+            color: hsl(var(--secondary));
         }
         
         .btn-nav:disabled {
@@ -390,9 +464,7 @@
         }
         
         .feature-icon {
-            width: 2rem;
-            height: 2rem;
-            color: #2563eb;
+            font-size: 2rem;
         }
         
         .feature-title {
@@ -586,7 +658,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* Footer */
+        /* Footer - persis seperti React component */
         .footer {
             background: #1f2937;
             color: white;
@@ -607,6 +679,7 @@
         }
         
         .footer-section h3 {
+            font-family: 'Poppins', sans-serif;
             font-size: 1.25rem;
             font-weight: bold;
             margin-bottom: 1rem;
@@ -646,6 +719,7 @@
             color: #d1d5db;
             font-size: 1.25rem;
             transition: color 0.3s;
+            text-decoration: none;
         }
         
         .social-link:hover {
@@ -663,7 +737,7 @@
         /* Contact info */
         .contact-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             margin-bottom: 0.5rem;
             color: #d1d5db;
         }
@@ -673,6 +747,7 @@
             height: 1.5rem;
             margin-right: 0.5rem;
             flex-shrink: 0;
+            margin-top: 0.125rem;
         }
         
         /* Responsive */
@@ -727,35 +802,107 @@
         .bg-red-600:hover {
             background: #b91c1c;
         }
+
+        /* Keyframe animations */
+        @keyframes navbarLogo {
+            0% { letter-spacing: 0.1em; opacity: 0.7; }
+            100% { letter-spacing: 0.25em; opacity: 1; }
+        }
+
+        @keyframes navbarMobile {
+            0% { transform: translateY(-30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes cloudMove {
+            0% { transform: translateX(-10vw); }
+            100% { transform: translateX(110vw); }
+        }
+
+        /* SVG Icons */
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            fill: currentColor;
+        }
+
+        .icon-lg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
+    <!-- Navbar - persis seperti React component -->
     <header class="navbar">
         <div class="navbar-container">
+            <!-- Animasi awan -->
+            <div class="navbar-clouds">
+                <div class="cloud"></div>
+                <div class="cloud"></div>
+                <div class="cloud"></div>
+            </div>
+            
             <a href="/" class="navbar-brand">
                 <img src="/Logo%20Mpn.png" alt="Logo Mahapala" class="navbar-logo">
                 <span class="navbar-title">
                     MAHAPALA <span class="navbar-accent">NAROTAMA</span>
                 </span>
             </a>
+            
             <nav class="navbar-nav">
                 <a href="/" class="navbar-link">Beranda</a>
                 <a href="/kegiatan" class="navbar-link">Kegiatan</a>
                 <a href="/pembelajaran" class="navbar-link">Pembelajaran</a>
                 <a href="/sejarah" class="navbar-link">Sejarah</a>
                 <a href="/pendaftaran" class="navbar-link">Informasi Pendaftaran</a>
-                <a href="/scan-anggota" class="navbar-link">👥 Anggota</a>
+                <a href="/scan-anggota" class="navbar-link">
+                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Anggota
+                    </span>
+                </a>
             </nav>
-            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+            
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" x2="20" y1="6" y2="6"/>
+                    <line x1="4" x2="20" y1="12" y2="12"/>
+                    <line x1="4" x2="20" y1="18" y2="18"/>
+                </svg>
+            </button>
         </div>
+        
         <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-close-btn">
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                    </svg>
+                </button>
+            </div>
             <a href="/" class="mobile-menu-item">Beranda</a>
             <a href="/kegiatan" class="mobile-menu-item">Kegiatan</a>
             <a href="/pembelajaran" class="mobile-menu-item">Pembelajaran</a>
             <a href="/sejarah" class="mobile-menu-item">Sejarah</a>
             <a href="/pendaftaran" class="mobile-menu-item">Informasi Pendaftaran</a>
-            <a href="/scan-anggota" class="mobile-menu-item">👥 Anggota</a>
+            <a href="/scan-anggota" class="mobile-menu-item">
+                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Anggota
+                </span>
+            </a>
         </div>
     </header>
     
@@ -967,7 +1114,7 @@
         </div>
     </div>
     
-    <!-- Footer -->
+    <!-- Footer - persis seperti React component -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-grid">
@@ -975,9 +1122,25 @@
                     <h3>Tentang Kami</h3>
                     <p>Mahapala Narotama adalah organisasi yang bergerak di bidang eksplorasi alam dan pelestarian lingkungan.</p>
                     <div class="social-links">
-                        <a href="https://www.instagram.com/mahapalanarotama?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="social-link" title="Instagram">📷</a>
-                        <a href="https://www.youtube.com/@mahapalanarotama1216" target="_blank" class="social-link" title="YouTube">📺</a>
-                        <a href="https://tiktok.com/" target="_blank" class="social-link" title="TikTok">🎵</a>
+                        <a href="https://www.instagram.com/mahapalanarotama?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" class="social-link" title="Instagram">
+                            <svg class="icon-lg" viewBox="0 0 24 24" fill="currentColor">
+                                <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                                <path d="m16 11.37-.55-.55C14.8 10.16 13.92 10 13 10s-1.8.16-2.45.82l-.55.55"/>
+                                <circle cx="12" cy="12" r="3"/>
+                                <circle cx="18" cy="6" r="1"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.youtube.com/@mahapalanarotama1216" target="_blank" class="social-link" title="YouTube">
+                            <svg class="icon-lg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/>
+                                <polygon points="10,15 15,12 10,9"/>
+                            </svg>
+                        </a>
+                        <a href="https://tiktok.com/" target="_blank" class="social-link" title="TikTok">
+                            <svg class="icon-lg" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16.5 3A4.5 4.5 0 0 0 21 7.5v1.25a6.25 6.25 0 0 1-5-1.25v7.5a5.5 5.5 0 1 1-5.5-5.5h.75v2H10.5a3.5 3.5 0 1 0 3.5 3.5V3h2.5Z" />
+                            </svg>
+                        </a>
                     </div>
                 </div>
                 
@@ -996,15 +1159,23 @@
                     <h3>Hubungi Kami</h3>
                     <address style="font-style: normal;">
                         <div class="contact-item">
-                            <span class="contact-icon">📍</span>
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
                             <span>Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</span>
                         </div>
                         <div class="contact-item">
-                            <span class="contact-icon">📞</span>
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
                             <span>(031) 34133 2882</span>
                         </div>
                         <div class="contact-item">
-                            <span class="contact-icon">✉️</span>
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                                <path d="m22 7-10 5L2 7"/>
+                            </svg>
                             <span>ukm.mahapala@narotama.ac.id</span>
                         </div>
                     </address>
@@ -1055,15 +1226,6 @@
             if (navigator.onLine) {
                 statusEl.textContent = 'Online';
                 statusEl.className = 'status-badge online';
-                
-                // Auto redirect saat online ke React component - hanya jika tidak diakses langsung
-                if (!window.location.pathname.includes('offline-standalone.html')) {
-                    setTimeout(() => {
-                        if (confirm('Internet tersambung. Kembali ke aplikasi React?')) {
-                            window.location.href = '/offline';
-                        }
-                    }, 1000);
-                }
             } else {
                 statusEl.textContent = 'Offline';
                 statusEl.className = 'status-badge offline';
@@ -1098,7 +1260,11 @@
             }
             
             // Add active class to clicked button
-            event.target.classList.add('active');
+            const clickedButton = Array.from(buttons).find(btn => btn.textContent.includes(getTabDisplayName(tabName)));
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+            
             currentTab = tabName;
             
             // Special initialization for certain tabs
@@ -1107,6 +1273,18 @@
             } else if (tabName === 'gps') {
                 updateGpsTable();
             }
+        }
+        
+        function getTabDisplayName(tabName) {
+            const tabNames = {
+                'fitur': 'Fitur Survival',
+                'survival': 'Panduan Survival',
+                'ppgd': 'PPGD',
+                'navigasi': 'Navigasi Darat',
+                'checklist': 'Checklist',
+                'gps': 'Pelacak GPS'
+            };
+            return tabNames[tabName] || tabName;
         }
         
         // PWA Installation
@@ -1183,6 +1361,29 @@
             document.getElementById('stop-tracking').disabled = false;
             updateGpsStatus('Pelacakan aktif...');
             
+            // Get initial position
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const now = new Date();
+                    const data = {
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude,
+                        time: now.toLocaleString(),
+                        nama: userName,
+                        online: navigator.onLine,
+                    };
+                    
+                    gpsPositions.push(data);
+                    localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
+                    updateGpsTable();
+                    updateGpsStatus(`Lokasi diperoleh: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`);
+                },
+                (error) => {
+                    updateGpsStatus('Gagal mendapatkan lokasi: ' + error.message);
+                }
+            );
+            
+            // Continue tracking every 10 seconds
             gpsInterval = setInterval(() => {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -1198,6 +1399,7 @@
                         gpsPositions.push(data);
                         localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
                         updateGpsTable();
+                        updateGpsStatus(`Lokasi terbaru: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)} (${navigator.onLine ? 'Online' : 'Offline'})`);
                         
                         // Simulate sync to Firestore (akan berfungsi penuh jika online)
                         if (navigator.onLine) {
@@ -1224,18 +1426,14 @@
             }
             document.getElementById('start-tracking').disabled = false;
             document.getElementById('stop-tracking').disabled = true;
-            gpsPositions = [];
-            localStorage.removeItem('gps_track');
-            localStorage.removeItem('gps_tracker');
-            updateGpsStatus('Pelacakan dimatikan dan data dihapus.');
-            updateGpsTable();
+            updateGpsStatus('Pelacakan dihentikan.');
         }
         
         function resetTrack() {
             gpsPositions = [];
             localStorage.removeItem('gps_track');
-            localStorage.removeItem('gps_tracker');
             updateGpsTable();
+            updateGpsStatus('Data lokasi telah direset.');
         }
         
         function updateGpsStatus(message) {
@@ -1262,14 +1460,6 @@
                 `;
             });
         }
-        
-        // Update GPS status based on online/offline
-        function updateGpsOnlineStatus() {
-            updateGpsStatus(navigator.onLine ? "Online" : "Mode Offline: Menyimpan data lokal");
-        }
-        
-        window.addEventListener('online', updateGpsOnlineStatus);
-        window.addEventListener('offline', updateGpsOnlineStatus);
         
         // Checklist Functions
         const checklistItems = [
@@ -1343,21 +1533,29 @@
             
             if (rjpCount >= 30) {
                 document.getElementById('rjp-result').innerHTML = 
-                    '<div style="color: #16a34a; font-weight: bold;">Simulasi selesai! Segera lakukan napas bantuan.</div>';
+                    '<div style="color: #16a34a; font-weight: bold;">✅ Simulasi selesai! Segera lakukan napas bantuan.</div>';
             }
         }
         
         // Compass simulation
         function initCompass() {
-            function handleOrientation(e) {
-                if (e.absolute && typeof e.alpha === 'number') {
-                    const deg = Math.round(e.alpha);
-                    document.getElementById('compass-direction').textContent = `${deg}° (Utara: 0°)`;
-                }
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                window.addEventListener('deviceorientation', handleOrientation, true);
             }
             
-            window.addEventListener('deviceorientationabsolute', handleOrientation);
-            window.addEventListener('deviceorientation', handleOrientation);
+            function handleOrientation(event) {
+                let alpha = event.alpha;
+                if (alpha !== null && alpha !== undefined) {
+                    // Convert to compass bearing
+                    let compass = (360 - alpha) % 360;
+                    const directions = ['Utara', 'Timur Laut', 'Timur', 'Tenggara', 'Selatan', 'Barat Daya', 'Barat', 'Barat Laut'];
+                    const directionIndex = Math.round(compass / 45) % 8;
+                    
+                    document.getElementById('compass-direction').textContent = 
+                        `${Math.round(compass)}° (${directions[directionIndex]})`;
+                }
+            }
         }
         
         // Sync offline GPS data when online (simulation)
@@ -1368,15 +1566,15 @@
             if (!saved) return;
             
             console.log('Syncing GPS data to Firestore:', JSON.parse(saved));
-            // Kosongkan localStorage setelah sync (simulation)
-            // localStorage.removeItem("gps_track");
         }
         
         // Auto sync when coming online
         window.addEventListener('online', syncOfflineGpsToFirestore);
         
         // Initialize GPS status
-        setTimeout(updateGpsOnlineStatus, 1000);
+        setTimeout(() => {
+            updateGpsStatus(navigator.onLine ? "Ready untuk pelacakan GPS" : "Mode Offline: Menyimpan data lokal");
+        }, 1000);
     </script>
 </body>
 </html>
