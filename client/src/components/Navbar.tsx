@@ -30,7 +30,7 @@ export function Navbar() {
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3 group">
             <img
-              src="https://raw.githubusercontent.com/mahapalanarotama/mahapalanarotama.github.io/refs/heads/main/Img/Logo%20Mpn.png"
+              src="/Logo%20Mpn.png"
               alt="Logo Mahapala"
               className="w-10 h-10 rounded-full shadow-md border-2 border-primary bg-white animate-navbar-logo"
               style={{ background: 'white' }}
