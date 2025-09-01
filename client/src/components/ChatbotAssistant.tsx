@@ -100,7 +100,7 @@ export async function fetchAIAnswer(question: string): Promise<string> {
               content: question,
             },
           ],
-          model: "openai/gpt-oss-20b:fireworks-ai",
+          model: "deepseek-ai/DeepSeek-R1",
         }),
       }
     );
