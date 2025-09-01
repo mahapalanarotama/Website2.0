@@ -91,8 +91,8 @@
         .navbar-title {
             font-family: 'Poppins', sans-serif;
             font-weight: bold;
-            font-size: 1.5rem;
-            letter-spacing: 0.25em;
+            font-size: clamp(1rem, 4vw, 1.5rem);
+            letter-spacing: 0.1em;
             color: hsl(var(--primary));
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
             animation: navbarLogo 1.2s cubic-bezier(0.4,0,0.2,1);
@@ -106,7 +106,7 @@
         
         .navbar-nav {
             display: none;
-            gap: 1.5rem;
+            gap: 1rem;
         }
         
         .navbar-link {
@@ -117,6 +117,7 @@
             color: hsl(var(--primary));
             transition: color 0.3s;
             z-index: 10;
+            font-size: 0.9rem;
         }
         
         .navbar-link:hover {
@@ -185,7 +186,7 @@
             border-radius: 0.5rem;
             transition: all 0.3s;
             margin-bottom: 0.5rem;
-            font-size: 1.125rem;
+            font-size: 1rem;
         }
         
         .mobile-menu-item:hover {
@@ -193,49 +194,6 @@
             color: hsl(var(--accent));
         }
 
-        /* Animasi awan di navbar */
-        .navbar-clouds {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: 2rem;
-            overflow: hidden;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .cloud {
-            position: absolute;
-            background: white;
-            border-radius: 50px;
-            opacity: 0.7;
-            animation: cloudMove 30s linear infinite;
-        }
-
-        .cloud:nth-child(1) {
-            width: 4rem;
-            height: 2rem;
-            animation-delay: 0s;
-            filter: blur(2px);
-        }
-
-        .cloud:nth-child(2) {
-            width: 6rem;
-            height: 2.5rem;
-            animation-delay: 2s;
-            filter: blur(3px);
-            opacity: 0.6;
-        }
-
-        .cloud:nth-child(3) {
-            width: 5rem;
-            height: 2rem;
-            animation-delay: 4s;
-            filter: blur(1px);
-            opacity: 0.5;
-        }
-        
         /* Status Badge */
         .status-indicator {
             position: sticky;
@@ -308,9 +266,9 @@
         
         /* Main Container */
         .container {
-            max-width: 36rem;
+            max-width: 90rem;
             margin: 0 auto;
-            padding: 2rem 0.5rem;
+            padding: 1rem;
             flex: 1;
         }
         
@@ -330,14 +288,14 @@
             background: linear-gradient(to right, #16a34a, #22c55e);
             color: white;
             font-weight: bold;
-            font-size: 1.25rem;
+            font-size: clamp(1rem, 3vw, 1.25rem);
             border: 2px solid #15803d;
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 4px 24px rgba(34, 197, 94, 0.33);
             animation: bounce 1.6s infinite;
-            min-width: 220px;
-            min-height: 56px;
+            min-width: 200px;
+            min-height: 50px;
         }
         
         .install-btn:hover {
@@ -370,7 +328,7 @@
         }
         
         .card h1 {
-            font-size: 1.5rem;
+            font-size: clamp(1.25rem, 5vw, 1.5rem);
             font-weight: bold;
             text-align: center;
             color: #15803d;
@@ -378,14 +336,14 @@
         }
         
         .card h2 {
-            font-size: 1.25rem;
+            font-size: clamp(1rem, 4vw, 1.25rem);
             font-weight: bold;
             color: #15803d;
             margin-bottom: 0.75rem;
         }
         
         .card h3 {
-            font-size: 1.125rem;
+            font-size: clamp(0.9rem, 3.5vw, 1.125rem);
             font-weight: 600;
             color: #16a34a;
             margin-bottom: 0.5rem;
@@ -395,6 +353,7 @@
             text-align: center;
             color: #6b7280;
             margin-bottom: 1.5rem;
+            font-size: clamp(0.875rem, 3vw, 1rem);
         }
         
         /* Navigation Tabs */
@@ -404,26 +363,31 @@
             justify-content: center;
             gap: 0.5rem;
             margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding: 0.5rem;
         }
         
         .btn-nav {
             background: hsl(var(--primary));
             color: white;
-            font-size: 1rem;
+            font-size: clamp(0.75rem, 3vw, 1rem);
             border-radius: 0.5rem;
-            padding: 0.5rem 1.1rem;
+            padding: 0.5rem 1rem;
             font-weight: bold;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             border: none;
             margin: 0.2rem;
             transition: all 0.2s;
             cursor: pointer;
+            white-space: nowrap;
+            min-width: fit-content;
         }
         
         .btn-nav:hover,
         .btn-nav.active {
             background: hsl(var(--accent));
             color: hsl(var(--secondary));
+            transform: translateY(-2px);
         }
         
         .btn-nav:disabled {
@@ -434,7 +398,7 @@
         /* Feature Grid */
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1rem;
             margin-bottom: 2rem;
         }
@@ -470,12 +434,12 @@
         .feature-title {
             font-weight: bold;
             color: #14532d;
-            font-size: 1.125rem;
+            font-size: clamp(1rem, 3.5vw, 1.125rem);
         }
         
         .feature-desc {
             color: #6b7280;
-            font-size: 0.875rem;
+            font-size: clamp(0.75rem, 3vw, 0.875rem);
             margin-bottom: 0.5rem;
         }
         
@@ -500,7 +464,7 @@
         .list-disc li,
         .list-decimal li {
             margin-bottom: 0.5rem;
-            font-size: 1.125rem;
+            font-size: clamp(0.875rem, 3vw, 1.125rem);
         }
         
         /* Forms */
@@ -513,6 +477,7 @@
             margin-bottom: 0.5rem;
             color: #15803d;
             font-weight: 600;
+            font-size: clamp(0.875rem, 3vw, 1rem);
         }
         
         .form-input {
@@ -520,9 +485,9 @@
             border-radius: 0.5rem;
             border: 1px solid #22c55e;
             color: #111827;
-            font-size: 1rem;
+            font-size: clamp(0.875rem, 3vw, 1rem);
             width: 100%;
-            max-width: 300px;
+            max-width: 400px;
         }
         
         .form-input:focus {
@@ -536,12 +501,13 @@
             background: #f0fdf4;
             border-radius: 0.5rem;
             padding: 0.5rem;
-            font-size: 0.75rem;
+            font-size: clamp(0.625rem, 2.5vw, 0.75rem);
         }
         
         .table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 500px;
         }
         
         .table th,
@@ -549,11 +515,13 @@
             padding: 0.5rem;
             text-align: left;
             border-bottom: 1px solid #d1d5db;
+            white-space: nowrap;
         }
         
         .table th {
             font-weight: bold;
             background: #dcfce7;
+            font-size: clamp(0.625rem, 2.5vw, 0.75rem);
         }
         
         /* Status badges */
@@ -578,7 +546,7 @@
         /* Checklist */
         .checklist-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1rem;
         }
         
@@ -611,7 +579,7 @@
         
         .checklist-label {
             flex: 1;
-            font-size: 1.125rem;
+            font-size: clamp(1rem, 3.5vw, 1.125rem);
             font-weight: 600;
             color: #374151;
             user-select: none;
@@ -650,6 +618,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             transition: all 0.2s;
             margin-bottom: 1rem;
+            font-size: clamp(0.875rem, 3vw, 1rem);
         }
         
         .download-btn:hover {
@@ -662,7 +631,7 @@
         .footer {
             background: #1f2937;
             color: white;
-            padding: 3rem 1rem 1.5rem 1rem;
+            padding: 2rem 1rem 1rem 1rem;
             margin-top: auto;
         }
         
@@ -680,7 +649,7 @@
         
         .footer-section h3 {
             font-family: 'Poppins', sans-serif;
-            font-size: 1.25rem;
+            font-size: clamp(1rem, 4vw, 1.25rem);
             font-weight: bold;
             margin-bottom: 1rem;
             color: white;
@@ -690,6 +659,7 @@
             color: #d1d5db;
             margin-bottom: 1rem;
             line-height: 1.6;
+            font-size: clamp(0.875rem, 3vw, 1rem);
         }
         
         .footer-section ul {
@@ -704,6 +674,7 @@
             color: #d1d5db;
             text-decoration: none;
             transition: color 0.3s;
+            font-size: clamp(0.875rem, 3vw, 1rem);
         }
         
         .footer-section a:hover {
@@ -713,6 +684,7 @@
         .social-links {
             display: flex;
             gap: 1rem;
+            flex-wrap: wrap;
         }
         
         .social-link {
@@ -731,7 +703,7 @@
             padding-top: 1.5rem;
             text-align: center;
             color: #9ca3af;
-            font-size: 0.875rem;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
         }
         
         /* Contact info */
@@ -750,14 +722,47 @@
             margin-top: 0.125rem;
         }
         
-        /* Responsive */
-        @media (min-width: 768px) {
+        /* Responsive Breakpoints */
+        @media (min-width: 640px) {
             .navbar-nav {
                 display: flex;
             }
             
             .mobile-menu-btn {
                 display: none;
+            }
+            
+            .container {
+                padding: 2rem;
+            }
+            
+            .nav-tabs {
+                padding: 0;
+                overflow-x: visible;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .feature-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            }
+            
+            .checklist-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .navbar-nav {
+                gap: 1.5rem;
+            }
+            
+            .navbar-link {
+                font-size: 1rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             }
         }
         
@@ -805,18 +810,13 @@
 
         /* Keyframe animations */
         @keyframes navbarLogo {
-            0% { letter-spacing: 0.1em; opacity: 0.7; }
-            100% { letter-spacing: 0.25em; opacity: 1; }
+            0% { letter-spacing: 0.05em; opacity: 0.7; }
+            100% { letter-spacing: 0.1em; opacity: 1; }
         }
 
         @keyframes navbarMobile {
             0% { transform: translateY(-30px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
-        }
-
-        @keyframes cloudMove {
-            0% { transform: translateX(-10vw); }
-            100% { transform: translateX(110vw); }
         }
 
         /* SVG Icons */
@@ -830,19 +830,57 @@
             width: 1.5rem;
             height: 1.5rem;
         }
+
+        /* Loading spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #16a34a;
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, setDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBe-XLmVRiMs844VxR1_awMzGEGARb6Xmk",
+            authDomain: "website-mpn-65e8d.firebaseapp.com",
+            projectId: "website-mpn-65e8d",
+            storageBucket: "website-mpn-65e8d.firebasestorage.app",
+            messagingSenderId: "798271486726",
+            appId: "1:798271486726:web:0d0e0178a963804f627c87",
+            measurementId: "G-KSVPVC1Z9D"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase functions available globally
+        window.firebaseDB = db;
+        window.firebaseCollection = collection;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseSetDoc = setDoc;
+        window.firebaseDoc = doc;
+        window.firebaseServerTimestamp = serverTimestamp;
+    </script>
 </head>
 <body>
     <!-- Navbar - persis seperti React component -->
     <header class="navbar">
         <div class="navbar-container">
-            <!-- Animasi awan -->
-            <div class="navbar-clouds">
-                <div class="cloud"></div>
-                <div class="cloud"></div>
-                <div class="cloud"></div>
-            </div>
-            
             <a href="/" class="navbar-brand">
                 <img src="/Logo%20Mpn.png" alt="Logo Mahapala" class="navbar-logo">
                 <span class="navbar-title">
@@ -1220,12 +1258,80 @@
             window.addEventListener('appinstalled', handleAppInstalled);
         });
         
+        // Firebase GPS functions
+        async function saveGpsToFirestore(data) {
+            if (!window.firebaseDB) {
+                console.log('Firebase not initialized, saving locally only');
+                return;
+            }
+            
+            try {
+                // Save to gps_tracker (latest position per user)
+                await window.firebaseSetDoc(
+                    window.firebaseDoc(window.firebaseDB, "gps_tracker", data.nama), 
+                    {
+                        ...data,
+                        updatedAt: window.firebaseServerTimestamp(),
+                    }
+                );
+                
+                // Save to gps_history (all positions)
+                await window.firebaseAddDoc(
+                    window.firebaseCollection(window.firebaseDB, "gps_history"), 
+                    {
+                        ...data,
+                        createdAt: window.firebaseServerTimestamp(),
+                    }
+                );
+                
+                console.log('GPS data saved to Firestore successfully');
+                updateGpsStatus('✅ Data GPS berhasil dikirim ke server');
+            } catch (error) {
+                console.error('Error saving GPS to Firestore:', error);
+                updateGpsStatus('⚠️ Gagal mengirim ke server, tersimpan lokal');
+            }
+        }
+        
+        async function syncOfflineGpsToFirestore() {
+            const saved = localStorage.getItem("gps_track");
+            if (!saved || !window.firebaseDB) return;
+            
+            try {
+                const positions = JSON.parse(saved);
+                let synced = 0;
+                
+                for (const data of positions) {
+                    try {
+                        await saveGpsToFirestore(data);
+                        synced++;
+                    } catch (error) {
+                        console.error('Error syncing GPS data:', error);
+                    }
+                }
+                
+                if (synced > 0) {
+                    // Clear local storage after successful sync
+                    localStorage.removeItem("gps_track");
+                    gpsPositions = [];
+                    updateGpsTable();
+                    updateGpsStatus(`✅ ${synced} data GPS berhasil disinkronkan ke server`);
+                }
+            } catch (error) {
+                console.error('Error during GPS sync:', error);
+            }
+        }
+        
         // Update online/offline status
         function updateStatus() {
             const statusEl = document.getElementById('status');
             if (navigator.onLine) {
                 statusEl.textContent = 'Online';
                 statusEl.className = 'status-badge online';
+                
+                // Auto sync when coming online
+                setTimeout(() => {
+                    syncOfflineGpsToFirestore();
+                }, 1000);
             } else {
                 statusEl.textContent = 'Offline';
                 statusEl.className = 'status-badge offline';
@@ -1338,6 +1444,7 @@
                 localStorage.setItem('gps_nama', input);
                 document.getElementById('nama-form').classList.add('hidden');
                 document.getElementById('gps-controls').classList.remove('hidden');
+                updateGpsStatus('Nama berhasil disimpan. Siap untuk pelacakan GPS.');
             }
         }
         
@@ -1352,14 +1459,14 @@
             if (!userName || gpsTracking) return;
             
             if (!navigator.geolocation) {
-                updateGpsStatus('Geolocation tidak didukung browser.');
+                updateGpsStatus('❌ Geolocation tidak didukung browser.');
                 return;
             }
             
             gpsTracking = true;
             document.getElementById('start-tracking').disabled = true;
             document.getElementById('stop-tracking').disabled = false;
-            updateGpsStatus('Pelacakan aktif...');
+            updateGpsStatus('🔄 Mengaktifkan pelacakan GPS...');
             
             // Get initial position
             navigator.geolocation.getCurrentPosition(
@@ -1368,7 +1475,7 @@
                     const data = {
                         lat: position.coords.latitude,
                         lon: position.coords.longitude,
-                        time: now.toLocaleString(),
+                        time: now.toISOString(),
                         nama: userName,
                         online: navigator.onLine,
                     };
@@ -1376,22 +1483,39 @@
                     gpsPositions.push(data);
                     localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
                     updateGpsTable();
-                    updateGpsStatus(`Lokasi diperoleh: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`);
+                    
+                    // Save to Firestore if online
+                    if (navigator.onLine) {
+                        saveGpsToFirestore(data);
+                    } else {
+                        updateGpsStatus(`📍 Lokasi tersimpan lokal: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`);
+                    }
                 },
                 (error) => {
-                    updateGpsStatus('Gagal mendapatkan lokasi: ' + error.message);
+                    updateGpsStatus('❌ Gagal mendapatkan lokasi: ' + error.message);
+                    stopTracking();
+                },
+                {
+                    enableHighAccuracy: true,
+                    maximumAge: 30000,
+                    timeout: 15000
                 }
             );
             
             // Continue tracking every 10 seconds
             gpsInterval = setInterval(() => {
+                if (!gpsTracking) {
+                    clearInterval(gpsInterval);
+                    return;
+                }
+                
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const now = new Date();
                         const data = {
                             lat: position.coords.latitude,
                             lon: position.coords.longitude,
-                            time: now.toLocaleString(),
+                            time: now.toISOString(),
                             nama: userName,
                             online: navigator.onLine,
                         };
@@ -1399,20 +1523,21 @@
                         gpsPositions.push(data);
                         localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
                         updateGpsTable();
-                        updateGpsStatus(`Lokasi terbaru: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)} (${navigator.onLine ? 'Online' : 'Offline'})`);
                         
-                        // Simulate sync to Firestore (akan berfungsi penuh jika online)
+                        // Save to Firestore if online
                         if (navigator.onLine) {
-                            console.log('GPS data would be synced to Firestore:', data);
+                            saveGpsToFirestore(data);
+                        } else {
+                            updateGpsStatus(`📍 Lokasi tersimpan lokal: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)} (Offline)`);
                         }
                     },
                     (error) => {
-                        updateGpsStatus('Gagal mendapatkan lokasi: ' + error.message);
+                        updateGpsStatus('⚠️ Gagal mendapatkan lokasi: ' + error.message);
                     },
                     {
                         enableHighAccuracy: true,
-                        maximumAge: 0,
-                        timeout: 10000
+                        maximumAge: 30000,
+                        timeout: 15000
                     }
                 );
             }, 10000); // 10 detik
@@ -1426,19 +1551,24 @@
             }
             document.getElementById('start-tracking').disabled = false;
             document.getElementById('stop-tracking').disabled = true;
-            updateGpsStatus('Pelacakan dihentikan.');
+            updateGpsStatus('⏹️ Pelacakan GPS dihentikan.');
         }
         
         function resetTrack() {
             gpsPositions = [];
             localStorage.removeItem('gps_track');
             updateGpsTable();
-            updateGpsStatus('Data lokasi telah direset.');
+            updateGpsStatus('🗑️ Data lokasi telah direset.');
         }
         
         function updateGpsStatus(message) {
             const statusEl = document.getElementById('gps-status');
-            statusEl.textContent = message;
+            statusEl.innerHTML = `<span class="loading-spinner"></span>${message}`;
+            
+            // Remove spinner after 2 seconds
+            setTimeout(() => {
+                statusEl.textContent = message;
+            }, 2000);
         }
         
         function updateGpsTable() {
@@ -1447,10 +1577,11 @@
             
             gpsPositions.forEach((pos, index) => {
                 const row = tbody.insertRow();
+                const timeStr = pos.time ? new Date(pos.time).toLocaleString('id-ID') : '-';
                 row.innerHTML = `
-                    <td>${pos.time}</td>
-                    <td>${pos.lat.toFixed(6)}</td>
-                    <td>${pos.lon.toFixed(6)}</td>
+                    <td>${timeStr}</td>
+                    <td>${pos.lat ? pos.lat.toFixed(6) : '-'}</td>
+                    <td>${pos.lon ? pos.lon.toFixed(6) : '-'}</td>
                     <td>${pos.nama || userName}</td>
                     <td>
                         <span class="${pos.online ? 'online-badge' : 'offline-badge'}">
@@ -1558,23 +1689,17 @@
             }
         }
         
-        // Sync offline GPS data when online (simulation)
-        function syncOfflineGpsToFirestore() {
-            if (!navigator.onLine) return;
-            
-            const saved = localStorage.getItem("gps_track");
-            if (!saved) return;
-            
-            console.log('Syncing GPS data to Firestore:', JSON.parse(saved));
-        }
-        
-        // Auto sync when coming online
-        window.addEventListener('online', syncOfflineGpsToFirestore);
-        
         // Initialize GPS status
         setTimeout(() => {
-            updateGpsStatus(navigator.onLine ? "Ready untuk pelacakan GPS" : "Mode Offline: Menyimpan data lokal");
+            updateGpsStatus(navigator.onLine ? "✅ Ready untuk pelacakan GPS" : "📱 Mode Offline: Menyimpan data lokal");
         }, 1000);
+        
+        // Auto sync when coming online
+        window.addEventListener('online', () => {
+            setTimeout(() => {
+                syncOfflineGpsToFirestore();
+            }, 2000);
+        });
     </script>
 </body>
 </html>
