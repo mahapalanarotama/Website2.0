@@ -11,6 +11,7 @@ export type MetaData = {
   faviconPng: string;
   googleFormUrl?: string;
   googleFormDownloadUrl?: string;
+  chatbotToken?: string;
 };
 
 const META_DOC_ID = 'main';

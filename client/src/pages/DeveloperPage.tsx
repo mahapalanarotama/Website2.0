@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
+import ImageInputWithMode from "@/components/ImageInputWithMode";
+
 import { getMeta, setMeta as saveMeta, MetaData } from "@/lib/meta";
+import { getPosters, addPoster, updatePoster, deletePoster, PosterConfig } from "@/lib/poster";
+import { deleteGithubFile } from "@/lib/github-delete";
+import { Timestamp } from "firebase/firestore";
 import { getCarouselContent, setCarouselContent, CarouselContentItem } from "@/lib/homepage";
 import { DEFAULT_CAROUSEL } from "../shared/carouselDefault";
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
@@ -19,6 +24,10 @@ const defaultMeta: MetaData = {
 };
 
 export default function DeveloperPage() {
+  // Interval ID untuk auto-refresh poster
+  const [posterIntervalId, setPosterIntervalId] = useState<NodeJS.Timeout | null>(null);
+  // State untuk waktu poster expired berikutnya
+  const [nextPosterExpire, setNextPosterExpire] = useState<Date | null>(null);
   const [meta, setMeta] = useState<MetaData>(defaultMeta);
   const [show, setShow] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -29,7 +38,139 @@ export default function DeveloperPage() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'meta' | 'logadmin' | 'homepage' | 'visimisi' | 'contact'>('meta');
+  const [tab, setTab] = useState<'poster' | 'meta' | 'logadmin' | 'homepage' | 'visimisi' | 'contact'>('meta');
+  // Poster tab state
+  const [posters, setPosters] = useState<PosterConfig[]>([]);
+  const [loadingPosters, setLoadingPosters] = useState(false);
+  const [editPoster, setEditPoster] = useState<PosterConfig | null>(null);
+  const [editPosterIdx, setEditPosterIdx] = useState<number | null>(null);
+  const [posterDialog, setPosterDialog] = useState(false);
+  // Load posters when tab is poster
+  useEffect(() => {
+    async function refreshPosters() {
+      setLoadingPosters(true);
+      const data = await getPosters();
+      const now = new Date();
+      // Filter poster yang sudah expired
+      const expired = data.filter(p => p.endTime && p.endTime.toDate() < now && p.id);
+      // Hapus semua poster expired
+      for (const p of expired) {
+        await deletePoster(p.id!);
+      }
+      // Tampilkan hanya poster yang masih aktif
+      const active = data.filter(p => !(p.endTime && p.endTime.toDate() < now));
+  setPosters(active);
+      setLoadingPosters(false);
+      // Hitung waktu poster expired berikutnya
+      const futureEnds = active.map(p => p.endTime?.toDate()).filter(d => d && d > now) as Date[];
+      if (futureEnds.length > 0) {
+        const nextExpire = new Date(Math.min(...futureEnds.map(d => d.getTime())));
+        setNextPosterExpire(nextExpire);
+      } else {
+        setNextPosterExpire(null);
+      }
+    }
+    if (tab === 'poster') {
+      refreshPosters();
+      // Bersihkan interval sebelumnya
+      if (posterIntervalId) clearInterval(posterIntervalId);
+      // Jika ada poster yang akan expired, set timeout untuk refresh tepat saat poster expired
+      if (nextPosterExpire) {
+        const now = new Date();
+        const ms = nextPosterExpire.getTime() - now.getTime();
+        if (ms > 0) {
+          const timeoutId = setTimeout(() => {
+            refreshPosters();
+          }, ms + 1000); // +1 detik buffer
+          setPosterIntervalId(timeoutId as unknown as NodeJS.Timeout);
+        }
+      }
+    }
+    // Bersihkan interval saat tab berubah
+    return () => {
+      if (posterIntervalId) clearTimeout(posterIntervalId);
+    };
+  }, [tab]);
+
+  // Poster CRUD handlers
+  const handlePosterEdit = (item: PosterConfig, idx: number) => {
+  // Pastikan id selalu ada di editPoster
+  setEditPoster({ ...item, id: item.id });
+  setEditPosterIdx(idx);
+  setPosterDialog(true);
+  };
+  const handlePosterAdd = () => {
+    setEditPoster({ imageUrl: '', startTime: Timestamp.now(), endTime: Timestamp.now(), linkUrl: '' });
+    setEditPosterIdx(null);
+    setPosterDialog(true);
+  };
+  const handlePosterDelete = async (idx: number) => {
+    if (window.confirm('Hapus poster ini?')) {
+      const poster = posters[idx];
+      // Hapus gambar di GitHub jika ada githubPath
+      if (poster.githubPath) {
+        await deleteGithubFile({
+          repo: 'mahapalanarotama/OfficialWebsite',
+          path: poster.githubPath,
+          branch: 'main',
+          token: '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',
+        });
+      }
+      if (poster.id) await deletePoster(poster.id);
+      setPosters(prev => prev.filter((_, i) => i !== idx));
+    }
+  };
+  const handlePosterSave = async (poster: PosterConfig) => {
+    // Validasi field
+    if (!poster.imageUrl || !poster.startTime || !poster.endTime) {
+      alert('Semua field wajib diisi!');
+      return;
+    }
+    // Pastikan linkUrl tidak undefined
+    const safeLinkUrl = poster.linkUrl === undefined || poster.linkUrl === null ? '' : poster.linkUrl;
+    if (editPosterIdx === null) {
+      // Add
+      const newPoster: any = {
+        imageUrl: poster.imageUrl,
+        startTime: poster.startTime,
+        endTime: poster.endTime,
+        linkUrl: safeLinkUrl,
+        order: posters.length, // new poster goes to end
+      };
+      if (poster.githubPath) newPoster.githubPath = poster.githubPath;
+      await addPoster(newPoster);
+    } else if (poster.id) {
+      // Jika gambar diubah dan ada githubPath lama, hapus gambar lama di GitHub
+      const oldPoster = posters[editPosterIdx];
+      if (oldPoster.githubPath && oldPoster.githubPath !== poster.githubPath) {
+        await deleteGithubFile({
+          repo: 'mahapalanarotama/OfficialWebsite',
+          path: oldPoster.githubPath,
+          branch: 'main',
+          token: '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',
+        });
+      }
+      // Update
+      const updateData: any = {
+        imageUrl: poster.imageUrl,
+        startTime: poster.startTime,
+        endTime: poster.endTime,
+        linkUrl: safeLinkUrl,
+        order: poster.order ?? editPosterIdx,
+      };
+      if (poster.githubPath) updateData.githubPath = poster.githubPath;
+      await updatePoster(poster.id, updateData);
+    } else {
+      alert('Gagal edit: ID poster tidak ditemukan!');
+      return;
+    }
+    setPosterDialog(false);
+    // Refresh poster list after save
+    setLoadingPosters(true);
+    const data = await getPosters();
+    setPosters(data);
+    setLoadingPosters(false);
+  };
   // Tipe untuk contact cards
   type ContactCard = {
     title: string;
@@ -271,7 +412,23 @@ export default function DeveloperPage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-extrabold mb-8 text-center text-primary">Developer Tools</h1>
-  <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto scrollbar-hide px-1 -mx-2 whitespace-nowrap" style={{ WebkitOverflowScrolling: 'touch' }}>
+  <div className="mb-6 flex gap-2 border-b border-blue-200 overflow-x-auto overflow-y-hidden scrollbar-hide px-1 -mx-2 whitespace-nowrap" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <button
+          className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'poster' ? 'data-[active=true]' : 'data-[active=false]'}`}
+          data-active={tab === 'poster'}
+          onClick={() => setTab('poster')}
+        >
+          <span className="flex items-center justify-center p-0 sm:p-1">
+            {/* Poster icon: vertical rectangle, circle, and text lines */}
+            <svg width="22" height="22" className="sm:w-[26px] sm:h-[26px] text-green-600" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <rect x="5" y="3" width="14" height="18" rx="2"/>
+              <circle cx="12" cy="8" r="3"/>
+              <line x1="8" y1="15" x2="16" y2="15" />
+              <line x1="8" y1="17" x2="16" y2="17" />
+            </svg>
+          </span>
+          <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Poster</span>
+        </button>
         <button
           className={`flex items-center gap-1 sm:gap-2 group transition-all duration-200 bg-muted px-2 sm:px-4 py-2 rounded-t-lg data-[active=true]:bg-primary/10 data-[active=true]:shadow-lg data-[active=true]:scale-105 data-[active=true]:text-primary data-[active=false]:hover:bg-muted/70 data-[active=false]:bg-muted/90 min-w-[64px] sm:min-w-[140px] justify-center ${tab === 'meta' ? 'data-[active=true]' : 'data-[active=false]'}`}
           data-active={tab === 'meta'}
@@ -313,7 +470,236 @@ export default function DeveloperPage() {
           <span className="hidden sm:inline transition-all duration-200 group-hover:inline group-focus:inline group-active:inline group-data-[active=true]:inline ml-1 group-hover:font-semibold group-data-[active=true]:font-bold group-data-[active=true]:text-primary">Contact</span>
         </button>
       </div>
-  <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
+      <div className="bg-gradient-to-br from-blue-50 to-green-50 rounded-2xl shadow-lg p-8 border border-blue-100 min-h-[400px]">
+        {tab === 'poster' && (
+          <>
+            <h2 className="font-bold text-xl mb-4 text-green-900 flex items-center gap-2">
+              {/* Poster icon: vertical rectangle, circle, and text lines */}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+                <rect x="5" y="3" width="18" height="18" rx="2"/>
+                <circle cx="14" cy="9" r="3"/>
+                <line x1="10" y1="16" x2="20" y2="16" />
+                <line x1="10" y1="18" x2="20" y2="18" />
+              </svg>
+              Konfigurasi Poster Popup
+            </h2>
+            <div className="flex justify-end mb-4">
+              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow" onClick={handlePosterAdd}>Tambah Poster</button>
+            </div>
+            {loadingPosters ? (
+              <div className="text-center py-10 text-gray-500">Memuat data poster...</div>
+            ) : posters.length === 0 ? (
+              <div className="text-center py-10 text-gray-400">Belum ada data poster.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-green-100 text-green-900">
+                      <th className="p-2">Urutan</th>
+                      <th className="p-2">Gambar</th>
+                      <th className="p-2">Start</th>
+                      <th className="p-2">End</th>
+                      <th className="p-2">Link</th>
+                      <th className="p-2">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {posters.map((item, idx) => (
+                      <tr key={item.id || idx} className="border-b last:border-b-0 group hover:bg-green-50" draggable
+                        onDragStart={e => {
+                          e.dataTransfer.setData('posterIdx', String(idx));
+                        }}
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={async e => {
+                          const fromIdx = Number(e.dataTransfer.getData('posterIdx'));
+                          if (fromIdx === idx) return;
+                          let newPosters = [...posters];
+                          const [moved] = newPosters.splice(fromIdx, 1);
+                          newPosters.splice(idx, 0, moved);
+                          // Urutan poster sesuai urutan array (order ascending)
+                          // Update order field sesuai urutan baru
+                          newPosters = newPosters.map((p, i) => ({ ...p, order: i }));
+                          for (let i = 0; i < newPosters.length; i++) {
+                            if (newPosters[i].id) await updatePoster(newPosters[i].id!, { order: i });
+                          }
+                          setPosters(newPosters);
+                        }}
+                      >
+                        <td className="p-2 text-center">
+                          <span className="font-bold">{idx + 1}</span>
+                          {/* tombol utama dihapus */}
+                        </td>
+                        <td className="p-2">
+                          <img
+                            src={(() => {
+                              // Google Drive
+                              if (/drive\.google\.com\/file\/d\/(.+?)\//.test(item.imageUrl)) {
+                                const match = item.imageUrl.match(/drive\.google\.com\/file\/d\/(.+?)\//);
+                                return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : item.imageUrl;
+                              }
+                              // Google Photos
+                              if (/photos\.google\.com\/share\/.+\?key=/.test(item.imageUrl)) {
+                                return item.imageUrl;
+                              }
+                              return item.imageUrl;
+                            })()}
+                            alt="Poster"
+                            className="h-16 w-28 object-cover rounded"
+                          />
+                        </td>
+                        <td className="p-2">{item.startTime?.toDate().toLocaleString('id-ID', { hour12: false })}</td>
+                        <td className="p-2">{item.endTime?.toDate().toLocaleString('id-ID', { hour12: false })}</td>
+                        <td className="p-2 max-w-xs truncate">{item.linkUrl || '-'}</td>
+                        <td className="p-2 flex gap-2">
+                          <button className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded" onClick={() => handlePosterEdit(item, idx)}>Edit</button>
+                          <button className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded" onClick={() => handlePosterDelete(idx)}>Hapus</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div className="text-xs text-gray-500 mt-2">Seret baris untuk mengubah urutan poster. Klik "Jadikan Utama" untuk menandai poster utama (paling depan).</div>
+              </div>
+            )}
+            {/* Dialog for add/edit poster */}
+            {posterDialog && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                <div className="bg-white rounded-lg shadow-lg w-full max-w-md relative overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-blue-100 flex flex-col" style={{ maxHeight: '80vh', padding: 0 }}>
+                  <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3" style={{ position: 'sticky', top: 0, zIndex: 20, background: 'white' }}>
+                    <h3 className="text-lg font-bold m-0">{editPosterIdx === null ? 'Tambah Poster' : 'Edit Poster'}</h3>
+                    <button className="text-gray-600 hover:text-red-500 text-2xl font-bold p-0 m-0" onClick={() => setPosterDialog(false)} style={{ lineHeight: 1 }}>×</button>
+                  </div>
+                  <form onSubmit={e => {e.preventDefault(); if(editPoster) handlePosterSave(editPoster);}} className="space-y-3 px-4 pt-4 pb-4 flex-1">
+                    <div>
+                      <label className="block font-medium mb-1">Poster Image <span className="text-red-600">*</span></label>
+                      {/* ImageInputWithMode: allow user to choose between link or upload to GitHub */}
+                      <div className="max-w-xs w-full mx-auto">
+                        <div style={{ minWidth: '220px', maxWidth: '100%' }}>
+                          <ImageInputWithMode
+                            value={editPoster?.imageUrl || ""}
+                            onChange={(newUrl: string, githubPath?: string) => {
+                              setEditPoster(editPoster ? { ...editPoster, imageUrl: newUrl, githubPath: githubPath ?? editPoster.githubPath } : null);
+                            }}
+                            repo="mahapalanarotama/OfficialWebsite"
+                            path="Img/poster"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    {/* Start Date & Time */}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block font-medium mb-1">Start Date <span className="text-red-600">*</span></label>
+                        <input
+                          type="date"
+                          className="w-full border rounded p-2"
+                          value={editPoster?.startTime ? editPoster.startTime.toDate().toISOString().slice(0,10) : ''}
+                          onChange={e => {
+                            const dateVal = e.target.value;
+                            let timeVal = editPoster?.startTime ? editPoster.startTime.toDate().toISOString().slice(11,16) : '00:00';
+                            if (dateVal) {
+                              // Gabungkan tanggal dan jam secara manual agar tidak offset
+                              const [hour, minute] = timeVal.split(':');
+                              const dt = new Date(dateVal);
+                              dt.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+                              setEditPoster(editPoster ? { ...editPoster, startTime: Timestamp.fromDate(dt) } : null);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block font-medium mb-1">Start Time <span className="text-red-600">*</span></label>
+                        <input
+                          type="time"
+                          className="w-full border rounded p-2"
+                          value={(() => {
+                            if (!editPoster?.startTime) return '';
+                            const d = editPoster.startTime.toDate();
+                            const h = String(d.getHours()).padStart(2, '0');
+                            const m = String(d.getMinutes()).padStart(2, '0');
+                            return `${h}:${m}`;
+                          })()}
+                          onChange={e => {
+                            const timeVal = e.target.value;
+                            let dateVal = editPoster?.startTime ? (() => {
+                              const d = editPoster.startTime.toDate();
+                              return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                            })() : '';
+                            if (dateVal && timeVal) {
+                              const [hour, minute] = timeVal.split(':');
+                              const dt = new Date(dateVal);
+                              dt.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+                              setEditPoster(editPoster ? { ...editPoster, startTime: Timestamp.fromDate(dt) } : null);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
+                    </div>
+                    {/* End Date & Time */}
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <label className="block font-medium mb-1">End Date <span className="text-red-600">*</span></label>
+                        <input
+                          type="date"
+                          className="w-full border rounded p-2"
+                          value={editPoster?.endTime ? editPoster.endTime.toDate().toISOString().slice(0,10) : ''}
+                          onChange={e => {
+                            const dateVal = e.target.value;
+                            let timeVal = editPoster?.endTime ? editPoster.endTime.toDate().toISOString().slice(11,16) : '00:00';
+                            if (dateVal) {
+                              const [hour, minute] = timeVal.split(':');
+                              const dt = new Date(dateVal);
+                              dt.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+                              setEditPoster(editPoster ? { ...editPoster, endTime: Timestamp.fromDate(dt) } : null);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block font-medium mb-1">End Time <span className="text-red-600">*</span></label>
+                        <input
+                          type="time"
+                          className="w-full border rounded p-2"
+                          value={(() => {
+                            if (!editPoster?.endTime) return '';
+                            const d = editPoster.endTime.toDate();
+                            const h = String(d.getHours()).padStart(2, '0');
+                            const m = String(d.getMinutes()).padStart(2, '0');
+                            return `${h}:${m}`;
+                          })()}
+                          onChange={e => {
+                            const timeVal = e.target.value;
+                            let dateVal = editPoster?.endTime ? (() => {
+                              const d = editPoster.endTime.toDate();
+                              return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                            })() : '';
+                            if (dateVal && timeVal) {
+                              const [hour, minute] = timeVal.split(':');
+                              const dt = new Date(dateVal);
+                              dt.setHours(Number(hour || 0), Number(minute || 0), 0, 0);
+                              setEditPoster(editPoster ? { ...editPoster, endTime: Timestamp.fromDate(dt) } : null);
+                            }
+                          }}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block font-medium mb-1">Link URL (optional)</label>
+                      <input type="text" className="w-full border rounded p-2" value={editPoster?.linkUrl || ''} onChange={e => setEditPoster(editPoster ? {...editPoster, linkUrl: e.target.value} : null)} />
+                    </div>
+                    <div className="flex justify-end border-t border-gray-200 px-4 py-3" style={{ position: 'sticky', bottom: 0, zIndex: 20, background: 'white' }}>
+                      <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded shadow hover:bg-green-700">Simpan</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </>
+        )}
         {tab === 'contact' && (
           <>
             <h2 className="font-bold text-xl mb-4 text-blue-900 flex items-center gap-2">
@@ -681,6 +1067,10 @@ export default function DeveloperPage() {
                   <div>
                     <label className="block font-medium mb-1">Link Download Formulir</label>
                     <input className="w-full border rounded p-2" name="googleFormDownloadUrl" value={pendingMeta.googleFormDownloadUrl || ''} onChange={handleChange} placeholder="https://.../formulir.docx" />
+                  </div>
+                  <div>
+                    <label className="block font-medium mb-1">Token Chatbot (ganti jika expired)</label>
+                    <input className="w-full border rounded p-2" name="chatbotToken" value={pendingMeta.chatbotToken || ''} onChange={handleChange} placeholder="Masukkan token chatbot..." />
                   </div>
                 </div>
                 <div className="flex gap-2">

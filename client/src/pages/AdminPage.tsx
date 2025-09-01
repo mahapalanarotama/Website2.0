@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import type { User } from 'firebase/auth';
 import { collection, getDocs, addDoc, doc, deleteDoc, setDoc, getDoc } from 'firebase/firestore';
+import { deleteGithubFile } from '@/lib/github-delete';
 import { auth, db } from '@/lib/firebase';
 import { differenceInDays } from 'date-fns';
 import { format, toZonedTime } from 'date-fns-tz';
@@ -266,100 +267,117 @@ export default function AdminPage() {
         await fetchData();
         return;
       }
-      if (formType === 'member' && (data.id || data.customId)) {
-        // ...existing code...
+      // --- EDIT LOGIC WITH GITHUB IMAGE DELETE ---
+      if (isEditing && (formType === 'member' || formType === 'activity' || formType === 'gallery' || formType === 'learning') && (data.id || data.customId)) {
         const docId = data.customId || data.id;
-        const memberData = {
-          namalengkap: data.namalengkap || data.fullName || '',
-          namalapangan: data.namalapangan || data.fieldName || '',
-          namaangkatan: data.namaangkatan || data.batchName || '',
-          tahun: data.tahun || data.batchYear || new Date().getFullYear(),
-          nomorregistrasi: data.nomorregistrasi || data.registrationNumber || '',
-          keanggotaan: data.keanggotaan || data.membershipStatus || 'Anggota Muda',
-          foto: data.foto || data.photoUrl || '',
-          email: data.email || '',
-          phone: data.phone || '',
-          gender: data.gender || '',
-          statusMahasiswa: data.statusMahasiswa,
-          url: data.url || '',
-          updateat: new Date().toISOString(),
-          id: docId,
-        };
-        await setDoc(doc(db, collectionName, docId), memberData);
-        try {
-          await addDevLog({
-            action: 'Edit Member',
-            detail: `Edit member: ${memberData.namalengkap} (${docId})`,
-            user: user?.email || 'unknown',
+        // Ambil data lama dari Firestore
+        const docSnap = await getDoc(doc(db, collectionName, docId));
+        let oldGithubPath = docSnap.exists() ? docSnap.data().githubPath : undefined;
+        let newGithubPath = data.githubPath;
+        // Jika githubPath lama ada dan berbeda dengan yang baru, hapus file lama di GitHub
+        if (oldGithubPath && oldGithubPath !== newGithubPath) {
+          await deleteGithubFile({
+            repo: 'mahapalanarotama/OfficialWebsite',
+            path: oldGithubPath,
+            branch: 'main',
+            token: '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',
           });
-        } catch (logErr: any) {
-          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
         }
-        notify('Data anggota berhasil diperbarui!');
-      } else if (isEditing && formType === 'activity' && data.id) {
-        // ...existing code...
-        const activityData = {
-          title: data.title || '',
-          description: data.description || '',
-          date: data.date || '',
-          category: data.category || '',
-          imageUrl: data.imageUrl || '',
-          id: data.id,
-        };
-        await setDoc(doc(db, 'activities', data.id), activityData);
-        try {
-          await addDevLog({
-            action: 'Edit Activity',
-            detail: `Edit activity: ${activityData.title} (${data.id})`,
-            user: user?.email || 'unknown',
-          });
-        } catch (logErr: any) {
-          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+        // ...existing code for updating data...
+        if (formType === 'member') {
+          const memberData = {
+            namalengkap: data.namalengkap || data.fullName || '',
+            namalapangan: data.namalapangan || data.fieldName || '',
+            namaangkatan: data.namaangkatan || data.batchName || '',
+            tahun: data.tahun || data.batchYear || new Date().getFullYear(),
+            nomorregistrasi: data.nomorregistrasi || data.registrationNumber || '',
+            keanggotaan: data.keanggotaan || data.membershipStatus || 'Anggota Muda',
+            foto: data.foto || data.photoUrl || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            gender: data.gender || '',
+            statusMahasiswa: data.statusMahasiswa,
+            url: data.url || '',
+            githubPath: data.githubPath || '',
+            updateat: new Date().toISOString(),
+            id: docId,
+          };
+          await setDoc(doc(db, collectionName, docId), memberData);
+          try {
+            await addDevLog({
+              action: 'Edit Member',
+              detail: `Edit member: ${memberData.namalengkap} (${docId})`,
+              user: user?.email || 'unknown',
+            });
+          } catch (logErr: any) {
+            window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+          }
+          notify('Data anggota berhasil diperbarui!');
+        } else if (formType === 'activity') {
+          const activityData = {
+            title: data.title || '',
+            description: data.description || '',
+            date: data.date || '',
+            category: data.category || '',
+            imageUrl: data.imageUrl || '',
+            githubPath: data.githubPath || '',
+            id: data.id,
+          };
+          await setDoc(doc(db, 'activities', data.id), activityData);
+          try {
+            await addDevLog({
+              action: 'Edit Activity',
+              detail: `Edit activity: ${activityData.title} (${data.id})`,
+              user: user?.email || 'unknown',
+            });
+          } catch (logErr: any) {
+            window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+          }
+          notify('Data kegiatan berhasil diperbarui!');
+        } else if (formType === 'gallery') {
+          const galleryData = {
+            title: data.title || '',
+            description: data.description || '',
+            imageUrl: data.imageUrl || '',
+            githubPath: data.githubPath || '',
+            activityId: data.activityId || '',
+            createdAt: data.createdAt || null,
+            updatedAt: new Date().toISOString(),
+            id: data.id,
+          };
+          await setDoc(doc(db, 'gallerys', data.id), galleryData);
+          try {
+            await addDevLog({
+              action: 'Edit Gallery',
+              detail: `Edit gallery: ${galleryData.title} (${data.id})`,
+              user: user?.email || 'unknown',
+            });
+          } catch (logErr: any) {
+            window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+          }
+          notify('Data galeri berhasil diperbarui!');
+        } else if (formType === 'learning') {
+          const learningData = {
+            title: data.title || '',
+            description: data.description || '',
+            icon: data.icon || '',
+            link: data.link || '',
+            githubPath: data.githubPath || '',
+            updatedAt: new Date().toISOString(),
+            id: data.id,
+          };
+          await setDoc(doc(db, 'learnings', data.id), learningData);
+          try {
+            await addDevLog({
+              action: 'Edit Learning',
+              detail: `Edit learning: ${learningData.title} (${data.id})`,
+              user: user?.email || 'unknown',
+            });
+          } catch (logErr: any) {
+            window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
+          }
+          notify('Data pembelajaran berhasil diperbarui!');
         }
-        notify('Data kegiatan berhasil diperbarui!');
-      } else if (isEditing && formType === 'gallery' && data.id) {
-        // ...existing code...
-        const galleryData = {
-          title: data.title || '',
-          description: data.description || '',
-          imageUrl: data.imageUrl || '',
-          activityId: data.activityId || '',
-          createdAt: data.createdAt || null,
-          updatedAt: new Date().toISOString(),
-          id: data.id,
-        };
-        await setDoc(doc(db, 'gallerys', data.id), galleryData);
-        try {
-          await addDevLog({
-            action: 'Edit Gallery',
-            detail: `Edit gallery: ${galleryData.title} (${data.id})`,
-            user: user?.email || 'unknown',
-          });
-        } catch (logErr: any) {
-          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
-        }
-        notify('Data galeri berhasil diperbarui!');
-      } else if (isEditing && formType === 'learning' && data.id) {
-        // Update learning
-        const learningData = {
-          title: data.title || '',
-          description: data.description || '',
-          icon: data.icon || '',
-          link: data.link || '',
-          updatedAt: new Date().toISOString(),
-          id: data.id,
-        };
-        await setDoc(doc(db, 'learnings', data.id), learningData);
-        try {
-          await addDevLog({
-            action: 'Edit Learning',
-            detail: `Edit learning: ${learningData.title} (${data.id})`,
-            user: user?.email || 'unknown',
-          });
-        } catch (logErr: any) {
-          window.alert('Gagal menulis log admin: ' + (logErr?.message || logErr));
-        }
-        notify('Data pembelajaran berhasil diperbarui!');
       } else if (formType === 'activity' && !isEditing) {
         // ...existing code...
         const activityData = {
@@ -469,6 +487,15 @@ export default function AdminPage() {
         return;
       }
       const dataAsli = docSnap.data();
+      // Hapus gambar di GitHub jika ada githubPath
+      if (dataAsli.githubPath) {
+        await deleteGithubFile({
+          repo: 'mahapalanarotama/OfficialWebsite',
+          path: dataAsli.githubPath,
+          branch: 'main',
+          token: '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',
+        });
+      }
       const dataToDelete = { ...dataAsli, originalType, deletedAt: new Date().toISOString() };
       await setDoc(doc(db, 'recycle_bin', itemId), dataToDelete);
       await deleteDoc(doc(db, collectionName, itemId));

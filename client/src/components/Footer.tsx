@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
 
 export function Footer() {
@@ -73,17 +73,17 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <Link href="/kegiatan" className="text-gray-300 hover:text-white transition">
+                <Link to="/kegiatan" className="text-gray-300 hover:text-white transition">
                   Daftar Kegiatan
                 </Link>
               </li>
               <li>
-                <Link href="/galeri" className="text-gray-300 hover:text-white transition">
+                <Link to="/galeri" className="text-gray-300 hover:text-white transition">
                   Galeri Foto
                 </Link>
               </li>
               <li>
-                <Link href="/url-shortener" className="text-gray-300 hover:text-white transition">
+                <Link to="/url-shortener" className="text-gray-300 hover:text-white transition">
                   URL Shortener
                 </Link>
               </li>

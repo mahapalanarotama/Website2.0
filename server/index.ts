@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 5000;
 
 // Enable CORS for all routes
 app.use(cors({
@@ -28,6 +28,10 @@ app.post('/api/github-oauth', async (req, res) => {
       return res.status(400).json({ error: 'Authorization code is required' });
     }
 
+    if (!process.env.GITHUB_CLIENT_SECRET) {
+      return res.status(500).json({ error: 'GitHub client secret not configured' });
+    }
+
     // Exchange code for access token
     const response = await fetch('https://github.com/login/oauth/access_token', {
       method: 'POST',
@@ -36,8 +40,8 @@ app.post('/api/github-oauth', async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        client_id: 'Ov23lisoZfewJvG9HtHK',
-        client_secret: '7f90b5275811168370669968294f6f3199b5489b',
+        client_id: process.env.GITHUB_CLIENT_ID || 'Ov23lisoZfewJvG9HtHK',
+        client_secret: process.env.GITHUB_CLIENT_SECRET,
         code: code
       })
     });
@@ -59,7 +63,29 @@ app.post('/api/github-oauth', async (req, res) => {
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Catch-all handler: send back React's index.html file
+// Special route for offline page - always serve standalone HTML directly
+app.get('/offline', (req, res) => {
+  const offlinePath = path.join(__dirname, 'public', 'offline-standalone.html');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.sendFile(offlinePath);
+});
+
+// API endpoint untuk GPS sync dari background
+app.post('/api/gps-sync', express.json(), (req, res) => {
+  // Forward ke Firebase atau handle GPS data sync
+  console.log('GPS background sync received:', req.body);
+  res.json({ success: true });
+});
+
+app.post('/api/gps-tracker', express.json(), (req, res) => {
+  // Forward ke Firebase atau handle GPS tracking
+  console.log('GPS tracker data received:', req.body);
+  res.json({ success: true });
+});
+
+// Catch-all handler: send back React's index.html file for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

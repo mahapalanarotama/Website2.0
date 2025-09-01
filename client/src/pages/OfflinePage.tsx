@@ -1,20 +1,19 @@
 import { saveGpsTrackerToFirestore, syncOfflineGpsToFirestore } from "@/lib/gpsFirestore";
 import { useState, useEffect, useRef } from "react";
 import { BookOpen, Map, Phone, AlertTriangle } from "lucide-react"; // Merged imports
- 
+
 
 // --- Komponen Fitur Survival ---
 function DownloadPanduan({ url, label }: { url: string; label: string }) {
   return (
-    <a
-      href={url}
-      download
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-green-400 text-white font-semibold shadow hover:from-green-700 hover:to-green-500 transition mb-4"
+    <button
+      onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-green-400 text-white font-semibold shadow hover:from-green-700 hover:to-green-500 transition mb-4 focus:outline-none focus:ring-2 focus:ring-green-500"
       style={{ textDecoration: 'none' }}
     >
       <BookOpen className="w-5 h-5" />
       {label}
-    </a>
+    </button>
   );
 }
 
@@ -111,13 +110,24 @@ function NavigasiDarat() {
 
 function ChecklistSurvival() {
   const items = [
-    "Kompas", "Bivak/Shelter", "Peluit", "Pisau", "Senter/Headlamp", "Makanan Cadangan", "P3K", "Botol Air", "Jas Hujan", "Tali Paracord", "Pakaian Cadangan", "Korek Api/Firestarter"
+    { icon: '🧭', label: "Kompas" },
+    { icon: '🏕️', label: "Bivak/Shelter" },
+    { icon: '📯', label: "Peluit" },
+    { icon: '🔪', label: "Pisau" },
+    { icon: '💡', label: "Senter/Headlamp" },
+    { icon: '🍱', label: "Makanan Cadangan" },
+    { icon: '🩹', label: "P3K" },
+    { icon: '🚰', label: "Botol Air" },
+    { icon: '🌧️', label: "Jas Hujan" },
+    { icon: '🪢', label: "Tali Paracord" },
+    { icon: '👕', label: "Pakaian Cadangan" },
+    { icon: '🔥', label: "Korek Api/Firestarter" }
   ];
   const [checked, setChecked] = useState(() => {
     const saved = localStorage.getItem("survival_checklist");
     return saved ? JSON.parse(saved) : Array(items.length).fill(false);
   });
-  function toggle(idx: any) {
+  function toggle(idx: number) {
     const next = [...checked];
     next[idx] = !next[idx];
     setChecked(next);
@@ -131,16 +141,26 @@ function ChecklistSurvival() {
   return (
     <section className="bg-white/90 rounded-2xl shadow-xl p-6 mb-4 text-gray-800">
       <h2 className="text-2xl font-bold mb-3 text-green-800">Checklist Survival</h2>
-      <ul className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {items.map((item, i) => (
-          <li key={item} className="flex items-center gap-3">
-            <input type="checkbox" id={item} checked={checked[i]} onChange={() => toggle(i)} />
-            <label htmlFor={item} className="text-lg select-none">{item}</label>
-          </li>
+          <label key={item.label} htmlFor={item.label} className={`flex items-center gap-4 p-4 rounded-xl shadow transition-all cursor-pointer border-2 ${checked[i] ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white hover:bg-green-100'}`}>
+            <span className="text-3xl select-none" aria-label={item.label}>{item.icon}</span>
+            <span className={`flex-1 text-lg font-semibold select-none ${checked[i] ? 'text-green-700' : 'text-gray-700'}`}>{item.label}</span>
+            <input
+              type="checkbox"
+              id={item.label}
+              checked={checked[i]}
+              onChange={() => toggle(i)}
+              className="form-checkbox h-6 w-6 text-green-600 border-green-400 focus:ring-green-500 transition-all"
+              style={{ accentColor: '#22c55e' }}
+            />
+          </label>
         ))}
-      </ul>
-      <button className="btn-nav mt-4" onClick={resetChecklist}>Reset Checklist</button>
-      <p className="mt-2 text-green-200 text-sm">Checklist tersimpan otomatis di perangkat Anda.</p>
+      </div>
+      <button className="mt-6 px-6 py-2 rounded-full bg-gradient-to-r from-green-600 to-green-400 text-white font-bold shadow hover:from-green-700 hover:to-green-500 transition-all text-lg" onClick={resetChecklist}>
+        Reset Checklist
+      </button>
+      <p className="mt-2 text-green-400 text-sm text-center">Checklist tersimpan otomatis di perangkat Anda.</p>
     </section>
   );
 }
@@ -309,6 +329,58 @@ const tipsSurvival = [
 ];
 
 export default function OfflinePage() {
+  const [cacheStatus, setCacheStatus] = useState<'checking'|'caching'|'ready'|'error'>('checking');
+  const [cacheError, setCacheError] = useState<string|null>(null);
+  const [showProgress, setShowProgress] = useState(true);
+  const [showStatus, setShowStatus] = useState(true);
+  useEffect(() => {
+    if (cacheStatus === 'ready') {
+      const progressTimeout = setTimeout(() => setShowProgress(false), 3000);
+      const statusTimeout = setTimeout(() => setShowStatus(false), 5000);
+      return () => {
+        clearTimeout(progressTimeout);
+        clearTimeout(statusTimeout);
+      };
+    } else {
+      setShowProgress(true);
+      setShowStatus(true);
+    }
+  }, [cacheStatus]);
+
+  useEffect(() => {
+    // Komunikasi dengan service worker + fallback polling
+    let listener: any;
+    let pollInterval: any;
+    function sendCheckCache() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+          if (reg.active) {
+            console.log('[OfflinePage] Sending CHECK_CACHE to SW');
+            reg.active.postMessage({ type: 'CHECK_CACHE' });
+          } else {
+            console.log('[OfflinePage] SW not active yet');
+          }
+        });
+      }
+    }
+    sendCheckCache();
+    pollInterval = setInterval(sendCheckCache, 2000); // Poll setiap 2 detik sampai status berubah
+    listener = (event: any) => {
+      if (event.data && event.data.type === 'CACHE_STATUS') {
+        console.log('[OfflinePage] Received CACHE_STATUS:', event.data);
+        setCacheStatus(event.data.status);
+        setCacheError(event.data.error || null);
+        if (event.data.status === 'ready' || event.data.status === 'error') {
+          clearInterval(pollInterval);
+        }
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', listener);
+    return () => {
+      if (listener) navigator.serviceWorker.removeEventListener('message', listener);
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, []);
   const [tab, setTab] = useState('fitur');
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -337,8 +409,71 @@ export default function OfflinePage() {
     }
   };
 
+  // Status online/offline
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  useEffect(() => {
+    const updateOnlineStatus = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-green-50 py-8 px-2">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-green-50 py-8 px-2 relative">
+      {/* Indikator Online/Offline sticky di bawah navbar utama */}
+  <div className="sticky top-0 z-40 w-full flex justify-end">
+        <span className={`mx-4 my-2 px-3 py-1 rounded-full font-bold text-xs shadow ${isOnline ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}
+          title={isOnline ? 'Online' : 'Offline'}>
+          {isOnline ? 'Online' : 'Offline'}
+        </span>
+      </div>
+      {/* Progress bar offline status */}
+      <div className="max-w-xl mx-auto mb-4">
+        {showProgress && (
+          <div className="w-full bg-gray-200 rounded-full h-6 mb-2 overflow-hidden">
+            {cacheStatus === 'checking' ? (
+              <div className="h-6 rounded-full animate-progress-loading" style={{ width: '33%', background: 'linear-gradient(90deg, #ef4444, #f59e42, #3b82f6, #22c55e)' }}></div>
+            ) : cacheStatus === 'caching' ? (
+              <div className="h-6 rounded-full transition-all duration-500" style={{ width: '66%', background: 'linear-gradient(90deg, #ef4444, #f59e42, #22c55e)' }}></div>
+            ) : cacheStatus === 'ready' ? (
+              <div className="h-6 rounded-full transition-all duration-500" style={{ width: '100%', background: 'linear-gradient(90deg, #22c55e, #16a34a)' }}></div>
+            ) : (
+              <div className="h-6 rounded-full transition-all duration-500" style={{ width: '33%', background: 'linear-gradient(90deg, #ef4444, #f59e42)' }}></div>
+            )}
+          </div>
+        )}
+        {/* Notifikasi jika cache belum siap */}
+        {cacheStatus === 'error' && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-2 text-center font-semibold">
+            <span>Cache offline belum siap. Silakan akses aplikasi ini dalam kondisi online minimal sekali agar semua file penting tercache. Setelah itu, Anda bisa mengakses offline dan refresh tanpa blank.</span>
+          </div>
+        )}
+        <style>{`
+          @keyframes progress-loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(300%); }
+          }
+          .animate-progress-loading {
+            animation: progress-loading 1.2s linear infinite;
+          }
+        `}</style>
+        <div className="text-center text-sm font-semibold">
+          {cacheStatus==='ready' && showStatus && (
+            <span className="flex items-center justify-center gap-2 text-green-700">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.414 7.414a1 1 0 01-1.414 0l-3.414-3.414a1 1 0 111.414-1.414L8 11.586l6.707-6.707a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+              Aplikasi sudah siap untuk offline
+            </span>
+          )}
+          {cacheStatus==='caching' && 'Sedang menyiapkan cache offline...'}
+          {cacheStatus==='checking' && 'Memeriksa status cache offline...'}
+          {cacheStatus==='error' && (
+            <span className="text-red-600">Gagal cache offline. {cacheError ? cacheError : ''} Coba reload aplikasi dalam kondisi online, atau clear cache dan ulangi instalasi.</span>
+          )}
+        </div>
+      </div>
       <div className="max-w-xl mx-auto">
         {/* Tombol Install PWA */}
         <div className="flex justify-center mb-4">

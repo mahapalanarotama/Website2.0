@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [location] = useLocation();
+  const location = useLocation();
 
   // Close mobile menu when route changes
   useEffect(() => {
@@ -28,9 +28,9 @@ export function Navbar() {
     <header className={`sticky top-0 z-50 transition-all duration-300 bg-white shadow-lg`}>
       <div className="relative">
         <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link to="/" className="flex items-center gap-3 group">
             <img
-              src="https://raw.githubusercontent.com/mahapalanarotama/mahapalanarotama.github.io/refs/heads/main/Img/Logo%20Mpn.png"
+              src="/Logo%20Mpn.png"
               alt="Logo Mahapala"
               className="w-10 h-10 rounded-full shadow-md border-2 border-primary bg-white animate-navbar-logo"
               style={{ background: 'white' }}
@@ -41,9 +41,9 @@ export function Navbar() {
           </Link>
           <nav className="hidden md:flex space-x-6">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={`relative px-2 py-1 font-medium transition group/nav ${location === link.href ? 'text-accent' : 'text-primary hover:text-accent'} animate-navbar-link`}>
+              <Link key={link.href} to={link.href} className={`relative px-2 py-1 font-medium transition group/nav ${location.pathname === link.href ? 'text-accent' : 'text-primary hover:text-accent'} animate-navbar-link`}>
                 <span className="relative z-10">{link.label}</span>
-                <span className={`absolute left-0 bottom-0 w-full h-0.5 bg-accent rounded transition-all duration-300 scale-x-0 group-hover/nav:scale-x-100 ${location === link.href ? 'scale-x-100' : ''}`}></span>
+                <span className={`absolute left-0 bottom-0 w-full h-0.5 bg-accent rounded transition-all duration-300 scale-x-0 group-hover/nav:scale-x-100 ${location.pathname === link.href ? 'scale-x-100' : ''}`}></span>
               </Link>
             ))}
           </nav>
@@ -82,9 +82,7 @@ export function Navbar() {
               </Button>
             </div>
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href}>
-                <a className={`block text-lg font-semibold py-2 px-4 rounded transition-all duration-300 hover:bg-accent/20 hover:text-accent ${location === link.href ? 'text-accent bg-accent/10' : 'text-primary'}`}>{link.label}</a>
-              </Link>
+              <Link key={link.href} to={link.href} className={`block text-lg font-semibold py-2 px-4 rounded transition-all duration-300 hover:bg-accent/20 hover:text-accent ${location.pathname === link.href ? 'text-accent bg-accent/10' : 'text-primary'}`}>{link.label}</Link>
             ))}
           </div>
         </div>

@@ -1,7 +1,7 @@
 import DeveloperPage from "@/pages/DeveloperPage";
 import React, { useEffect } from "react";
 import { getMeta, MetaData } from "@/lib/meta";
-import { Switch, Route } from "wouter";
+import { Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
@@ -47,6 +47,7 @@ function App() {
         return false;
       }
     };
+          // Removed unused install prompt logic and variables
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu);
@@ -58,9 +59,25 @@ function App() {
   const [meta, setMeta] = React.useState<MetaData | null>(null);
 
   React.useEffect(() => {
-    getMeta().then((data) => {
-      if (data) setMeta(data);
-    });
+    getMeta()
+      .then((data) => {
+        if (data) setMeta(data);
+      })
+      .catch(() => {
+        // Jika offline, gunakan meta default dan tampilkan status offline
+        setMeta({
+          title: "Aplikasi Survival Offline",
+          description: "Aplikasi dapat digunakan tanpa koneksi internet.",
+          keywords: "survival, offline, pwa, gps, tracker",
+          image: "/OfflineApp.png",
+          favicon: "/favicon.ico",
+          faviconFallback: "/favicon.ico",
+          faviconPng: "/favicon.png",
+        });
+        if (window && window.navigator && !window.navigator.onLine) {
+          console.warn("Anda sedang offline, data meta default digunakan.");
+        }
+      });
   }, []);
 
   React.useEffect(() => {
@@ -117,29 +134,29 @@ function App() {
         <ScrollToTop />
         <ScrollToTopButton />
         <Layout>
-          <Switch>
-            <Route path="/github-oauth-callback" component={GithubOAuthCallback} />
-            <Route path="/offline" component={OfflinePage} />
-            <Route path="/url-shortener" component={UrlShortenerPage} />
-            <Route path="/s/:shortcode" component={ShortRedirectPage} />
-            <Route path="/" component={HomePage} />
-            <Route path="/kegiatan" component={ActivitiesPage} />
-            <Route path="/pembelajaran" component={LearningPage} />
-            <Route path="/kartu-anggota" component={MemberCardPage} />
-            <Route path="/pendaftaran" component={PendaftaranPage} />
-            <Route path="/galeri" component={GalleryPage} />
-            <Route path="/admin" component={AdminPage} />
-            <Route path="/kegiatan/:id" component={DetailActivityPage} />
-            <Route path="/developer" component={DeveloperPage} />
-            <Route path="/kartu-anggota-detail" component={MemberCardDetailPage} />
-            <Route path="/member-card-3d" component={MemberCard3DPage} />
-            <Route path="/sejarah" component={SejarahPage} />
-            <Route path="/sejarahAdmin" component={SejarahAdminPage} />
-            <Route path="/scan-anggota" component={MemberCardScanPage} />
-            <Route path="/eduhub" component={EduHubPage} />
-            <Route component={NotFound} />
-          </Switch>
-        </Layout>
+        <Routes>
+          <Route path="/github-oauth-callback" element={<GithubOAuthCallback />} />
+          <Route path="/offline" element={<OfflinePage />} />
+          <Route path="/url-shortener" element={<UrlShortenerPage />} />
+          <Route path="/s/:shortcode" element={<ShortRedirectPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/kegiatan" element={<ActivitiesPage />} />
+          <Route path="/pembelajaran" element={<LearningPage />} />
+          <Route path="/kartu-anggota" element={<MemberCardPage />} />
+          <Route path="/pendaftaran" element={<PendaftaranPage />} />
+          <Route path="/galeri" element={<GalleryPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/kegiatan/:id" element={<DetailActivityPage />} />
+          <Route path="/developer" element={<DeveloperPage />} />
+          <Route path="/kartu-anggota-detail" element={<MemberCardDetailPage />} />
+          <Route path="/member-card-3d" element={<MemberCard3DPage />} />
+          <Route path="/sejarah" element={<SejarahPage />} />
+          <Route path="/sejarahAdmin" element={<SejarahAdminPage />} />
+          <Route path="/scan-anggota" element={<MemberCardScanPage />} />
+          <Route path="/eduhub" element={<EduHubPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
       </TooltipProvider>
     </ErrorBoundary>
   );
