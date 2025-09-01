@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-cache-v2';
+const CACHE_NAME = 'offline-cache-v3';
 let ASSETS = [
   '/',
   '/index.html',
@@ -30,7 +30,38 @@ self.addEventListener('install', event => {
         console.log('[SW] Could not load assets manifest, using static assets only');
       }
 
+      // Cache the main page first to get all linked assets
       const cache = await caches.open(CACHE_NAME);
+      
+      // First cache the index.html to discover all linked assets
+      try {
+        await cache.add('/');
+        const indexResponse = await cache.match('/');
+        if (indexResponse) {
+          const htmlText = await indexResponse.text();
+          
+          // Extract CSS and JS links from HTML
+          const cssMatches = htmlText.match(/href="([^"]*\.css[^"]*)"/g) || [];
+          const jsMatches = htmlText.match(/src="([^"]*\.js[^"]*)"/g) || [];
+          
+          cssMatches.forEach(match => {
+            const url = match.match(/href="([^"]*)"/)?.[1];
+            if (url && !ASSETS.includes(url)) {
+              ASSETS.push(url);
+            }
+          });
+          
+          jsMatches.forEach(match => {
+            const url = match.match(/src="([^"]*)"/)?.[1];
+            if (url && !ASSETS.includes(url)) {
+              ASSETS.push(url);
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('[SW] Failed to analyze index.html for assets');
+      }
+      
       let loaded = 0;
       
       for (const asset of ASSETS) {
@@ -49,7 +80,7 @@ self.addEventListener('install', event => {
         }
       }
       
-      console.log('[SW] All assets cached successfully');
+      console.log('[SW] All assets cached successfully, total:', ASSETS.length);
     })()
   );
   self.skipWaiting();
@@ -105,14 +136,49 @@ self.addEventListener('fetch', event => {
   // Handle asset requests
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
+      .then(async response => {
         if (response) {
           return response;
         }
+        
+        // Try to find similar assets in cache if exact match fails
+        const cache = await caches.open(CACHE_NAME);
+        const cachedRequests = await cache.keys();
+        
+        // For CSS files, try to find any cached CSS file
+        if (url.pathname.includes('.css')) {
+          for (const req of cachedRequests) {
+            if (req.url.includes('.css')) {
+              const cachedResponse = await cache.match(req);
+              if (cachedResponse) return cachedResponse;
+            }
+          }
+        }
+        
+        // For JS files, try to find any cached JS file
+        if (url.pathname.includes('.js')) {
+          for (const req of cachedRequests) {
+            if (req.url.includes('.js') && !req.url.includes('service-worker')) {
+              const cachedResponse = await cache.match(req);
+              if (cachedResponse) return cachedResponse;
+            }
+          }
+        }
+        
         return fetch(event.request);
       })
       .catch(() => {
-        // If it's an asset and we can't fetch it, return a fallback
+        // If it's an asset and we can't fetch it, return a minimal fallback
+        if (event.request.destination === 'style') {
+          return new Response('/* Offline fallback CSS */', { 
+            headers: { 'Content-Type': 'text/css' }
+          });
+        }
+        if (event.request.destination === 'script') {
+          return new Response('console.log("Offline fallback JS");', { 
+            headers: { 'Content-Type': 'text/javascript' }
+          });
+        }
         if (event.request.destination === 'image') {
           return new Response('', { status: 404 });
         }
