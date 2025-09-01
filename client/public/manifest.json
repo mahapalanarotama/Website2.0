@@ -8,16 +8,16 @@
   "theme_color": "#0b3d2e",
   "scope": "/",
   "orientation": "any",
-  "categories": ["navigation", "utilities"],
+  "categories": ["navigation", "utilities", "lifestyle"],
   "launch_handler": {
     "client_mode": "focus-existing"
   },
   "permissions": [
     "geolocation",
     "background-sync",
-    "notifications"
+    "notifications",
+    "wakeLock"
   ],
-  "categories": ["navigation", "utilities", "lifestyle"],
   "icons": [
     {
       "src": "/OfflineApp.png",

@@ -1258,7 +1258,26 @@
                         <button class="btn-nav gps-control-btn" onclick="resetTrack()">Reset Data Lokasi</button>
                         <button class="btn-nav gps-control-btn bg-red-600" id="stop-gps" onclick="stopTracking()" disabled>Matikan GPS</button>
                         <button class="btn-nav gps-control-btn bg-purple-600" id="background-gps" onclick="enableBackgroundGps()" disabled>Aktifkan Background GPS</button>
+                        <button class="btn-nav gps-control-btn bg-orange-600" id="wake-lock-btn" onclick="toggleWakeLock()" disabled>Aktifkan Screen Lock</button>
                     </div>
+                    
+                    <!-- Background App Permissions Info -->
+                    <div id="background-permissions-info" class="highlight-box mb-2" style="display: none;">
+                        <div class="text-center mb-2">
+                            <span style="font-size: 1.2rem;">📱</span>
+                            <strong>Status Izin Background App</strong>
+                        </div>
+                        <div id="permissions-status" class="text-xs space-y-1">
+                            <div>📱 Notifikasi: <span id="notification-status">Belum diizinkan</span></div>
+                            <div>🔄 Background Sync: <span id="sync-status">Belum diizinkan</span></div>
+                            <div>🔋 Wake Lock: <span id="wakelock-status">Belum diizinkan</span></div>
+                            <div>💾 Storage Persisten: <span id="storage-status">Belum diizinkan</span></div>
+                        </div>
+                        <button class="btn-nav mt-2" id="request-permissions-btn" onclick="requestAllBackgroundPermissions()">
+                            Minta Izin Background App
+                        </button>
+                    </div>
+
                     <div id="gps-status" class="mb-2 text-green text-small text-center"></div>
                     <div class="table-container">
                         <table class="table">
@@ -1469,6 +1488,143 @@
             }
         }
 
+        // Background App Permission Manager
+        let wakeLock = null;
+        let backgroundPermissionGranted = false;
+
+        async function requestBackgroundPermissions() {
+            const permissions = {
+                notifications: false,
+                backgroundSync: false,
+                wakeLock: false,
+                persistentStorage: false
+            };
+
+            try {
+                // 1. Request Notification Permission
+                if ('Notification' in window) {
+                    const notificationPermission = await Notification.requestPermission();
+                    permissions.notifications = notificationPermission === 'granted';
+                }
+
+                // 2. Check Background Sync Support
+                if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+                    permissions.backgroundSync = true;
+                }
+
+                // 3. Check Wake Lock Support
+                if ('wakeLock' in navigator) {
+                    permissions.wakeLock = true;
+                }
+
+                // 4. Request Persistent Storage
+                if ('storage' in navigator && 'persist' in navigator.storage) {
+                    permissions.persistentStorage = await navigator.storage.persist();
+                }
+
+                backgroundPermissionGranted = permissions.notifications && permissions.backgroundSync;
+                
+                return permissions;
+            } catch (error) {
+                console.error('Error requesting background permissions:', error);
+                return permissions;
+            }
+        }
+
+        async function enableWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Screen Wake Lock was released');
+                    });
+                    updateGpsStatus("🔋 Screen Wake Lock aktif - layar tidak akan mati");
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error requesting wake lock:', error);
+                updateGpsStatus("❌ Wake Lock tidak didukung atau gagal diaktifkan");
+                return false;
+            }
+        }
+
+        async function disableWakeLock() {
+            if (wakeLock) {
+                await wakeLock.release();
+                wakeLock = null;
+                updateGpsStatus("🔋 Screen Wake Lock dimatikan");
+            }
+        }
+
+        async function showBackgroundPermissionDialog() {
+            return new Promise((resolve) => {
+                const dialog = document.createElement('div');
+                dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                dialog.innerHTML = `
+                    <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+                        <h3 class="text-lg font-bold mb-3 text-gray-900">Izin Aplikasi Background</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Untuk fitur GPS tracking yang optimal, aplikasi memerlukan izin:
+                        </p>
+                        <div class="mb-4">
+                            <ul class="text-xs text-gray-500 list-disc list-inside space-y-1">
+                                <li>📱 Notifikasi - untuk update status GPS</li>
+                                <li>🔄 Background Sync - untuk sinkronisasi data offline</li>
+                                <li>🔋 Wake Lock - mencegah layar mati saat tracking</li>
+                                <li>💾 Persistent Storage - penyimpanan data permanen</li>
+                            </ul>
+                        </div>
+                        <div class="flex gap-2 justify-end">
+                            <button onclick="handleBackgroundPermissionDecline()" class="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                                Tolak
+                            </button>
+                            <button onclick="handleBackgroundPermissionAccept()" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                                Izinkan
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                window.handleBackgroundPermissionAccept = async () => {
+                    document.body.removeChild(dialog);
+                    const permissions = await requestBackgroundPermissions();
+                    localStorage.setItem('backgroundPermissionRequested', 'true');
+                    localStorage.setItem('backgroundPermissionGranted', backgroundPermissionGranted.toString());
+                    resolve(permissions);
+                };
+
+                window.handleBackgroundPermissionDecline = () => {
+                    document.body.removeChild(dialog);
+                    localStorage.setItem('backgroundPermissionRequested', 'true');
+                    localStorage.setItem('backgroundPermissionGranted', 'false');
+                    backgroundPermissionGranted = false;
+                    resolve(null);
+                };
+
+                document.body.appendChild(dialog);
+            });
+        }
+
+        async function checkBackgroundPermissions() {
+            const permissionRequested = localStorage.getItem('backgroundPermissionRequested');
+            const permissionGranted = localStorage.getItem('backgroundPermissionGranted') === 'true';
+
+            if (!permissionRequested) {
+                // First time - show dialog
+                const permissions = await showBackgroundPermissionDialog();
+                return permissions;
+            } else if (permissionGranted) {
+                // Already granted - check current status
+                backgroundPermissionGranted = true;
+                return await requestBackgroundPermissions();
+            } else {
+                // Previously declined
+                backgroundPermissionGranted = false;
+                return null;
+            }
+        }
+
         // Restore GPS tracking state after page refresh
         function restoreGpsState() {
             const startBtn = document.getElementById('start-gps');
@@ -1565,11 +1721,24 @@
             // Set current year
             document.getElementById('current-year').textContent = new Date().getFullYear();
 
+            // Check if background permissions were previously granted
+            backgroundPermissionGranted = localStorage.getItem('backgroundPermissionGranted') === 'true';
+            
+            // Update permissions status if GPS controls are visible
+            if (userName) {
+                setTimeout(() => {
+                    updateBackgroundPermissionsStatus();
+                }, 500);
+            }
+
             // Event listeners
             window.addEventListener('online', updateStatus);
             window.addEventListener('offline', updateStatus);
             window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
             window.addEventListener('appinstalled', handleAppInstalled);
+            
+            // Handle page visibility change for background app
+            document.addEventListener('visibilitychange', handleVisibilityChange);
         });
 
         // Firebase GPS functions - diperbaiki untuk dapat mengirim ke Firestore
@@ -1792,12 +1961,18 @@
             // Check GPS permission after name is saved
             await checkGpsPermission();
 
+            // Show background permissions info
+            document.getElementById('background-permissions-info').style.display = 'block';
+            updateBackgroundPermissionsStatus();
+
             // Enable GPS controls only if permission is granted
             const startBtn = document.getElementById('start-gps');
             const bgBtn = document.getElementById('background-gps');
+            const wakeLockBtn = document.getElementById('wake-lock-btn');
 
             if (startBtn) startBtn.disabled = !gpsPermissionGranted;
             if (bgBtn) bgBtn.disabled = !gpsPermissionGranted;
+            if (wakeLockBtn) wakeLockBtn.disabled = !gpsPermissionGranted;
 
             if (gpsPermissionGranted) {
                 updateGpsStatus("✅ Siap untuk pelacakan GPS");
@@ -1805,6 +1980,82 @@
                 restoreGpsState();
             } else {
                 updateGpsStatus("❌ Izin lokasi diperlukan - aktifkan di pengaturan browser");
+            }
+        }
+
+        async function requestAllBackgroundPermissions() {
+            updateGpsStatus("🔄 Meminta izin background app...");
+            
+            const permissions = await checkBackgroundPermissions();
+            if (permissions) {
+                updateBackgroundPermissionsStatus();
+                updateGpsStatus("✅ Izin background app telah diminta");
+                
+                // Enable background features if permissions granted
+                const bgBtn = document.getElementById('background-gps');
+                const wakeLockBtn = document.getElementById('wake-lock-btn');
+                
+                if (bgBtn && backgroundPermissionGranted) bgBtn.disabled = false;
+                if (wakeLockBtn && permissions.wakeLock) wakeLockBtn.disabled = false;
+            } else {
+                updateGpsStatus("❌ Izin background ditolak - fitur terbatas");
+            }
+        }
+
+        function updateBackgroundPermissionsStatus() {
+            // Check current permissions status
+            const notificationStatus = document.getElementById('notification-status');
+            const syncStatus = document.getElementById('sync-status');
+            const wakelockStatus = document.getElementById('wakelock-status');
+            const storageStatus = document.getElementById('storage-status');
+
+            // Update notification status
+            if (notificationStatus) {
+                notificationStatus.textContent = Notification.permission === 'granted' ? '✅ Diizinkan' : '❌ Tidak diizinkan';
+                notificationStatus.style.color = Notification.permission === 'granted' ? '#16a34a' : '#dc2626';
+            }
+
+            // Update background sync status
+            if (syncStatus) {
+                const bgSyncSupported = 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype;
+                syncStatus.textContent = bgSyncSupported ? '✅ Didukung' : '❌ Tidak didukung';
+                syncStatus.style.color = bgSyncSupported ? '#16a34a' : '#dc2626';
+            }
+
+            // Update wake lock status
+            if (wakelockStatus) {
+                const wakeLockSupported = 'wakeLock' in navigator;
+                wakelockStatus.textContent = wakeLockSupported ? '✅ Didukung' : '❌ Tidak didukung';
+                wakelockStatus.style.color = wakeLockSupported ? '#16a34a' : '#dc2626';
+            }
+
+            // Update storage status
+            if (storageStatus) {
+                navigator.storage?.persist?.().then(persistent => {
+                    storageStatus.textContent = persistent ? '✅ Persisten' : '❌ Tidak persisten';
+                    storageStatus.style.color = persistent ? '#16a34a' : '#dc2626';
+                }).catch(() => {
+                    storageStatus.textContent = '❌ Tidak didukung';
+                    storageStatus.style.color = '#dc2626';
+                });
+            }
+        }
+
+        async function toggleWakeLock() {
+            const btn = document.getElementById('wake-lock-btn');
+            
+            if (wakeLock) {
+                await disableWakeLock();
+                btn.textContent = 'Aktifkan Screen Lock';
+                btn.classList.remove('bg-red-600');
+                btn.classList.add('bg-orange-600');
+            } else {
+                const success = await enableWakeLock();
+                if (success) {
+                    btn.textContent = 'Matikan Screen Lock';
+                    btn.classList.remove('bg-orange-600');
+                    btn.classList.add('bg-red-600');
+                }
             }
         }
 
@@ -2264,6 +2515,15 @@
                 return;
             }
 
+            // Check background permissions first
+            if (!backgroundPermissionGranted) {
+                const permissions = await checkBackgroundPermissions();
+                if (!permissions || !backgroundPermissionGranted) {
+                    updateGpsStatus('❌ Izin background app diperlukan untuk fitur ini');
+                    return;
+                }
+            }
+
             try {
                 updateGpsStatus("🔄 Mengaktifkan background GPS...");
 
@@ -2286,6 +2546,16 @@
 
                 gpsBackgroundActive = true;
                 localStorage.setItem('gps_background_active', 'true'); // Save state
+
+                // Send notification about background GPS
+                if (Notification.permission === 'granted') {
+                    new Notification('GPS Tracker - Mahapala Narotama', {
+                        body: 'Background GPS tracking telah diaktifkan',
+                        icon: '/OfflineApp.png',
+                        badge: '/OfflineApp.png',
+                        tag: 'gps-background'
+                    });
+                }
 
                 // Update UI
                 updateGpsStatus("✅ Background GPS tracking diaktifkan");
@@ -2347,6 +2617,59 @@
                 localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
                 updateGpsTable();
                 updateGpsStatus(`📍 Background GPS: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`);
+                
+                // Send notification if app is in background and notifications allowed
+                if (document.hidden && Notification.permission === 'granted') {
+                    new Notification('GPS Update - Mahapala Narotama', {
+                        body: `Lokasi terupdate: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`,
+                        icon: '/OfflineApp.png',
+                        badge: '/OfflineApp.png',
+                        tag: 'gps-update',
+                        silent: true
+                    });
+                }
+            }
+        }
+
+        // Handle page visibility changes for background functionality
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                // App goes to background
+                console.log('App moved to background');
+                
+                if (gpsBackgroundActive && Notification.permission === 'granted') {
+                    new Notification('GPS Tracker - Background Mode', {
+                        body: 'GPS tracking berlanjut di background',
+                        icon: '/OfflineApp.png',
+                        badge: '/OfflineApp.png',
+                        tag: 'background-mode',
+                        silent: true
+                    });
+                }
+            } else {
+                // App comes to foreground
+                console.log('App moved to foreground');
+                
+                // Refresh GPS table when returning from background
+                if (gpsTracking || gpsBackgroundActive) {
+                    loadGpsData();
+                    updateGpsTable();
+                }
+            }
+        }
+
+        // Send test notification
+        function sendTestNotification() {
+            if (Notification.permission === 'granted') {
+                new Notification('GPS Tracker - Test', {
+                    body: 'Notifikasi berhasil! GPS tracker siap bekerja di background.',
+                    icon: '/OfflineApp.png',
+                    badge: '/OfflineApp.png',
+                    tag: 'test-notification'
+                });
+                updateGpsStatus("✅ Test notifikasi berhasil dikirim");
+            } else {
+                updateGpsStatus("❌ Izin notifikasi diperlukan untuk test ini");
             }
         }
     </script>
