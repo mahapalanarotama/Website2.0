@@ -1042,6 +1042,33 @@
         </div>
     </header>
 
+    <!-- Cookie Consent Dialog -->
+    <div id="cookie-consent" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+            <h3 class="text-lg font-bold mb-3 text-gray-900">Preferensi Cookie</h3>
+            <p class="text-sm text-gray-600 mb-4">
+                Kami menggunakan cookie untuk meningkatkan pengalaman browsing Anda, menyajikan konten yang dipersonalisasi, dan menganalisis lalu lintas kami. Website ini menggunakan cookie yang diperlukan untuk fungsionalitas dan cookie pihak ketiga untuk analitik serta fitur media sosial.
+            </p>
+            <div class="mb-4">
+                <h4 class="font-medium text-sm mb-2">Kami menggunakan cookie untuk:</h4>
+                <ul class="text-xs text-gray-500 list-disc list-inside space-y-1">
+                    <li>Fungsionalitas website penting</li>
+                    <li>Autentikasi dan keamanan</li>
+                    <li>Analitik dan performa</li>
+                    <li>Integrasi media sosial</li>
+                </ul>
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button onclick="handleCookieDecline()" class="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                    Penting Saja
+                </button>
+                <button onclick="handleCookieAccept()" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                    Terima Semua
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Status Indicator -->
     <div class="status-indicator">
         <div id="status" class="status-badge offline">Offline</div>
@@ -1365,8 +1392,8 @@
         let isInstalled = false;
 
         // GPS Tracker Variables with persistence
-        let gpsTracking = localStorage.getItem('gps_tracking_active') === 'true' || false;
-        let gpsBackgroundActive = localStorage.getItem('gps_background_active') === 'true' || false;
+        let gpsTracking = localStorage.getItem('gps_tracking_active') === 'true';
+        let gpsBackgroundActive = localStorage.getItem('gps_background_active') === 'true';
         let gpsInterval = null;
         let gpsPositions = [];
         let userName = localStorage.getItem('gps_nama') || '';
@@ -1419,11 +1446,23 @@
             if (userName) {
                 document.getElementById('nama-form').style.display = 'none';
                 document.getElementById('gps-controls').style.display = 'block';
+                
+                // Always load data first
+                loadGpsData();
+                updateGpsTable();
+                
                 await checkGpsPermission();
                 
                 // Restore GPS state after permission check
                 if (gpsPermissionGranted) {
                     restoreGpsState();
+                } else {
+                    // If no permission, reset states
+                    gpsTracking = false;
+                    gpsBackgroundActive = false;
+                    localStorage.setItem('gps_tracking_active', 'false');
+                    localStorage.setItem('gps_background_active', 'false');
+                    updateTrackingButtonStates();
                 }
             } else {
                 updateGpsStatus("📝 Masukkan nama untuk memulai pelacakan GPS");
@@ -1436,19 +1475,35 @@
             const stopBtn = document.getElementById('stop-gps');
             const bgBtn = document.getElementById('background-gps');
 
+            // Always load saved positions first
+            loadGpsData();
+            updateGpsTable();
+
             if (gpsTracking && gpsPermissionGranted) {
                 // Restore active tracking state
                 if (startBtn) {
                     startBtn.disabled = true;
                     startBtn.textContent = 'GPS Aktif';
                     startBtn.classList.add('bg-green-600');
+                    startBtn.classList.remove('bg-blue-600');
                 }
                 if (stopBtn) stopBtn.disabled = false;
                 if (bgBtn) bgBtn.disabled = false;
 
                 // Restart tracking interval
-                gpsInterval = setInterval(trackLocation, 5000);
+                if (!gpsInterval) {
+                    gpsInterval = setInterval(trackLocation, 5000);
+                }
                 updateGpsStatus("✅ GPS tracking dipulihkan setelah refresh");
+            } else {
+                // Ensure buttons are in correct initial state
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Aktifkan Pelacakan';
+                    startBtn.classList.remove('bg-green-600');
+                    startBtn.classList.add('bg-blue-600');
+                }
+                if (stopBtn) stopBtn.disabled = true;
             }
 
             if (gpsBackgroundActive && gpsPermissionGranted) {
@@ -1459,11 +1514,41 @@
                     bgBtn.classList.add('bg-orange-600');
                     bgBtn.classList.remove('bg-purple-600');
                 }
-                // Re-enable background GPS
-                setTimeout(() => enableBackgroundGps(), 1000);
+                // Re-enable background GPS with delay
+                setTimeout(() => {
+                    if (gpsBackgroundActive) {
+                        enableBackgroundGps();
+                    }
+                }, 1000);
+            } else {
+                // Ensure background button is in correct initial state
+                if (bgBtn) {
+                    bgBtn.textContent = 'Aktifkan Background GPS';
+                    bgBtn.onclick = enableBackgroundGps;
+                    bgBtn.classList.remove('bg-orange-600');
+                    bgBtn.classList.add('bg-purple-600');
+                }
             }
         }
 
+
+        // Cookie Consent Functions
+        function showCookieConsent() {
+            const hasConsented = localStorage.getItem('cookieConsent');
+            if (!hasConsented) {
+                document.getElementById('cookie-consent').classList.remove('hidden');
+            }
+        }
+
+        function handleCookieAccept() {
+            localStorage.setItem('cookieConsent', 'true');
+            document.getElementById('cookie-consent').classList.add('hidden');
+        }
+
+        function handleCookieDecline() {
+            localStorage.setItem('cookieConsent', 'false');
+            document.getElementById('cookie-consent').classList.add('hidden');
+        }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1475,6 +1560,7 @@
             initCompass();
             setupPWA();
             initializeGpsState(); // Initialize GPS state with persistence
+            showCookieConsent(); // Show cookie consent if needed
 
             // Set current year
             document.getElementById('current-year').textContent = new Date().getFullYear();
@@ -1797,23 +1883,14 @@
                 localStorage.setItem('gps_tracking_active', 'true'); // Save state
 
                 // Update UI
-                const startBtn = document.getElementById('start-gps');
-                const stopBtn = document.getElementById('stop-gps');
-                const bgBtn = document.getElementById('background-gps');
-
-                if (startBtn) {
-                    startBtn.disabled = true;
-                    startBtn.textContent = 'GPS Aktif';
-                    startBtn.classList.add('bg-green-600');
-                    startBtn.classList.remove('bg-blue-600');
-                }
-                if (stopBtn) stopBtn.disabled = false;
-                if (bgBtn) bgBtn.disabled = false;
+                updateTrackingButtonStates();
 
                 updateGpsStatus("✅ GPS tracking aktif");
 
-                // Start tracking interval
-                gpsInterval = setInterval(trackLocation, 5000); // 5 seconds
+                // Start tracking interval only if not already running
+                if (!gpsInterval) {
+                    gpsInterval = setInterval(trackLocation, 5000); // 5 seconds
+                }
 
                 // Track immediately
                 await trackLocation();
@@ -1840,6 +1917,34 @@
                 updateGpsStatus(errorMsg);
                 gpsTracking = false;
                 localStorage.setItem('gps_tracking_active', 'false'); // Save state
+                updateTrackingButtonStates();
+            }
+        }
+
+        // Helper function to update button states consistently
+        function updateTrackingButtonStates() {
+            const startBtn = document.getElementById('start-gps');
+            const stopBtn = document.getElementById('stop-gps');
+            const bgBtn = document.getElementById('background-gps');
+
+            if (gpsTracking) {
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.textContent = 'GPS Aktif';
+                    startBtn.classList.add('bg-green-600');
+                    startBtn.classList.remove('bg-blue-600');
+                }
+                if (stopBtn) stopBtn.disabled = false;
+                if (bgBtn) bgBtn.disabled = false;
+            } else {
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Aktifkan Pelacakan';
+                    startBtn.classList.remove('bg-green-600');
+                    startBtn.classList.add('bg-blue-600');
+                }
+                if (stopBtn) stopBtn.disabled = true;
+                if (bgBtn) bgBtn.disabled = true;
             }
         }
 
@@ -1918,21 +2023,13 @@
                 });
             }
 
-            // Update button states
-            const startBtn = document.getElementById('start-gps');
-            const stopBtn = document.getElementById('stop-gps');
-            const bgBtn = document.getElementById('background-gps');
+            // Update button states using helper function
+            updateTrackingButtonStates();
 
-            if (startBtn) {
-                startBtn.disabled = false;
-                startBtn.textContent = 'Aktifkan Pelacakan';
-                startBtn.classList.remove('bg-green-600');
-                startBtn.classList.add('bg-blue-600');
-            }
-            if (stopBtn) stopBtn.disabled = true;
+            // Reset background button specifically
+            const bgBtn = document.getElementById('background-gps');
             if (bgBtn) {
                 bgBtn.disabled = true;
-                // Reset background button appearance if changed
                 bgBtn.textContent = 'Aktifkan Background GPS';
                 bgBtn.onclick = enableBackgroundGps;
                 bgBtn.classList.remove('bg-orange-600');
