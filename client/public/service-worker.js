@@ -288,15 +288,15 @@ function stopBackgroundGpsTracking() {
 
 function getCurrentPositionPromise() {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation not supported'));
+    if (!self.navigator || !self.navigator.geolocation) {
+      reject(new Error('Geolocation not supported in service worker context'));
       return;
     }
     
-    navigator.geolocation.getCurrentPosition(
+    self.navigator.geolocation.getCurrentPosition(
       resolve,
       reject,
-      { enableHighAccuracy: true, maximumAge: 60000, timeout: 15000 }
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
     );
   });
 }

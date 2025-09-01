@@ -17,6 +17,7 @@
     "background-sync",
     "notifications"
   ],
+  "categories": ["navigation", "utilities", "lifestyle"],
   "icons": [
     {
       "src": "/OfflineApp.png",

@@ -832,6 +832,13 @@
         .bg-purple-600:hover {
             background: #5b21b6;
         }
+        .bg-orange-600 {
+            background: #f97316;
+        }
+        .bg-orange-600:hover {
+            background: #d97706;
+        }
+
 
         /* Keyframe animations */
         @keyframes navbarLogo {
@@ -1260,12 +1267,65 @@
         let currentTab = 'fitur';
         let deferredPrompt = null;
         let isInstalled = false;
+
+        // GPS Tracker Variables
         let gpsTracking = false;
         let gpsInterval = null;
         let gpsPositions = [];
-        let userName = '';
-        let rjpCount = 0;
-        let rjpStarted = false;
+        let userName = localStorage.getItem('gps_nama') || '';
+        let gpsPermissionGranted = false;
+
+        // Check GPS permission and user name on load
+        async function checkGpsPermission() {
+            try {
+                if (!navigator.geolocation) {
+                    throw new Error('Geolocation tidak didukung oleh browser ini');
+                }
+
+                // Request permission
+                const permission = await navigator.permissions.query({name: 'geolocation'});
+
+                if (permission.state === 'granted') {
+                    gpsPermissionGranted = true;
+                    updateGpsStatus("✅ Izin lokasi telah diberikan");
+                } else if (permission.state === 'prompt') {
+                    // Try to get position to trigger permission prompt
+                    try {
+                        await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(
+                                (pos) => {
+                                    gpsPermissionGranted = true;
+                                    resolve(pos);
+                                },
+                                reject,
+                                { enableHighAccuracy: true, timeout: 5000 }
+                            );
+                        });
+                        updateGpsStatus("✅ Izin lokasi telah diberikan");
+                    } catch (error) {
+                        updateGpsStatus("❌ Izin lokasi diperlukan untuk GPS tracker");
+                        gpsPermissionGranted = false;
+                    }
+                } else {
+                    updateGpsStatus("❌ Izin lokasi ditolak - aktifkan di pengaturan browser");
+                    gpsPermissionGranted = false;
+                }
+            } catch (error) {
+                console.error('Error checking GPS permission:', error);
+                updateGpsStatus("❌ Error: " + error.message);
+                gpsPermissionGranted = false;
+            }
+        }
+
+        // Initialize GPS components
+        if (userName) {
+            document.getElementById('nama-form').style.display = 'none';
+            document.getElementById('gps-controls').style.display = 'block';
+            checkGpsPermission();
+        } else {
+            updateGpsStatus("📝 Masukkan nama untuk memulai pelacakan GPS");
+        }
+
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1483,25 +1543,41 @@
             if (saved) {
                 userName = saved;
                 document.getElementById('input-nama').value = saved;
-                document.getElementById('nama-form').classList.add('hidden');
-                document.getElementById('gps-controls').classList.remove('hidden');
-                
-                // Enable start GPS button when name is loaded
-                document.getElementById('start-gps').disabled = false;
+                document.getElementById('nama-form').style.display = 'none';
+                document.getElementById('gps-controls').style.display = 'block';
+                checkGpsPermission();
             }
         }
 
-        function simpanNama() {
-            const input = document.getElementById('input-nama').value.trim();
-            if (input) {
-                userName = input;
-                localStorage.setItem('gps_nama', input);
-                document.getElementById('nama-form').classList.add('hidden');
-                document.getElementById('gps-controls').classList.remove('hidden');
-                
-                // Enable start GPS button after saving name
-                document.getElementById('start-gps').disabled = false;
-                updateGpsStatus('✅ Nama berhasil disimpan. Siap untuk pelacakan GPS.');
+        async function simpanNama() {
+            const nama = document.getElementById('input-nama').value.trim();
+            if (!nama) {
+                alert('Masukkan nama terlebih dahulu!');
+                return;
+            }
+
+            userName = nama;
+            localStorage.setItem('gps_nama', nama);
+
+            document.getElementById('nama-form').style.display = 'none';
+            document.getElementById('gps-controls').style.display = 'block';
+
+            updateGpsStatus("🔄 Memeriksa izin lokasi...");
+
+            // Check GPS permission after name is saved
+            await checkGpsPermission();
+
+            // Enable GPS controls only if permission is granted
+            const startBtn = document.getElementById('start-gps');
+            const bgBtn = document.getElementById('background-gps');
+
+            if (startBtn) startBtn.disabled = !gpsPermissionGranted;
+            if (bgBtn) bgBtn.disabled = !gpsPermissionGranted;
+
+            if (gpsPermissionGranted) {
+                updateGpsStatus("✅ Siap untuk pelacakan GPS");
+            } else {
+                updateGpsStatus("❌ Izin lokasi diperlukan - aktifkan di pengaturan browser");
             }
         }
 
@@ -1554,34 +1630,92 @@
 
         async function startTracking() {
             if (!userName) {
-                updateGpsStatus("❌ Masukkan nama terlebih dahulu");
+                updateGpsStatus('❌ Masukkan nama terlebih dahulu');
                 return;
             }
 
-            try {
-                updateGpsStatus("🔍 Meminta izin akses lokasi...");
-                
-                // Request location permission first
-                const initialPosition = await requestLocationPermission();
-                
-                gpsTracking = true;
-                updateGpsStatus("✅ Pelacakan GPS aktif...");
-                
-                // Update button states
-                document.getElementById('start-gps').disabled = true;
-                document.getElementById('stop-gps').disabled = false;
-                document.getElementById('background-gps').disabled = false;
+            if (!gpsPermissionGranted) {
+                updateGpsStatus('❌ Izin lokasi diperlukan - aktifkan di pengaturan browser');
+                await checkGpsPermission();
+                return;
+            }
 
-                // Request notification permission untuk background
-                if ('Notification' in window && Notification.permission === 'default') {
-                    await Notification.requestPermission();
+            updateGpsStatus("🔄 Memulai pelacakan GPS...");
+
+            try {
+                // Test GPS access first
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    });
+                });
+
+                gpsTracking = true;
+
+                // Update UI
+                const startBtn = document.getElementById('start-gps');
+                const stopBtn = document.getElementById('stop-gps');
+                const bgBtn = document.getElementById('background-gps');
+
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.textContent = 'GPS Aktif';
+                    startBtn.classList.add('bg-green-600');
+                    startBtn.classList.remove('bg-blue-600');
+                }
+                if (stopBtn) stopBtn.disabled = false;
+                if (bgBtn) bgBtn.disabled = false;
+
+                updateGpsStatus("✅ GPS tracking aktif");
+
+                // Start tracking interval
+                gpsInterval = setInterval(trackLocation, 5000); // 5 seconds
+
+                // Track immediately
+                await trackLocation();
+
+            } catch (error) {
+                console.error("GPS Error:", error);
+                let errorMsg = "❌ GPS Error: ";
+
+                switch(error.code) {
+                    case 1:
+                        errorMsg += "Izin lokasi ditolak - aktifkan di pengaturan browser";
+                        gpsPermissionGranted = false;
+                        break;
+                    case 2:
+                        errorMsg += "Lokasi tidak tersedia - pastikan GPS aktif";
+                        break;
+                    case 3:
+                        errorMsg += "Timeout - coba lagi atau pindah ke area terbuka";
+                        break;
+                    default:
+                        errorMsg += error.message;
                 }
 
-                // Process initial position
+                updateGpsStatus(errorMsg);
+                gpsTracking = false;
+            }
+        }
+
+        async function trackLocation() {
+            if (!gpsTracking) return;
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 10000 // Allow slightly older data if new isn't available
+                    });
+                });
+
                 const now = new Date();
                 const data = {
-                    lat: initialPosition.coords.latitude,
-                    lon: initialPosition.coords.longitude,
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude,
                     time: now.toISOString(),
                     nama: userName,
                     online: navigator.onLine,
@@ -1592,77 +1726,30 @@
                 localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
                 updateGpsTable();
 
-                // Save to Firestore if online
                 if (navigator.onLine) {
                     await saveGpsToFirestore(data);
                 } else {
                     updateGpsStatus(`📍 Lokasi tersimpan lokal: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)} (Offline)`);
                 }
 
-                // Continue tracking every 10 seconds
-                gpsInterval = setInterval(async () => {
-                    if (!gpsTracking) {
-                        clearInterval(gpsInterval);
-                        return;
-                    }
-
-                    navigator.geolocation.getCurrentPosition(
-                        async (position) => {
-                            const now = new Date();
-                            const data = {
-                                lat: position.coords.latitude,
-                                lon: position.coords.longitude,
-                                time: now.toISOString(),
-                                nama: userName,
-                                online: navigator.onLine,
-                                background: false
-                            };
-
-                            gpsPositions.push(data);
-                            localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
-                            updateGpsTable();
-
-                            if (navigator.onLine) {
-                                await saveGpsToFirestore(data);
-                            } else {
-                                updateGpsStatus(`📍 Lokasi tersimpan lokal: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)} (Offline)`);
-                            }
-                        },
-                        (error) => {
-                            console.error('GPS Error:', error);
-                            let errorMessage = "⚠️ Error GPS: ";
-                            switch(error.code) {
-                                case error.PERMISSION_DENIED:
-                                    errorMessage += "Izin lokasi ditolak";
-                                    stopTracking(); // Stop tracking if permission denied
-                                    break;
-                                case error.POSITION_UNAVAILABLE:
-                                    errorMessage += "Lokasi tidak tersedia";
-                                    break;
-                                case error.TIMEOUT:
-                                    errorMessage += "Timeout";
-                                    break;
-                                default:
-                                    errorMessage += error.message;
-                            }
-                            updateGpsStatus(errorMessage);
-                        },
-                        {
-                            enableHighAccuracy: true,
-                            maximumAge: 30000,
-                            timeout: 15000
-                        }
-                    );
-                }, 10000); // 10 seconds
-
             } catch (error) {
-                console.error('Error starting GPS tracking:', error);
-                updateGpsStatus('❌ ' + error.message);
-                
-                // Reset button states on error
-                document.getElementById('start-gps').disabled = false;
-                document.getElementById('stop-gps').disabled = true;
-                document.getElementById('background-gps').disabled = true;
+                console.error("GPS Tracking Error:", error);
+                let errorMsg = "❌ GPS Error: ";
+                switch(error.code) {
+                    case 1:
+                        errorMsg += "Izin lokasi ditolak";
+                        stopTracking(); // Stop if permission is denied
+                        break;
+                    case 2:
+                        errorMsg += "Lokasi tidak tersedia";
+                        break;
+                    case 3:
+                        errorMsg += "Timeout";
+                        break;
+                    default:
+                        errorMsg += error.message;
+                }
+                updateGpsStatus(errorMsg);
             }
         }
 
@@ -1672,17 +1759,28 @@
                 clearInterval(gpsInterval);
                 gpsInterval = null;
             }
-            
+
             // Update button states
-            document.getElementById('start-gps').disabled = false;
-            document.getElementById('stop-gps').disabled = true;
-            document.getElementById('background-gps').disabled = true;
-            
-            // Reset background GPS button text if it was changed
-            const bgButton = document.getElementById('background-gps');
-            bgButton.textContent = 'Aktifkan Background GPS';
-            bgButton.onclick = enableBackgroundGps;
-            
+            const startBtn = document.getElementById('start-gps');
+            const stopBtn = document.getElementById('stop-gps');
+            const bgBtn = document.getElementById('background-gps');
+
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.textContent = 'Aktifkan Pelacakan';
+                startBtn.classList.remove('bg-green-600');
+                startBtn.classList.add('bg-blue-600');
+            }
+            if (stopBtn) stopBtn.disabled = true;
+            if (bgBtn) {
+                bgBtn.disabled = true;
+                // Reset background button appearance if changed
+                bgBtn.textContent = 'Aktifkan Background GPS';
+                bgBtn.onclick = enableBackgroundGps;
+                bgBtn.classList.remove('bg-orange-600');
+                bgBtn.classList.add('bg-purple-600');
+            }
+
             updateGpsStatus('⏹️ Pelacakan GPS dihentikan.');
         }
 
@@ -1691,10 +1789,10 @@
             if (gpsTracking) {
                 stopTracking();
             }
-            
+
             gpsPositions = [];
             localStorage.removeItem('gps_track');
-            localStorage.removeItem('gps_offline_queue');
+            localStorage.removeItem('gps_offline_queue'); // Also clear any queued items
             updateGpsTable();
             updateGpsStatus('🗑️ Data lokasi telah direset.');
         }
@@ -1706,9 +1804,9 @@
             if (message.includes('🔄') || message.includes('Mengaktifkan')) {
                 statusEl.innerHTML = `<span class="loading-spinner"></span>${message}`;
 
-                // Remove spinner after 3 seconds
+                // Remove spinner after 3 seconds if message hasn't changed
                 setTimeout(() => {
-                    if (statusEl.innerHTML.startsWith('<span class="loading-spinner">')) {
+                    if (statusEl.textContent === message) { // Check if message is still the same
                         statusEl.textContent = message;
                     }
                 }, 3000);
@@ -1848,31 +1946,18 @@
             }
         }
 
-        // Initialize page components and GPS status
-        function initializeGpsComponents() {
-            // Set initial button states
+        // Initialize GPS status when page loads
+        setTimeout(() => {
+            // Ensure buttons are correctly enabled/disabled based on initial state
             const startBtn = document.getElementById('start-gps');
             const stopBtn = document.getElementById('stop-gps');
             const bgBtn = document.getElementById('background-gps');
-            
-            if (startBtn) startBtn.disabled = !userName; // Only enable if name is set
-            if (stopBtn) stopBtn.disabled = true;
-            if (bgBtn) bgBtn.disabled = true;
-            
-            // Update initial status
-            updateStatus();
-            
-            if (userName) {
-                updateGpsStatus("✅ Ready untuk pelacakan GPS");
-            } else {
-                updateGpsStatus("📝 Masukkan nama untuk memulai pelacakan GPS");
-            }
-        }
 
-        // Initialize GPS status when page loads
-        setTimeout(() => {
-            initializeGpsComponents();
-            
+            if (startBtn) startBtn.disabled = !userName || !gpsPermissionGranted;
+            if (stopBtn) stopBtn.disabled = true;
+            if (bgBtn) bgBtn.disabled = !userName || !gpsPermissionGranted;
+
+
             if (navigator.onLine) {
                 updateGpsStatus(userName ? "✅ Ready untuk pelacakan GPS - Firebase terhubung" : "📝 Masukkan nama untuk memulai");
             } else {
@@ -1931,7 +2016,7 @@
                 }
 
                 const registration = await navigator.serviceWorker.ready;
-                
+
                 if (!registration || !registration.active) {
                     throw new Error("Service worker tidak aktif");
                 }
@@ -1964,7 +2049,7 @@
             try {
                 if ('serviceWorker' in navigator) {
                     const registration = await navigator.serviceWorker.ready;
-                    
+
                     if (registration && registration.active) {
                         registration.active.postMessage({
                             type: 'STOP_GPS_BACKGROUND'
