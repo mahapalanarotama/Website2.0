@@ -2,7 +2,7 @@
   "name": "MPN OfflineApp",
   "short_name": "MPN OfflineApp",
   "description": "Website Mahapala Narotama",
-  "start_url": "/offline",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0b3d2e",
   "theme_color": "#0b3d2e",
