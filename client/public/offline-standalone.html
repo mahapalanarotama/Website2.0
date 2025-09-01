@@ -48,17 +48,19 @@
             font-family: 'Poppins', sans-serif;
         }
         
-        /* Navbar Styles - persis seperti React component */
+        /* Navbar Styles - diperbaiki agar tidak terhimpit */
         .navbar {
             position: sticky;
             top: 0;
             z-index: 50;
+            width: 100%;
             background: white;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
         }
         
         .navbar-container {
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0.75rem 1rem;
@@ -76,6 +78,7 @@
             color: inherit;
             position: relative;
             z-index: 10;
+            flex-shrink: 0;
         }
         
         .navbar-logo {
@@ -86,16 +89,20 @@
             border: 2px solid hsl(var(--primary));
             background: white;
             animation: navbarLogo 1.2s cubic-bezier(0.4,0,0.2,1);
+            object-fit: cover;
         }
         
         .navbar-title {
             font-family: 'Poppins', sans-serif;
             font-weight: bold;
-            font-size: clamp(1rem, 4vw, 1.5rem);
-            letter-spacing: 0.1em;
+            font-size: clamp(0.875rem, 3vw, 1.25rem);
+            letter-spacing: 0.05em;
             color: hsl(var(--primary));
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
             animation: navbarLogo 1.2s cubic-bezier(0.4,0,0.2,1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .navbar-accent {
@@ -106,7 +113,8 @@
         
         .navbar-nav {
             display: none;
-            gap: 1rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
         
         .navbar-link {
@@ -117,7 +125,8 @@
             color: hsl(var(--primary));
             transition: color 0.3s;
             z-index: 10;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
         }
         
         .navbar-link:hover {
@@ -151,6 +160,7 @@
             padding: 0.5rem;
             border-radius: 0.25rem;
             transition: background 0.2s;
+            flex-shrink: 0;
         }
         
         .mobile-menu-btn:hover {
@@ -163,7 +173,11 @@
             border-radius: 0 0 1rem 1rem;
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             padding: 1rem;
-            position: relative;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 100;
         }
         
         .mobile-menu.active {
@@ -364,7 +378,7 @@
             gap: 0.5rem;
             margin-bottom: 1.5rem;
             overflow-x: auto;
-            padding: 0.5rem;
+            padding: 0.5rem 0;
         }
         
         .btn-nav {
@@ -627,12 +641,13 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
-        /* Footer - persis seperti React component */
+        /* Footer - diperbaiki agar tidak overlap */
         .footer {
             background: #1f2937;
             color: white;
             padding: 2rem 1rem 1rem 1rem;
             margin-top: auto;
+            width: 100%;
         }
         
         .footer-container {
@@ -739,6 +754,11 @@
             .nav-tabs {
                 padding: 0;
                 overflow-x: visible;
+            }
+            
+            .navbar-title {
+                font-size: 1.25rem;
+                letter-spacing: 0.1em;
             }
         }
         
@@ -848,37 +868,9 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-        import { getFirestore, collection, addDoc, setDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBe-XLmVRiMs844VxR1_awMzGEGARb6Xmk",
-            authDomain: "website-mpn-65e8d.firebaseapp.com",
-            projectId: "website-mpn-65e8d",
-            storageBucket: "website-mpn-65e8d.firebasestorage.app",
-            messagingSenderId: "798271486726",
-            appId: "1:798271486726:web:0d0e0178a963804f627c87",
-            measurementId: "G-KSVPVC1Z9D"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // Make Firebase functions available globally
-        window.firebaseDB = db;
-        window.firebaseCollection = collection;
-        window.firebaseAddDoc = addDoc;
-        window.firebaseSetDoc = setDoc;
-        window.firebaseDoc = doc;
-        window.firebaseServerTimestamp = serverTimestamp;
-    </script>
 </head>
 <body>
-    <!-- Navbar - persis seperti React component -->
+    <!-- Navbar - diperbaiki layoutnya -->
     <header class="navbar">
         <div class="navbar-container">
             <a href="/" class="navbar-brand">
@@ -893,7 +885,7 @@
                 <a href="/kegiatan" class="navbar-link">Kegiatan</a>
                 <a href="/pembelajaran" class="navbar-link">Pembelajaran</a>
                 <a href="/sejarah" class="navbar-link">Sejarah</a>
-                <a href="/pendaftaran" class="navbar-link">Informasi Pendaftaran</a>
+                <a href="/pendaftaran" class="navbar-link">Pendaftaran</a>
                 <a href="/scan-anggota" class="navbar-link">
                     <span style="display: flex; align-items: center; gap: 0.5rem;">
                         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1152,7 +1144,7 @@
         </div>
     </div>
     
-    <!-- Footer - persis seperti React component -->
+    <!-- Footer - diperbaiki agar tidak overlap -->
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-grid">
@@ -1226,6 +1218,37 @@
         </div>
     </footer>
     
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, setDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        // Firebase configuration - persis sama dengan yang di React
+        const firebaseConfig = {
+            apiKey: "AIzaSyBe-XLmVRiMs844VxR1_awMzGEGARb6Xmk",
+            authDomain: "website-mpn-65e8d.firebaseapp.com",
+            projectId: "website-mpn-65e8d",
+            storageBucket: "website-mpn-65e8d.firebasestorage.app",
+            messagingSenderId: "798271486726",
+            appId: "1:798271486726:web:0d0e0178a963804f627c87",
+            measurementId: "G-KSVPVC1Z9D"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase functions available globally for GPS tracker
+        window.firebaseDB = db;
+        window.firebaseCollection = collection;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseSetDoc = setDoc;
+        window.firebaseDoc = doc;
+        window.firebaseServerTimestamp = serverTimestamp;
+        
+        console.log('Firebase initialized successfully');
+    </script>
+    
     <script>
         // Global variables
         let currentTab = 'fitur';
@@ -1258,52 +1281,73 @@
             window.addEventListener('appinstalled', handleAppInstalled);
         });
         
-        // Firebase GPS functions
+        // Firebase GPS functions - diperbaiki untuk dapat mengirim ke Firestore
         async function saveGpsToFirestore(data) {
-            if (!window.firebaseDB) {
+            if (!window.firebaseDB || !window.firebaseSetDoc) {
                 console.log('Firebase not initialized, saving locally only');
-                return;
+                updateGpsStatus('⚠️ Firebase belum siap, data tersimpan lokal');
+                return false;
             }
             
             try {
-                // Save to gps_tracker (latest position per user)
+                console.log('Attempting to save GPS to Firestore:', data);
+                
+                // Save to gps_tracker (latest position per user) - persis seperti di AdminPage
                 await window.firebaseSetDoc(
                     window.firebaseDoc(window.firebaseDB, "gps_tracker", data.nama), 
                     {
-                        ...data,
+                        nama: data.nama,
+                        lat: data.lat,
+                        lon: data.lon,
+                        time: data.time,
+                        online: data.online,
                         updatedAt: window.firebaseServerTimestamp(),
                     }
                 );
                 
-                // Save to gps_history (all positions)
+                // Save to gps_history (all positions) - persis seperti di AdminPage
                 await window.firebaseAddDoc(
                     window.firebaseCollection(window.firebaseDB, "gps_history"), 
                     {
-                        ...data,
+                        nama: data.nama,
+                        lat: data.lat,
+                        lon: data.lon,
+                        time: data.time,
+                        online: data.online,
                         createdAt: window.firebaseServerTimestamp(),
                     }
                 );
                 
                 console.log('GPS data saved to Firestore successfully');
-                updateGpsStatus('✅ Data GPS berhasil dikirim ke server');
+                updateGpsStatus(`✅ GPS berhasil dikirim ke server: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`);
+                return true;
             } catch (error) {
                 console.error('Error saving GPS to Firestore:', error);
-                updateGpsStatus('⚠️ Gagal mengirim ke server, tersimpan lokal');
+                updateGpsStatus(`❌ Gagal mengirim ke server: ${error.message}`);
+                return false;
             }
         }
         
         async function syncOfflineGpsToFirestore() {
             const saved = localStorage.getItem("gps_track");
-            if (!saved || !window.firebaseDB) return;
+            if (!saved || !window.firebaseDB) {
+                console.log('No offline GPS data to sync or Firebase not ready');
+                return;
+            }
             
             try {
                 const positions = JSON.parse(saved);
                 let synced = 0;
                 
+                updateGpsStatus('🔄 Sinkronisasi data offline ke server...');
+                
                 for (const data of positions) {
                     try {
-                        await saveGpsToFirestore(data);
-                        synced++;
+                        const success = await saveGpsToFirestore(data);
+                        if (success) synced++;
+                        
+                        // Small delay to avoid rate limiting
+                        await new Promise(resolve => setTimeout(resolve, 500));
                     } catch (error) {
                         console.error('Error syncing GPS data:', error);
                     }
@@ -1318,6 +1362,7 @@
                 }
             } catch (error) {
                 console.error('Error during GPS sync:', error);
+                updateGpsStatus(`❌ Error sinkronisasi: ${error.message}`);
             }
         }
         
@@ -1328,10 +1373,10 @@
                 statusEl.textContent = 'Online';
                 statusEl.className = 'status-badge online';
                 
-                // Auto sync when coming online
+                // Auto sync when coming online with delay
                 setTimeout(() => {
                     syncOfflineGpsToFirestore();
-                }, 1000);
+                }, 2000);
             } else {
                 statusEl.textContent = 'Offline';
                 statusEl.className = 'status-badge offline';
@@ -1426,7 +1471,7 @@
             }
         }
         
-        // GPS Tracker Functions
+        // GPS Tracker Functions - diperbaiki untuk integrasi Firestore
         function loadUserName() {
             const saved = localStorage.getItem('gps_nama');
             if (saved) {
@@ -1444,14 +1489,19 @@
                 localStorage.setItem('gps_nama', input);
                 document.getElementById('nama-form').classList.add('hidden');
                 document.getElementById('gps-controls').classList.remove('hidden');
-                updateGpsStatus('Nama berhasil disimpan. Siap untuk pelacakan GPS.');
+                updateGpsStatus('✅ Nama berhasil disimpan. Siap untuk pelacakan GPS.');
             }
         }
         
         function loadGpsData() {
             const saved = localStorage.getItem('gps_track');
             if (saved) {
-                gpsPositions = JSON.parse(saved);
+                try {
+                    gpsPositions = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading GPS data:', e);
+                    gpsPositions = [];
+                }
             }
         }
         
@@ -1468,7 +1518,7 @@
             document.getElementById('stop-tracking').disabled = false;
             updateGpsStatus('🔄 Mengaktifkan pelacakan GPS...');
             
-            // Get initial position
+            // Get initial position with better error handling
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const now = new Date();
@@ -1484,14 +1534,15 @@
                     localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
                     updateGpsTable();
                     
-                    // Save to Firestore if online
+                    // Save to Firestore if online - dengan penanganan error yang lebih baik
                     if (navigator.onLine) {
                         saveGpsToFirestore(data);
                     } else {
-                        updateGpsStatus(`📍 Lokasi tersimpan lokal: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`);
+                        updateGpsStatus(`📍 Lokasi tersimpan lokal: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)} (Offline)`);
                     }
                 },
                 (error) => {
+                    console.error('GPS Error:', error);
                     updateGpsStatus('❌ Gagal mendapatkan lokasi: ' + error.message);
                     stopTracking();
                 },
@@ -1502,7 +1553,7 @@
                 }
             );
             
-            // Continue tracking every 10 seconds
+            // Continue tracking every 10 seconds with improved error handling
             gpsInterval = setInterval(() => {
                 if (!gpsTracking) {
                     clearInterval(gpsInterval);
@@ -1524,7 +1575,7 @@
                         localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
                         updateGpsTable();
                         
-                        // Save to Firestore if online
+                        // Save to Firestore if online - dengan feedback yang lebih baik
                         if (navigator.onLine) {
                             saveGpsToFirestore(data);
                         } else {
@@ -1532,6 +1583,7 @@
                         }
                     },
                     (error) => {
+                        console.error('GPS Error:', error);
                         updateGpsStatus('⚠️ Gagal mendapatkan lokasi: ' + error.message);
                     },
                     {
@@ -1563,21 +1615,40 @@
         
         function updateGpsStatus(message) {
             const statusEl = document.getElementById('gps-status');
-            statusEl.innerHTML = `<span class="loading-spinner"></span>${message}`;
             
-            // Remove spinner after 2 seconds
-            setTimeout(() => {
+            // Show loading spinner for certain messages
+            if (message.includes('🔄') || message.includes('Mengaktifkan')) {
+                statusEl.innerHTML = `<span class="loading-spinner"></span>${message}`;
+                
+                // Remove spinner after 3 seconds
+                setTimeout(() => {
+                    statusEl.textContent = message;
+                }, 3000);
+            } else {
                 statusEl.textContent = message;
-            }, 2000);
+            }
+            
+            console.log('GPS Status:', message);
         }
         
         function updateGpsTable() {
             const tbody = document.getElementById('gps-table-body');
             tbody.innerHTML = '';
             
-            gpsPositions.forEach((pos, index) => {
+            // Sort positions by time (newest first)
+            const sortedPositions = [...gpsPositions].sort((a, b) => new Date(b.time) - new Date(a.time));
+            
+            sortedPositions.forEach((pos, index) => {
                 const row = tbody.insertRow();
-                const timeStr = pos.time ? new Date(pos.time).toLocaleString('id-ID') : '-';
+                const timeStr = pos.time ? new Date(pos.time).toLocaleString('id-ID', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }) : '-';
+                
                 row.innerHTML = `
                     <td>${timeStr}</td>
                     <td>${pos.lat ? pos.lat.toFixed(6) : '-'}</td>
@@ -1689,16 +1760,30 @@
             }
         }
         
-        // Initialize GPS status
+        // Initialize GPS status when page loads
         setTimeout(() => {
-            updateGpsStatus(navigator.onLine ? "✅ Ready untuk pelacakan GPS" : "📱 Mode Offline: Menyimpan data lokal");
-        }, 1000);
+            updateGpsStatus(navigator.onLine ? "✅ Ready untuk pelacakan GPS - Firebase terhubung" : "📱 Mode Offline: Menyimpan data lokal");
+        }, 2000);
         
-        // Auto sync when coming online
+        // Test Firebase connection
+        setTimeout(() => {
+            if (window.firebaseDB) {
+                console.log('Firebase connection test successful');
+                if (navigator.onLine) {
+                    updateGpsStatus("✅ Firebase terhubung, siap mengirim GPS ke server");
+                }
+            } else {
+                console.error('Firebase not initialized properly');
+                updateGpsStatus("❌ Firebase belum siap, periksa koneksi internet");
+            }
+        }, 3000);
+        
+        // Auto sync when coming online with better timing
         window.addEventListener('online', () => {
+            updateGpsStatus('🌐 Kembali online, menyinkronkan data...');
             setTimeout(() => {
                 syncOfflineGpsToFirestore();
-            }, 2000);
+            }, 3000); // Delay lebih lama untuk memastikan Firebase siap
         });
     </script>
 </body>
