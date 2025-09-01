@@ -32,9 +32,28 @@ self.addEventListener('install', event => {
           client.postMessage({ type: 'CACHE_PROGRESS', progress });
         }
       }
-      // Debug: Log all cached requests
+
+      // --- Tambahan: cek dan recache asset yang size 0 B ---
       const cachedRequests = await cache.keys();
-      console.log('[SW] Cached assets:', cachedRequests.map(r => r.url));
+      for (const req of cachedRequests) {
+        const response = await cache.match(req);
+        if (response) {
+          // Cek size 0 B (jika ada header content-length)
+          const contentLength = response.headers.get('content-length');
+          if (contentLength === '0') {
+            await cache.delete(req);
+            try {
+              await cache.add(new URL(req.url).pathname);
+              console.log('[SW] Recached asset with 0 B:', req.url);
+            } catch (e) {
+              console.error('[SW] Failed to recache asset:', req.url, e);
+            }
+          }
+        }
+      }
+      // Debug: Log all cached requests
+      const cachedRequestsAfterRecache = await cache.keys();
+      console.log('[SW] Cached assets:', cachedRequestsAfterRecache.map(r => r.url));
     })()
   );
   self.skipWaiting();
