@@ -107,11 +107,11 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  // Handle navigation requests (page/document loads)
+  // Handle navigation requests (SPA page/document loads)
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request).catch(() =>
-        caches.match('/offline')
+        caches.match('/index.html')
       )
     );
     return;
