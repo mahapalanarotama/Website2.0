@@ -412,9 +412,23 @@ export default function OfflinePage() {
   // Status online/offline
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   useEffect(() => {
-    const updateOnlineStatus = () => setIsOnline(navigator.onLine);
+    const updateOnlineStatus = () => {
+      setIsOnline(navigator.onLine);
+      
+      // Jika offline dan di React component, redirect ke standalone page
+      if (!navigator.onLine) {
+        setTimeout(() => {
+          if (confirm('Koneksi terputus. Pindah ke mode offline standalone?')) {
+            window.location.href = '/offline-standalone.html';
+          }
+        }, 2000);
+      }
+    };
+    
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus(); // Check initial status
+    
     return () => {
       window.removeEventListener('online', updateOnlineStatus);
       window.removeEventListener('offline', updateOnlineStatus);
