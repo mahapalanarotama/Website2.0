@@ -1,3 +1,71 @@
+// Debug: Log cache contents after install
+self.addEventListener('install', event => {
+  event.waitUntil(
+    (async () => {
+      try {
+        const manifestResponse = await fetch('/assets-manifest.json');
+        if (manifestResponse.ok) {
+          const manifestAssets = await manifestResponse.json();
+          ASSETS = ASSETS.concat(manifestAssets);
+        }
+      } catch (e) {}
+      const cache = await caches.open(CACHE_NAME);
+      let loaded = 0;
+      for (const asset of ASSETS) {
+        let success = false;
+        for (let attempt = 1; attempt <= 2; attempt++) {
+          try {
+            await cache.add(asset);
+            success = true;
+            break;
+          } catch (e) {
+            console.error(`[SW] Failed to cache (attempt ${attempt}):`, asset, e);
+          }
+        }
+        if (!success) {
+          console.error('[SW] Asset NOT cached after retry:', asset);
+        }
+        loaded++;
+        const progress = Math.round((loaded / ASSETS.length) * 100);
+        const allClients = await self.clients.matchAll();
+        for (const client of allClients) {
+          client.postMessage({ type: 'CACHE_PROGRESS', progress });
+        }
+      }
+      // Debug: Log all cached requests
+      const cachedRequests = await cache.keys();
+      console.log('[SW] Cached assets:', cachedRequests.map(r => r.url));
+    })()
+  );
+  self.skipWaiting();
+});
+self.addEventListener('message', async event => {
+  if (event.data && event.data.type === 'CHECK_CACHE') {
+    let status = 'checking';
+    let error = null;
+    try {
+      const cache = await caches.open(CACHE_NAME);
+      const cachedRequests = await cache.keys();
+      const cachedPaths = cachedRequests.map(req => new URL(req.url).pathname);
+      const missing = ASSETS.filter(asset => !cachedPaths.includes(asset));
+      if (missing.length === 0) {
+        status = 'ready';
+      } else if (missing.length < ASSETS.length) {
+        status = 'caching';
+        error = 'Missing: ' + missing.join(', ');
+      } else {
+        status = 'error';
+        error = 'Beberapa file penting belum tercache.';
+      }
+      // Debug: Log missing assets
+      console.log('[SW] Missing assets:', missing);
+    } catch (e) {
+      status = 'error';
+      error = e.message;
+    }
+    event.source.postMessage({ type: 'CACHE_STATUS', status, error });
+  }
+});
 // Listen for messages from client to report cache status and progress
 self.addEventListener('message', async event => {
   if (event.data && event.data.type === 'CHECK_CACHE') {
