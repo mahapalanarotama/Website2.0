@@ -107,6 +107,16 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+  // Handle navigation requests (page/document loads)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() =>
+        caches.match('/offline')
+      )
+    );
+    return;
+  }
+  // Handle asset requests
   if (ASSETS.includes(url.pathname)) {
     event.respondWith(
       caches.match(event.request).then(response =>
@@ -114,7 +124,7 @@ self.addEventListener('fetch', event => {
       )
     );
   }
-  // For other requests, do nothing (do not call event.respondWith)
+  // For other requests, do nothing
 });
 
 self.addEventListener('activate', event => {
