@@ -1,10 +1,7 @@
-const CACHE_NAME = 'mpn-offline-v5';
+const CACHE_NAME = 'mpn-offline-standalone-v1';
 
-// Critical assets yang harus di-cache
-const CRITICAL_ASSETS = [
-  '/',
-  '/index.html',
-  '/offline',
+// Essential files untuk offline functionality
+const OFFLINE_ASSETS = [
   '/offline-standalone.html',
   '/favicon.ico',
   '/manifest.json',
@@ -14,48 +11,30 @@ const CRITICAL_ASSETS = [
   '/ppgd.pdf'
 ];
 
-// Install - cache semua assets
+// Install - cache hanya file yang benar-benar dibutuhkan offline
 self.addEventListener('install', event => {
-  console.log('[SW] Installing...');
+  console.log('[SW] Installing offline-first service worker...');
   event.waitUntil(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
       
-      // Cache critical assets first
-      for (const asset of CRITICAL_ASSETS) {
+      // Cache satu per satu dengan error handling
+      for (const asset of OFFLINE_ASSETS) {
         try {
           await cache.add(asset);
-          console.log('[SW] Cached:', asset);
+          console.log('[SW] ✅ Cached:', asset);
         } catch (e) {
-          console.warn('[SW] Failed to cache:', asset);
+          console.error('[SW] ❌ Failed to cache:', asset, e);
         }
       }
-
-      // Try to cache additional assets from manifest
-      try {
-        const manifestResponse = await fetch('/assets-manifest.json');
-        if (manifestResponse.ok) {
-          const additionalAssets = await manifestResponse.json();
-          for (const asset of additionalAssets) {
-            try {
-              await cache.add(asset);
-              console.log('[SW] Cached additional:', asset);
-            } catch (e) {
-              console.warn('[SW] Failed to cache additional:', asset);
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('[SW] Could not load assets manifest');
-      }
-
-      console.log('[SW] Installation complete');
+      
+      console.log('[SW] Installation complete - offline assets ready');
     })()
   );
   self.skipWaiting();
 });
 
-// Activate - clean old caches
+// Activate - bersihkan cache lama
 self.addEventListener('activate', event => {
   console.log('[SW] Activating...');
   event.waitUntil(
@@ -68,29 +47,54 @@ self.addEventListener('activate', event => {
         })
       );
       await self.clients.claim();
-      console.log('[SW] Activated');
+      console.log('[SW] Activated - ready to serve offline content');
     })()
   );
 });
 
-// Fetch - serve from cache when offline
+// Fetch - strategi offline-first untuk /offline route
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
   
-  // Skip chrome-extension and other non-http requests
-  if (!event.request.url.startsWith('http')) return;
+  // Skip non-GET dan non-HTTP requests
+  if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) {
+    return;
+  }
   
   event.respondWith(
     (async () => {
+      // Khusus untuk route /offline - langsung serve offline page tanpa coba network
+      if (url.pathname === '/offline') {
+        const cache = await caches.open(CACHE_NAME);
+        const offlineResponse = await cache.match('/offline-standalone.html');
+        
+        if (offlineResponse) {
+          console.log('[SW] 🎯 Serving standalone offline page');
+          return offlineResponse;
+        }
+        
+        // Jika offline page tidak ter-cache, fallback ke response sederhana
+        return new Response(`
+          <!DOCTYPE html>
+          <html><head><title>Offline</title></head>
+          <body style="font-family: Arial; text-align: center; padding: 50px;">
+            <h1>🏕️ Mode Offline</h1>
+            <p>Fitur survival sedang dimuat...</p>
+            <button onclick="location.reload()">Muat Ulang</button>
+          </body></html>
+        `, {
+          headers: { 'Content-Type': 'text/html' }
+        });
+      }
+      
+      // Untuk request lainnya, coba network dulu
       try {
-        // Try network first
         const response = await fetch(event.request);
         
-        // Cache successful responses for future offline use
-        if (response.ok) {
-          const cache = await caches.open(CACHE_NAME);
+        // Jika berhasil dari network, cache untuk offline use
+        if (response.ok && event.request.method === 'GET') {
           try {
+            const cache = await caches.open(CACHE_NAME);
             cache.put(event.request, response.clone());
           } catch (e) {
             // Ignore cache errors
@@ -99,123 +103,53 @@ self.addEventListener('fetch', event => {
         
         return response;
       } catch (networkError) {
-        // Network failed, try cache
+        // Network gagal, coba dari cache
         const cache = await caches.open(CACHE_NAME);
         const cachedResponse = await cache.match(event.request);
         
         if (cachedResponse) {
-          console.log('[SW] Served from cache:', event.request.url);
+          console.log('[SW] 📦 Served from cache:', url.pathname);
           return cachedResponse;
         }
         
-        // No cache hit - handle based on request type
-        const url = new URL(event.request.url);
-        
-        // For navigation requests, serve appropriate page
+        // Tidak ada di cache - untuk navigation request, redirect ke offline page
         if (event.request.mode === 'navigate') {
-          // If requesting /offline specifically, serve standalone offline page
-          if (url.pathname === '/offline') {
-            const offlineResponse = await cache.match('/offline-standalone.html');
-            if (offlineResponse) {
-              console.log('[SW] Served offline-standalone.html');
-              return offlineResponse;
-            }
-          }
-          
-          // For other navigation, try index.html first
-          const indexResponse = await cache.match('/index.html');
-          if (indexResponse) {
-            console.log('[SW] Served index.html for navigation:', url.pathname);
-            return indexResponse;
-          }
-          
-          // Fallback to standalone offline page
           const offlineResponse = await cache.match('/offline-standalone.html');
           if (offlineResponse) {
-            console.log('[SW] Served offline-standalone.html as fallback');
+            console.log('[SW] 🔄 Redirecting to offline page');
             return offlineResponse;
           }
         }
         
-        // For assets, return appropriate fallbacks
-        if (url.pathname.endsWith('.css')) {
-          return new Response(`
-            /* Offline fallback CSS */
-            body { 
-              font-family: Arial, sans-serif; 
-              background: linear-gradient(135deg, #f3f4f6 0%, #e5f3e5 100%);
-              margin: 0;
-              padding: 20px;
-            }
-            .offline-message {
-              text-align: center;
-              padding: 40px;
-              background: white;
-              border-radius: 15px;
-              box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-              max-width: 500px;
-              margin: 50px auto;
-            }
-          `, {
-            headers: { 'Content-Type': 'text/css' }
-          });
-        }
-        
-        if (url.pathname.endsWith('.js')) {
-          return new Response(`
-            console.log('Offline mode - limited functionality');
-            // Fallback for offline
-            if (typeof window !== 'undefined') {
-              window.addEventListener('load', function() {
-                if (!navigator.onLine) {
-                  document.body.innerHTML = '<div class="offline-message"><h1>Mode Offline</h1><p>Beberapa fitur mungkin terbatas saat offline.</p><button onclick="window.location.reload()">Coba Lagi</button></div>';
-                }
-              });
-            }
-          `, {
-            headers: { 'Content-Type': 'text/javascript' }
-          });
-        }
-        
-        // Last resort - return error
-        return new Response('Offline - Resource not available', {
-          status: 503,
-          statusText: 'Service Unavailable'
-        });
+        // Untuk assets yang tidak ter-cache, return error
+        console.log('[SW] ❌ Asset not available offline:', url.pathname);
+        return new Response('Not available offline', { status: 503 });
       }
     })()
   );
 });
 
-// Message handler
+// Message handler untuk status check
 self.addEventListener('message', async event => {
   if (event.data && event.data.type === 'CHECK_CACHE') {
     try {
       const cache = await caches.open(CACHE_NAME);
-      const cachedRequests = await cache.keys();
+      
+      // Check apakah offline page ter-cache
+      const offlinePageCached = await cache.match('/offline-standalone.html');
       
       let status = 'ready';
       let error = null;
       
-      // Check if critical assets are cached
-      const criticalMissing = [];
-      for (const asset of CRITICAL_ASSETS) {
-        const cached = await cache.match(asset);
-        if (!cached) {
-          criticalMissing.push(asset);
-        }
-      }
-      
-      if (criticalMissing.length > 0) {
+      if (!offlinePageCached) {
         status = 'error';
-        error = `Missing critical assets: ${criticalMissing.join(', ')}`;
+        error = 'Offline page belum ter-cache';
       }
       
       event.source.postMessage({ 
         type: 'CACHE_STATUS', 
         status, 
-        error,
-        cachedCount: cachedRequests.length 
+        error 
       });
     } catch (e) {
       event.source.postMessage({ 
