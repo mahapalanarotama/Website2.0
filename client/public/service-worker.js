@@ -79,17 +79,24 @@ self.addEventListener('fetch', event => {
         .catch(async () => {
           const cache = await caches.open(CACHE_NAME);
           
-          // Check if requesting /offline specifically
-          if (url.pathname === '/offline') {
-            // Try to serve from cache first, fallback to index.html
-            const offlineResponse = await cache.match('/offline') || 
-                                   await cache.match('/offline-static.html') ||
-                                   await cache.match('/index.html');
+          // Always serve index.html for SPA routing when offline
+          // This allows React Router to handle the /offline route properly
+          const indexResponse = await cache.match('/index.html');
+          if (indexResponse) {
+            return indexResponse;
+          }
+          
+          // Fallback to static offline page if index.html not cached
+          const offlineResponse = await cache.match('/offline-static.html');
+          if (offlineResponse) {
             return offlineResponse;
           }
           
-          // For other navigation requests, serve index.html (SPA routing)
-          return await cache.match('/index.html');
+          // Last resort fallback
+          return new Response('Aplikasi tidak tersedia offline', { 
+            status: 503,
+            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+          });
         })
     );
     return;
