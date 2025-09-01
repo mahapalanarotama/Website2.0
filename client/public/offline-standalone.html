@@ -777,12 +777,10 @@
                 statusEl.textContent = 'Online';
                 statusEl.className = 'status-badge online';
                 
-                // Auto redirect saat online ke React component
+                // Auto redirect saat online (dengan konfirmasi)
                 setTimeout(() => {
-                    if (confirm('Internet tersambung. Kembali ke aplikasi React?')) {
-                        // Force reload untuk memastikan service worker menggunakan network
-                        window.location.href = '/offline?online=true';
-                        setTimeout(() => window.location.reload(), 100);
+                    if (confirm('Internet tersambung. Kembali ke aplikasi utama?')) {
+                        window.location.href = '/offline';
                     }
                 }, 1000);
             } else {
