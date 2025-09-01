@@ -63,7 +63,12 @@ app.post('/api/github-oauth', async (req, res) => {
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Catch-all handler: send back React's index.html file
+// Special route for offline page - serve standalone HTML directly
+app.get('/offline', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'offline-standalone.html'));
+});
+
+// Catch-all handler: send back React's index.html file for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
