@@ -6,6 +6,18 @@
   "display": "standalone",
   "background_color": "#0b3d2e",
   "theme_color": "#0b3d2e",
+  "scope": "/",
+  "orientation": "any",
+  "categories": ["navigation", "utilities", "lifestyle"],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "permissions": [
+    "geolocation",
+    "background-sync",
+    "notifications",
+    "wakeLock"
+  ],
   "icons": [
     {
       "src": "/OfflineApp.png",

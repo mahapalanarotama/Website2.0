@@ -1,7 +1,7 @@
 import { saveGpsTrackerToFirestore, syncOfflineGpsToFirestore } from "@/lib/gpsFirestore";
 import { useState, useEffect, useRef } from "react";
 import { BookOpen, Map, Phone, AlertTriangle } from "lucide-react"; // Merged imports
- 
+
 
 // --- Komponen Fitur Survival ---
 function DownloadPanduan({ url, label }: { url: string; label: string }) {
