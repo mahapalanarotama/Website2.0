@@ -11,7 +11,7 @@ run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
 
 [workflows]
-runButton = "Run build"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -32,31 +32,14 @@ args = "npm run dev"
 waitForPort = 5000
 
 [[workflows.workflow]]
-name = "Run build"
+name = "Run Full Stack"
 author = 42785191
 mode = "parallel"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd client"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
 args = "npm run dev"
-
-[[workflows.workflow]]
-name = "Dev"
-mode = "sequential"
-author = 47150151
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd client; npm run dev"
 
 [[ports]]
 localPort = 5000
-
-[[ports]]
-localPort = 5173
 externalPort = 80
-exposeLocalhost = true
