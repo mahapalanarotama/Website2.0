@@ -1,3 +1,6 @@
+import { PosterPopup } from "@/components/PosterPopup";
+// ...existing code...
+<PosterPopup />
 import { useEffect, useState } from "react";
 import { getMeta } from "@/lib/meta";
 import { Button } from "@/components/ui/button";

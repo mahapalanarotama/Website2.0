@@ -1,3 +1,6 @@
+import { PosterPopup } from "@/components/PosterPopup";
+// ...existing code...
+<PosterPopup />
 import React, { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { doc, getDoc } from "firebase/firestore";

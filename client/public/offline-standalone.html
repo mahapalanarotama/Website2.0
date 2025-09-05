@@ -1,0 +1,2871 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MPN Offline - Survival Tools</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables untuk konsistensi */
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 20 14.3% 4.1%;
+            --primary: 142 66% 34%;
+            --primary-foreground: 211 100% 99%;
+            --secondary: 140 45% 22%;
+            --accent: 45 93% 47%;
+            --muted: 60 4.8% 95.9%;
+            --muted-foreground: 25 5.3% 44.7%;
+            --border: 20 5.9% 90%;
+            --ring: 142 66% 34%;
+            --radius: 0.5rem;
+        }
+
+        /* Reset dan base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(to bottom, #f9fafb, #ecfdf5);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Navbar Styles - diperbaiki agar tidak terhimpit */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            width: 100%;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .navbar-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .navbar-logo {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 2px solid hsl(var(--primary));
+            background: white;
+            animation: navbarLogo 1.2s cubic-bezier(0.4,0,0.2,1);
+            object-fit: cover;
+        }
+
+        .navbar-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: bold;
+            font-size: clamp(0.875rem, 3vw, 1.25rem);
+            letter-spacing: 0.05em;
+            color: hsl(var(--primary));
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            animation: navbarLogo 1.2s cubic-bezier(0.4,0,0.2,1);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .navbar-accent {
+            color: hsl(var(--accent));
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .navbar-nav {
+            display: none;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .navbar-link {
+            position: relative;
+            padding: 0.25rem 0.5rem;
+            font-weight: 500;
+            text-decoration: none;
+            color: hsl(var(--primary));
+            transition: color 0.3s;
+            z-index: 10;
+            font-size: 0.875rem;
+            white-space: nowrap;
+        }
+
+        .navbar-link:hover {
+            color: hsl(var(--accent));
+        }
+
+        .navbar-link::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 2px;
+            background: hsl(var(--accent));
+            border-radius: 1px;
+            transform: scaleX(0);
+            transition: transform 0.3s;
+        }
+
+        .navbar-link:hover::after {
+            transform: scaleX(1);
+        }
+
+        .mobile-menu-btn {
+            display: block;
+            background: none;
+            border: none;
+            color: hsl(var(--primary));
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .mobile-menu {
+            display: none;
+            background: white;
+            border-radius: 0 0 1rem 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            padding: 1rem;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .mobile-menu.active {
+            display: block;
+            animation: navbarMobile 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .mobile-close-btn {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-menu-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: hsl(var(--primary));
+            font-weight: 600;
+            border-radius: 0.5rem;
+            transition: all 0.3s;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .mobile-menu-item:hover {
+            background: rgba(22, 163, 74, 0.1);
+            color: hsl(var(--accent));
+        }
+
+        /* Status Badge */
+        .status-indicator {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            display: flex;
+            justify-content: flex-end;
+            padding: 0.5rem 1rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            font-size: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 0.5rem 1rem;
+        }
+
+        .status-badge.online {
+            background: #16a34a;
+            color: white;
+        }
+
+        .status-badge.offline {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            max-width: 36rem;
+            margin: 0 auto 1rem auto;
+            padding: 0 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 1.5rem;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: all 0.5s;
+        }
+
+        .progress-ready {
+            width: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+        }
+
+        .progress-status {
+            text-align: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .progress-status.ready {
+            color: #16a34a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 90rem;
+            margin: 0 auto;
+            padding: 1rem;
+            flex: 1;
+        }
+
+        /* Install Button */
+        .install-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .install-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            background: linear-gradient(to right, #16a34a, #22c55e);
+            color: white;
+            font-weight: bold;
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            border: 2px solid #15803d;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 24px rgba(34, 197, 94, 0.33);
+            animation: bounce 1.6s infinite;
+            min-width: 200px;
+            min-height: 50px;
+        }
+
+        .install-btn:hover {
+            background: linear-gradient(to right, #15803d, #16a34a);
+        }
+
+        .app-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            border: 2px solid #dcfce7;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            color: #374151;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .card h1 {
+            font-size: clamp(1.25rem, 5vw, 1.5rem);
+            font-weight: bold;
+            text-align: center;
+            color: #15803d;
+            margin-bottom: 1rem;
+        }
+
+        .card h2 {
+            font-size: clamp(1rem, 4vw, 1.25rem);
+            font-weight: bold;
+            color: #15803d;
+            margin-bottom: 0.75rem;
+        }
+
+        .card h3 {
+            font-size: clamp(0.9rem, 3.5vw, 1.125rem);
+            font-weight: 600;
+            color: #16a34a;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+            font-size: clamp(0.875rem, 3vw, 1rem);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding: 0.5rem 0;
+        }
+
+        .btn-nav {
+            background: hsl(var(--primary));
+            color: white;
+            font-size: clamp(0.75rem, 3vw, 1rem);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: none;
+            margin: 0.2rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        .btn-nav:hover,
+        .btn-nav.active {
+            background: hsl(var(--accent));
+            color: hsl(var(--secondary));
+            transform: translateY(-2px);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+            border: 1px solid #e5e7eb;
+        }
+
+        .feature-card:hover {
+            background: #f0fdf4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+        }
+
+        .feature-title {
+            font-weight: bold;
+            color: #14532d;
+            font-size: clamp(1rem, 3.5vw, 1.125rem);
+        }
+
+        .feature-desc {
+            color: #6b7280;
+            font-size: clamp(0.75rem, 3vw, 0.875rem);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-link {
+            color: #16a34a;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        /* Lists */
+        .list-disc {
+            list-style-type: disc;
+            padding-left: 1.25rem;
+        }
+
+        .list-decimal {
+            list-style-type: decimal;
+            padding-left: 1.25rem;
+        }
+
+        .list-disc li,
+        .list-decimal li {
+            margin-bottom: 0.5rem;
+            font-size: clamp(0.875rem, 3vw, 1.125rem);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #15803d;
+            font-weight: 600;
+            font-size: clamp(0.875rem, 3vw, 1rem);
+        }
+
+        .form-input {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #22c55e;
+            color: #111827;
+            font-size: clamp(0.875rem, 3vw, 1rem);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px #16a34a;
+        }
+
+        /* Tables - Mobile Responsive */
+        .table-container {
+            overflow-x: auto;
+            background: #f0fdf4;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            font-size: clamp(0.625rem, 2.5vw, 0.75rem);
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 280px;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.25rem 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #d1d5db;
+            font-size: clamp(0.5rem, 2vw, 0.75rem);
+            word-break: break-word;
+            max-width: 80px;
+        }
+
+        .table th {
+            font-weight: bold;
+            background: #dcfce7;
+            font-size: clamp(0.5rem, 2vw, 0.75rem);
+            position: sticky;
+            top: 0;
+        }
+
+        /* Mobile specific table adjustments */
+        @media (max-width: 640px) {
+            .table th,
+            .table td {
+                padding: 0.25rem;
+                font-size: 0.625rem;
+                max-width: 60px;
+            }
+            
+            .table th:nth-child(2),
+            .table td:nth-child(2),
+            .table th:nth-child(3),
+            .table td:nth-child(3) {
+                max-width: 70px;
+                font-size: 0.5rem;
+            }
+        }
+
+        /* Status badges */
+        .online-badge {
+            background: #22c55e;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .offline-badge {
+            background: #6b7280;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        /* Checklist - Mobile Responsive */
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.75rem;
+            padding: 0 0.5rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid #e5e7eb;
+            background: white;
+        }
+
+        .checklist-item:hover {
+            background: #f0fdf4;
+        }
+
+        .checklist-item.checked {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+        .checklist-emoji {
+            font-size: 1.5rem;
+            user-select: none;
+            flex-shrink: 0;
+        }
+
+        .checklist-label {
+            flex: 1;
+            font-size: clamp(0.875rem, 3vw, 1rem);
+            font-weight: 600;
+            color: #374151;
+            user-select: none;
+            line-height: 1.2;
+        }
+
+        .checklist-item.checked .checklist-label {
+            color: #16a34a;
+        }
+
+        .checklist-checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: #22c55e;
+            flex-shrink: 0;
+        }
+
+        /* Mobile checklist adjustments */
+        @media (max-width: 640px) {
+            .checklist-grid {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+                padding: 0;
+            }
+            
+            .checklist-item {
+                padding: 0.5rem;
+                gap: 0.5rem;
+            }
+            
+            .checklist-emoji {
+                font-size: 1.25rem;
+            }
+            
+            .checklist-label {
+                font-size: 0.875rem;
+            }
+            
+            .checklist-checkbox {
+                width: 1rem;
+                height: 1rem;
+            }
+        }
+
+        /* Highlight boxes */
+        .highlight-box {
+            background: #f0fdf4;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Download buttons */
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(to right, #16a34a, #22c55e);
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+            font-size: clamp(0.875rem, 3vw, 1rem);
+        }
+
+        .download-btn:hover {
+            background: linear-gradient(to right, #15803d, #16a34a);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Footer - diperbaiki agar tidak overlap */
+        .footer {
+            background: #1f2937;
+            color: white;
+            padding: 2rem 1rem 1rem 1rem;
+            margin-top: auto;
+            width: 100%;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(1rem, 4vw, 1.25rem);
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .footer-section p {
+            color: #d1d5db;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            font-size: clamp(0.875rem, 3vw, 1rem);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: #d1d5db;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: clamp(0.875rem, 3vw, 1rem);
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .social-link {
+            color: #d1d5db;
+            font-size: 1.25rem;
+            transition: color 0.3s;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 1.5rem;
+            text-align: center;
+            color: #9ca3af;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+        }
+
+        /* Contact info */
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+            color: #d1d5db;
+        }
+
+        .contact-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
+            margin-top: 0.125rem;
+        }
+
+        /* Responsive Breakpoints */
+        @media (min-width: 640px) {
+            .navbar-nav {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: none;
+            }
+
+            .container {
+                padding: 2rem;
+            }
+
+            .nav-tabs {
+                padding: 0;
+                overflow-x: visible;
+            }
+
+            .navbar-title {
+                font-size: 1.25rem;
+                letter-spacing: 0.1em;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .feature-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            }
+
+            .checklist-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .navbar-nav {
+                gap: 1.5rem;
+            }
+
+            .navbar-link {
+                font-size: 1rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            }
+        }
+
+        /* Hide elements */
+        .hidden {
+            display: none;
+        }
+
+        /* Cookie Consent Overlay */
+        /* .cookie-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+        } */
+
+        /* .cookie-dialog {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            max-width: 425px;
+            width: 100%;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            animation: cookieSlideIn 0.3s ease-out;
+        } */
+
+        /* @keyframes cookieSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        } */
+
+        .cookie-title {
+            font-size: 1.125rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+            color: #111827;
+        }
+
+        .cookie-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .cookie-list {
+            margin-bottom: 1rem;
+        }
+
+        .cookie-list h4 {
+            font-weight: 500;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            color: #111827;
+        }
+
+        .cookie-list ul {
+            list-style: disc;
+            list-style-position: inside;
+            font-size: 0.75rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        .cookie-list li {
+            margin-bottom: 0.25rem;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .cookie-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .cookie-btn-outline {
+            border: 1px solid #d1d5db;
+            background: white;
+            color: #374151;
+        }
+
+        .cookie-btn-outline:hover {
+            background: #f9fafb;
+        }
+
+        .cookie-btn-primary {
+            background: #16a34a;
+            color: white;
+        }
+
+        .cookie-btn-primary:hover {
+            background: #15803d;
+        }
+
+        /* Utilities */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-small {
+            font-size: 0.875rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
+
+        .text-green {
+            color: #16a34a;
+        }
+
+        .text-red {
+            color: #dc2626;
+        }
+
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .ml-2 { margin-left: 0.5rem; }
+
+        .bg-red-600 {
+            background: #dc2626;
+        }
+
+        .bg-red-600:hover {
+            background: #b91c1c;
+        }
+        .bg-purple-600 {
+            background: #7e22ce;
+        }
+        .bg-purple-600:hover {
+            background: #5b21b6;
+        }
+        .bg-orange-600 {
+            background: #f97316;
+        }
+        .bg-orange-600:hover {
+            background: #d97706;
+        }
+
+        /* GPS Controls Mobile Responsive */
+        .gps-controls-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .gps-control-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-weight: 600;
+            font-size: clamp(0.75rem, 2.5vw, 0.875rem);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+            text-align: center;
+        }
+
+        @media (max-width: 640px) {
+            .gps-controls-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .gps-control-btn {
+                width: 100%;
+                min-width: auto;
+                margin: 0.25rem 0;
+            }
+            
+            .form-input {
+                width: 100%;
+                max-width: none;
+            }
+        }
+
+
+        /* Keyframe animations */
+        @keyframes navbarLogo {
+            0% { letter-spacing: 0.05em; opacity: 0.7; }
+            100% { letter-spacing: 0.1em; opacity: 1; }
+        }
+
+        @keyframes navbarMobile {
+            0% { transform: translateY(-30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* SVG Icons */
+        .icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            fill: currentColor;
+        }
+
+        .icon-lg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #16a34a;
+            border-radius: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!--Navbar - diperbaiki layoutnya -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <img src="/Logo%20Mpn.png" alt="Logo Mahapala" class="navbar-logo">
+                <span class="navbar-title">
+                    MAHAPALA <span class="navbar-accent">NAROTAMA</span>
+                </span>
+            </a>
+
+            <nav class="navbar-nav">
+                <a href="/" class="navbar-link">Beranda</a>
+                <a href="/kegiatan" class="navbar-link">Kegiatan</a>
+                <a href="/pembelajaran" class="navbar-link">Pembelajaran</a>
+                <a href="/sejarah" class="navbar-link">Sejarah</a>
+                <a href="/pendaftaran" class="navbar-link">Pendaftaran</a>
+                <a href="/scan-anggota" class="navbar-link">
+                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Anggota
+                    </span>
+                </a>
+            </nav>
+
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" x2="20" y1="6" y2="6"/>
+                    <line x1="4" x2="20" y1="12" y2="12"/>
+                    <line x1="4" x2="20" y1="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="mobile-menu" id="mobile-menu">
+            <div class="mobile-close-btn">
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+                    <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6 6 18"/>
+                        <path d="m6 6 12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <a href="/" class="mobile-menu-item">Beranda</a>
+            <a href="/kegiatan" class="mobile-menu-item">Kegiatan</a>
+            <a href="/pembelajaran" class="mobile-menu-item">Pembelajaran</a>
+            <a href="/sejarah" class="mobile-menu-item">Sejarah</a>
+            <a href="/pendaftaran" class="mobile-menu-item">Informasi Pendaftaran</a>
+            <a href="/scan-anggota" class="mobile-menu-item">
+                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Anggota
+                </span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Cookie Consent Dialog -->
+    <div id="cookie-consent" class="cookie-overlay hidden">
+        <div class="cookie-dialog">
+            <h3 class="cookie-title">Preferensi Cookie</h3>
+            <p class="cookie-description">
+                Kami menggunakan cookie untuk meningkatkan pengalaman browsing Anda, menyajikan konten yang dipersonalisasi, dan menganalisis lalu lintas kami. Website ini menggunakan cookie yang diperlukan untuk fungsionalitas dan cookie pihak ketiga untuk analitik serta fitur media sosial.
+            </p>
+            <div class="cookie-list">
+                <h4>Kami menggunakan cookie untuk:</h4>
+                <ul>
+                    <li>Fungsionalitas website penting</li>
+                    <li>Autentikasi dan keamanan</li>
+                    <li>Analitik dan performa</li>
+                    <li>Integrasi media sosial</li>
+                </ul>
+            </div>
+            <div class="cookie-buttons">
+                <button onclick="handleCookieDecline()" class="cookie-btn cookie-btn-outline">
+                    Penting Saja
+                </button>
+                <button onclick="handleCookieAccept()" class="cookie-btn cookie-btn-primary">
+                    Terima Semua
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Indicator -->
+    <div class="status-indicator">
+        <div id="status" class="status-badge offline">Offline</div>
+    </div>
+
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill progress-ready" id="progress-fill"></div>
+            </div>
+            <div class="progress-status ready" id="progress-status">
+                <span>✓ Aplikasi sudah siap untuk offline</span>
+            </div>
+        </div>
+
+        <!-- Install PWA Button -->
+        <div class="install-container" id="install-container">
+            <button class="install-btn" id="install-btn" onclick="handleInstall()">
+                <img src="/OfflineApp.png" alt="App Icon" class="app-icon">
+                <span>Install di Layar Utama</span>
+            </button>
+        </div>
+
+        <!-- Header -->
+        <div class="card">
+            <h1>🏕️ Mode Offline & Survival Tools</h1>
+            <p class="subtitle">Tetap siap di alam bebas! Semua fitur berikut dapat diakses tanpa internet.</p>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="btn-nav active" onclick="showTab('fitur')">Fitur Survival</button>
+            <button class="btn-nav" onclick="showTab('survival')">Panduan Survival</button>
+            <button class="btn-nav" onclick="showTab('ppgd')">PPGD</button>
+            <button class="btn-nav" onclick="showTab('navigasi')">Navigasi Darat</button>
+            <button class="btn-nav" onclick="showTab('checklist')">Checklist</button>
+            <button class="btn-nav" onclick="showTab('gps')">Pelacak GPS</button>
+        </nav>
+
+        <!-- Tab Content: Fitur -->
+        <div id="tab-fitur" class="tab-content">
+            <div class="feature-grid">
+                <a href="/panduan-survival.pdf" class="feature-card">
+                    <div class="feature-header">
+                        <span class="feature-icon">📖</span>
+                        <span class="feature-title">Panduan Survival Offline</span>
+                    </div>
+                    <div class="feature-desc">Akses panduan survival, P3GD, dan navigasi darat tanpa internet.</div>
+                    <div class="feature-link">Buka Panduan Survival</div>
+                </a>
+                <a href="/navigasi-darat.pdf" class="feature-card">
+                    <div class="feature-header">
+                        <span class="feature-icon">🗺️</span>
+                        <span class="feature-title">Navigasi Darat PDF</span>
+                    </div>
+                    <div class="feature-desc">Pelajari teknik navigasi darat dan orientasi peta-kompas.</div>
+                    <div class="feature-link">Buka Navigasi Darat</div>
+                </a>
+            </div>
+
+            <!-- Nomor Darurat -->
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.5rem;">📞</span>
+                    <span style="font-weight: bold; color: #7c3aed;">Nomor Darurat Penting</span>
+                </div>
+                <ul style="color: #374151; font-size: 0.875rem;">
+                    <li><strong>SAR Nasional (Basarnas):</strong> <a href="tel:115" style="color: #2563eb; text-decoration: underline;">115</a></li>
+                    <li><strong>BPBD Surabaya:</strong> <a href="tel:031-8499909" style="color: #2563eb; text-decoration: underline;">031-8499909</a></li>
+                    <li><strong>Polisi:</strong> <a href="tel:110" style="color: #2563eb; text-decoration: underline;">110</a></li>
+                    <li><strong>Ambulans:</strong> <a href="tel:118" style="color: #2563eb; text-decoration: underline;">118</a></li>
+                    <li><strong>RSU Dr. Soetomo:</strong> <a href="tel:031-5501078" style="color: #2563eb; text-decoration: underline;">031-5501078</a></li>
+                </ul>
+            </div>
+
+            <!-- Tips Survival -->
+            <div class="card">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.5rem;">⚠️</span>
+                    <span style="font-weight: bold; color: #dc2626;">Tips Bertahan Hidup</span>
+                </div>
+                <ul class="list-disc" style="color: #374151; font-size: 0.875rem;">
+                    <li>Selalu bawa peluit, senter, dan korek api cadangan.</li>
+                    <li>Jangan panik, tetap tenang dan hemat energi.</li>
+                    <li>Cari sumber air bersih dan buat perlindungan sederhana.</li>
+                    <li>Gunakan sinyal darurat (asap, peluit, cermin) untuk menarik perhatian.</li>
+                    <li>Kenali tanaman dan hewan berbahaya di sekitar.</li>
+                    <li>Lakukan pertolongan pertama pada luka ringan sebelum mencari bantuan.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tab Content: Survival -->
+        <div id="tab-survival" class="tab-content hidden">
+            <div class="card">
+                <a href="/panduan-survival.pdf" class="download-btn">
+                    <span>📖</span>
+                    Download Buku Panduan Survival
+                </a>
+                <h2>Panduan Survival Dasar</h2>
+                <ul class="list-disc">
+                    <li>Tenang, jangan panik. Analisa situasi dan sumber daya sekitar.</li>
+                    <li>Cari sumber air bersih dan buat perlindungan (bivak/shelter).</li>
+                    <li>Jaga suhu tubuh, hindari hipotermia/heatstroke.</li>
+                    <li>Gunakan api untuk sinyal, hangat, dan memasak.</li>
+                    <li>Manfaatkan alat survival: kompas, pisau, peluit, senter, dsb.</li>
+                    <li>Catat lokasi terakhir dan buat tanda jejak jika berpindah.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tab Content: PPGD -->
+        <div id="tab-ppgd" class="tab-content hidden">
+            <div class="card">
+                <a href="/ppgd.pdf" class="download-btn">
+                    <span>📖</span>
+                    Download Buku PPGD
+                </a>
+                <h2>PPGD (Pertolongan Pertama Gawat Darurat)</h2>
+                <ol class="list-decimal mb-4">
+                    <li>Pastikan keamanan lokasi sebelum menolong.</li>
+                    <li>Periksa respons korban: sadar/tidak, napas, denyut nadi.</li>
+                    <li>Lakukan RJP (Resusitasi Jantung Paru) jika perlu.</li>
+                    <li>Hentikan perdarahan, atasi syok, imobilisasi patah tulang.</li>
+                    <li>Gunakan alat P3K, jaga kebersihan luka.</li>
+                    <li>Segera cari bantuan medis jika kondisi berat.</li>
+                </ol>
+                <div class="highlight-box">
+                    <h3>Simulasi RJP</h3>
+                    <div id="rjp-content">
+                        <button class="btn-nav" onclick="startRJP()">Mulai Simulasi RJP</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Navigasi -->
+        <div id="tab-navigasi" class="tab-content hidden">
+            <div class="card">
+                <a href="/navigasi-darat.pdf" class="download-btn">
+                    <span>📖</span>
+                    Download Buku Navigasi Darat
+                </a>
+                <h2>Navigasi Darat</h2>
+                <ul class="list-disc mb-4">
+                    <li>Gunakan peta topografi dan kompas untuk orientasi.</li>
+                    <li>Kenali tanda alam: matahari, bintang, arah angin, vegetasi.</li>
+                    <li>Buat rencana perjalanan dan catat titik penting di jalur.</li>
+                    <li>Hindari berjalan sendirian, selalu informasikan posisi ke tim.</li>
+                    <li>Gunakan GPS jika tersedia, tapi tetap siapkan navigasi manual.</li>
+                </ul>
+                <div class="highlight-box">
+                    <h3>Simulasi Kompas</h3>
+                    <div style="font-size: 1.125rem;">Arah Utara: <span id="compass-direction" style="font-weight: bold;">Tidak tersedia</span></div>
+                    <div class="text-green text-xs mt-2">(Fitur ini hanya akurat di HP dengan sensor kompas)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Checklist -->
+        <div id="tab-checklist" class="tab-content hidden">
+            <div class="card">
+                <h2>Checklist Survival</h2>
+                <div class="checklist-grid" id="checklist-grid"></div>
+                <button class="btn-nav mt-6" onclick="resetChecklist()">Reset Checklist</button>
+                <p class="mt-2 text-green text-small text-center">Checklist tersimpan otomatis di perangkat Anda.</p>
+            </div>
+        </div>
+
+        <!-- Tab Content: GPS -->
+        <div id="tab-gps" class="tab-content hidden">
+            <div class="card">
+                <h2>Pelacak Lokasi GPS</h2>
+
+                <!-- Form Nama -->
+                <div id="nama-form" class="form-group">
+                    <label class="form-label">Masukkan Nama Anda:</label>
+                    <input type="text" class="form-input" id="input-nama" placeholder="Nama Lengkap">
+                    <button class="btn-nav ml-2 mt-2" onclick="simpanNama()">Simpan Nama</button>
+                </div>
+
+                <!-- GPS Controls -->
+                <div id="gps-controls" class="hidden">
+                    <div class="gps-controls-container">
+                        <button class="btn-nav gps-control-btn" id="start-gps" onclick="startTracking()" disabled>Aktifkan Pelacakan</button>
+                        <button class="btn-nav gps-control-btn" onclick="resetTrack()">Reset Data Lokasi</button>
+                        <button class="btn-nav gps-control-btn bg-red-600" id="stop-gps" onclick="stopTracking()" disabled>Matikan GPS</button>
+                        <button class="btn-nav gps-control-btn bg-purple-600" id="background-gps" onclick="enableBackgroundGps()" disabled>Aktifkan Background GPS</button>
+                        <button class="btn-nav gps-control-btn bg-orange-600" id="wake-lock-btn" onclick="toggleWakeLock()" disabled>Aktifkan Screen Lock</button>
+                    </div>
+                    
+                    <!-- Background App Permissions Info -->
+                    <div id="background-permissions-info" class="highlight-box mb-2" style="display: none;">
+                        <div class="text-center mb-2">
+                            <span style="font-size: 1.2rem;">📱</span>
+                            <strong>Status Izin Background App</strong>
+                        </div>
+                        <div id="permissions-status" class="text-xs space-y-1">
+                            <div>📱 Notifikasi: <span id="notification-status">Belum diizinkan</span></div>
+                            <div>🔄 Background Sync: <span id="sync-status">Belum diizinkan</span></div>
+                            <div>🔋 Wake Lock: <span id="wakelock-status">Belum diizinkan</span></div>
+                            <div>💾 Storage Persisten: <span id="storage-status">Belum diizinkan</span></div>
+                        </div>
+                        <button class="btn-nav mt-2" id="request-permissions-btn" onclick="requestAllBackgroundPermissions()">
+                            Minta Izin Background App
+                        </button>
+                    </div>
+
+                    <div id="gps-status" class="mb-2 text-green text-small text-center"></div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Waktu</th>
+                                    <th>Lat</th>
+                                    <th>Lon</th>
+                                    <th>Nama</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gps-table-body"></tbody>
+                        </table>
+                    </div>
+                    <p class="mt-2 text-green text-xs text-center">Data lokasi tersimpan lokal & dikirim ke server jika online.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer - diperbaiki agar tidak overlap -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Tentang Kami</h3>
+                    <p>Mahapala Narotama adalah organisasi yang bergerak di bidang eksplorasi alam dan pelestarian lingkungan.</p>
+                <div class="social-links">
+                    <!-- Instagram -->
+                    <a href="https://www.instagram.com/mahapalanarotama?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
+                       target="_blank" class="social-link" title="Instagram">
+                        <svg class="icon-lg" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5A4.25 4.25 0 0 0 20.5 16.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5Zm8.75 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/>
+                        </svg>
+                    </a>
+
+                    <!-- YouTube -->
+                    <a href="https://www.youtube.com/@mahapalanarotama1216" 
+                       target="_blank" class="social-link" title="YouTube">
+                      <svg class="icon-lg" viewBox="0 0 24 24" fill="currentColor" 
+                           xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21.8 8.001c-.2-1.5-.9-2.2-2.3-2.4C17.5 5.2 12 5.2 12 5.2s-5.5 0-7.5.4c-1.4.2-2.1.9-2.3 2.4C2 9.9 2 12 2 12s0 2.1.2 3.999c.2 1.5.9 2.2 2.3 2.4 2 .4 7.5.4 7.5.4s5.5 0 7.5-.4c1.4-.2 2.1-.9 2.3-2.4.2-1.899.2-3.999.2-3.999s0-2.1-.2-3.999ZM10 15V9l6 3-6 3Z"/>
+                      </svg>
+                    </a>
+
+                    <!-- TikTok -->
+                    <a href="https://tiktok.com/" target="_blank" class="social-link" title="TikTok">
+                        <svg class="icon-lg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16.5 3A4.5 4.5 0 0 0 21 7.5v1.25a6.25 6.25 0 0 1-5-1.25v7.5a5.5 5.5 0 1 1-5.5-5.5h.75v2H10.5a3.5 3.5 0 1 0 3.5 3.5V3h2.5Z" />
+                        </svg>
+                    </a>
+                </div>
+
+
+                <div class="footer-section">
+                    <h3>Link Terkait</h3>
+                    <ul>
+                        <li><a href="https://narotama.ac.id/" target="_blank">Universitas Narotama</a></li>
+                        <li><a href="https://wartapalaindonesia.com/">WARTAPALA Indonesia</a></li>
+                        <li><a href="/kegiatan">Daftar Kegiatan</a></li>
+                        <li><a href="/galeri">Galeri Foto</a></li>
+                        <li><a href="/url-shortener">URL Shortener</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3>Hubungi Kami</h3>
+                    <address style="font-style: normal;">
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            <span>Jl. Arief Rachman Hakim No. 51, Klampis Ngasem, Sukolilo, Kota Surabaya, Jawa Timur</span>
+                        </div>
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                            <span>(031) 34133 2882</span>
+                        </div>
+                        <div class="contact-item">
+                            <svg class="contact-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                                <path d="m22 7-10 5L2 7"/>
+                            </svg>
+                            <span>ukm.mahapala@narotama.ac.id</span>
+                        </div>
+                    </address>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; <span id="current-year"></span> Mahapala Narotama. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getFirestore, collection, addDoc, setDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+        // Firebase configuration - persis sama dengan yang di React
+        const firebaseConfig = {
+            apiKey: "AIzaSyBe-XLmVRiMs844VxR1_awMzGEGARb6Xmk",
+            authDomain: "website-mpn-65e8d.firebaseapp.com",
+            projectId: "website-mpn-65e8d",
+            storageBucket: "website-mpn-65e8d.firebasestorage.app",
+            messagingSenderId: "798271486726",
+            appId: "1:798271486726:web:0d0e0178a963804f627c87",
+            measurementId: "G-KSVPVC1Z9D"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make Firebase functions available globally for GPS tracker
+        window.firebaseDB = db;
+        window.firebaseCollection = collection;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseSetDoc = setDoc;
+        window.firebaseDoc = doc;
+        window.firebaseServerTimestamp = serverTimestamp;
+
+        console.log('Firebase initialized successfully');
+    </script>
+
+    <script>
+        // Global variables
+        let currentTab = 'fitur';
+        let deferredPrompt = null;
+        let isInstalled = false;
+
+        // GPS Tracker Variables with persistence
+        let gpsTracking = localStorage.getItem('gps_tracking_active') === 'true';
+        let gpsBackgroundActive = localStorage.getItem('gps_background_active') === 'true';
+        let gpsInterval = null;
+        let gpsPositions = [];
+        let userName = localStorage.getItem('gps_nama') || '';
+        let gpsPermissionGranted = false;
+
+        // RJP Variables
+        let rjpStarted = false;
+        let rjpCount = 0;
+
+        // Check GPS permission and user name on load
+        async function checkGpsPermission() {
+            try {
+                if (!navigator.geolocation) {
+                    throw new Error('Geolocation tidak didukung oleh browser ini');
+                }
+
+                // Request permission
+                const permission = await navigator.permissions.query({name: 'geolocation'});
+
+                if (permission.state === 'granted') {
+                    gpsPermissionGranted = true;
+                    updateGpsStatus("✅ Izin lokasi telah diberikan");
+                } else if (permission.state === 'prompt') {
+                    // Try to get position to trigger permission prompt
+                    try {
+                        await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(
+                                (pos) => {
+                                    gpsPermissionGranted = true;
+                                    resolve(pos);
+                                },
+                                reject,
+                                { enableHighAccuracy: true, timeout: 5000 }
+                            );
+                        });
+                        updateGpsStatus("✅ Izin lokasi telah diberikan");
+                    } catch (error) {
+                        updateGpsStatus("❌ Izin lokasi diperlukan untuk GPS tracker");
+                        gpsPermissionGranted = false;
+                    }
+                } else {
+                    updateGpsStatus("❌ Izin lokasi ditolak - aktifkan di pengaturan browser");
+                    gpsPermissionGranted = false;
+                }
+            } catch (error) {
+                console.error('Error checking GPS permission:', error);
+                updateGpsStatus("❌ Error: " + error.message);
+                gpsPermissionGranted = false;
+            }
+        }
+
+        // Initialize GPS components with state restoration
+        async function initializeGpsState() {
+            if (userName) {
+                document.getElementById('nama-form').style.display = 'none';
+                document.getElementById('gps-controls').style.display = 'block';
+                
+                // Always load data first
+                loadGpsData();
+                updateGpsTable();
+                
+                await checkGpsPermission();
+                
+                // Restore GPS state after permission check
+                if (gpsPermissionGranted) {
+                    restoreGpsState();
+                } else {
+                    // If no permission, reset states
+                    gpsTracking = false;
+                    gpsBackgroundActive = false;
+                    localStorage.setItem('gps_tracking_active', 'false');
+                    localStorage.setItem('gps_background_active', 'false');
+                    updateTrackingButtonStates();
+                }
+            } else {
+                updateGpsStatus("📝 Masukkan nama untuk memulai pelacakan GPS");
+            }
+        }
+
+        // Background App Permission Manager
+        let wakeLock = null;
+        let backgroundPermissionGranted = false;
+
+        async function requestBackgroundPermissions() {
+            const permissions = {
+                notifications: false,
+                backgroundSync: false,
+                wakeLock: false,
+                persistentStorage: false
+            };
+
+            try {
+                // 1. Request Notification Permission
+                if ('Notification' in window) {
+                    const notificationPermission = await Notification.requestPermission();
+                    permissions.notifications = notificationPermission === 'granted';
+                }
+
+                // 2. Check Background Sync Support
+                if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+                    permissions.backgroundSync = true;
+                }
+
+                // 3. Check Wake Lock Support
+                if ('wakeLock' in navigator) {
+                    permissions.wakeLock = true;
+                }
+
+                // 4. Request Persistent Storage
+                if ('storage' in navigator && 'persist' in navigator.storage) {
+                    permissions.persistentStorage = await navigator.storage.persist();
+                }
+
+                backgroundPermissionGranted = permissions.notifications && permissions.backgroundSync;
+                
+                return permissions;
+            } catch (error) {
+                console.error('Error requesting background permissions:', error);
+                return permissions;
+            }
+        }
+
+        async function enableWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Screen Wake Lock was released');
+                    });
+                    updateGpsStatus("🔋 Screen Wake Lock aktif - layar tidak akan mati");
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error requesting wake lock:', error);
+                updateGpsStatus("❌ Wake Lock tidak didukung atau gagal diaktifkan");
+                return false;
+            }
+        }
+
+        async function disableWakeLock() {
+            if (wakeLock) {
+                await wakeLock.release();
+                wakeLock = null;
+                updateGpsStatus("🔋 Screen Wake Lock dimatikan");
+            }
+        }
+
+        async function showBackgroundPermissionDialog() {
+            return new Promise((resolve) => {
+                const dialog = document.createElement('div');
+                dialog.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                dialog.innerHTML = `
+                    <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+                        <h3 class="text-lg font-bold mb-3 text-gray-900">Izin Aplikasi Background</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            Untuk fitur GPS tracking yang optimal, aplikasi memerlukan izin:
+                        </p>
+                        <div class="mb-4">
+                            <ul class="text-xs text-gray-500 list-disc list-inside space-y-1">
+                                <li>📱 Notifikasi - untuk update status GPS</li>
+                                <li>🔄 Background Sync - untuk sinkronisasi data offline</li>
+                                <li>🔋 Wake Lock - mencegah layar mati saat tracking</li>
+                                <li>💾 Persistent Storage - penyimpanan data permanen</li>
+                            </ul>
+                        </div>
+                        <div class="flex gap-2 justify-end">
+                            <button onclick="handleBackgroundPermissionDecline()" class="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50">
+                                Tolak
+                            </button>
+                            <button onclick="handleBackgroundPermissionAccept()" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700">
+                                Izinkan
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                window.handleBackgroundPermissionAccept = async () => {
+                    document.body.removeChild(dialog);
+                    const permissions = await requestBackgroundPermissions();
+                    localStorage.setItem('backgroundPermissionRequested', 'true');
+                    localStorage.setItem('backgroundPermissionGranted', backgroundPermissionGranted.toString());
+                    resolve(permissions);
+                };
+
+                window.handleBackgroundPermissionDecline = () => {
+                    document.body.removeChild(dialog);
+                    localStorage.setItem('backgroundPermissionRequested', 'true');
+                    localStorage.setItem('backgroundPermissionGranted', 'false');
+                    backgroundPermissionGranted = false;
+                    resolve(null);
+                };
+
+                document.body.appendChild(dialog);
+            });
+        }
+
+        async function checkBackgroundPermissions() {
+            const permissionRequested = localStorage.getItem('backgroundPermissionRequested');
+            const permissionGranted = localStorage.getItem('backgroundPermissionGranted') === 'true';
+
+            if (!permissionRequested) {
+                // First time - show dialog
+                const permissions = await showBackgroundPermissionDialog();
+                return permissions;
+            } else if (permissionGranted) {
+                // Already granted - check current status
+                backgroundPermissionGranted = true;
+                return await requestBackgroundPermissions();
+            } else {
+                // Previously declined
+                backgroundPermissionGranted = false;
+                return null;
+            }
+        }
+
+        // Restore GPS tracking state after page refresh
+        function restoreGpsState() {
+            const startBtn = document.getElementById('start-gps');
+            const stopBtn = document.getElementById('stop-gps');
+            const bgBtn = document.getElementById('background-gps');
+
+            // Always load saved positions first
+            loadGpsData();
+            updateGpsTable();
+
+            if (gpsTracking && gpsPermissionGranted) {
+                // Restore active tracking state
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.textContent = 'GPS Aktif';
+                    startBtn.classList.add('bg-green-600');
+                    startBtn.classList.remove('bg-blue-600');
+                }
+                if (stopBtn) stopBtn.disabled = false;
+                if (bgBtn) bgBtn.disabled = false;
+
+                // Restart tracking interval
+                if (!gpsInterval) {
+                    gpsInterval = setInterval(trackLocation, 5000);
+                }
+                updateGpsStatus("✅ GPS tracking dipulihkan setelah refresh");
+            } else {
+                // Ensure buttons are in correct initial state
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Aktifkan Pelacakan';
+                    startBtn.classList.remove('bg-green-600');
+                    startBtn.classList.add('bg-blue-600');
+                }
+                if (stopBtn) stopBtn.disabled = true;
+            }
+
+            if (gpsBackgroundActive && gpsPermissionGranted) {
+                // Restore background GPS state
+                if (bgBtn) {
+                    bgBtn.textContent = 'Matikan Background GPS';
+                    bgBtn.onclick = disableBackgroundGps;
+                    bgBtn.classList.add('bg-orange-600');
+                    bgBtn.classList.remove('bg-purple-600');
+                }
+                // Re-enable background GPS with delay
+                setTimeout(() => {
+                    if (gpsBackgroundActive) {
+                        enableBackgroundGps();
+                    }
+                }, 1000);
+            } else {
+                // Ensure background button is in correct initial state
+                if (bgBtn) {
+                    bgBtn.textContent = 'Aktifkan Background GPS';
+                    bgBtn.onclick = enableBackgroundGps;
+                    bgBtn.classList.remove('bg-orange-600');
+                    bgBtn.classList.add('bg-purple-600');
+                }
+            }
+        }
+
+
+        // Cookie Consent Functions - Fixed to work properly
+        // function showCookieConsent() {
+        //     const hasConsented = localStorage.getItem('cookieConsent');
+        //     console.log('Cookie consent check:', hasConsented);
+            
+        //     if (!hasConsented) {
+        //         const cookieDialog = document.getElementById('cookie-consent');
+        //         if (cookieDialog) {
+        //             cookieDialog.classList.remove('hidden');
+        //             console.log('Cookie consent dialog shown');
+        //         } else {
+        //             console.error('Cookie consent element not found');
+        //         }
+        //     } else {
+        //         console.log('User already consented to cookies');
+        //     }
+        // }
+
+        // function handleCookieAccept() {
+        //     console.log('Cookie consent accepted');
+        //     localStorage.setItem('cookieConsent', 'true');
+            
+        //     const cookieDialog = document.getElementById('cookie-consent');
+        //     if (cookieDialog) {
+        //         cookieDialog.classList.add('hidden');
+        //     }
+        // }
+
+        // function handleCookieDecline() {
+        //     console.log('Cookie consent declined');
+        //     localStorage.setItem('cookieConsent', 'false');
+            
+        //     const cookieDialog = document.getElementById('cookie-consent');
+        //     if (cookieDialog) {
+        //         cookieDialog.classList.add('hidden');
+        //     }
+        // }
+
+        // Initialize - Fixed initialization order and debugging
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing app...');
+            
+            // Core initialization
+            updateStatus();
+            initializePage();
+            
+            // PWA setup - must be early to catch install events
+            setupPWA();
+            
+            // Load saved data
+            loadUserName();
+            loadGpsData();
+            loadChecklist();
+            
+            // Initialize components
+            initCompass();
+            initializeGpsState(); // Initialize GPS state with persistence
+            
+            // Show cookie consent - delay slightly to ensure DOM is ready
+            setTimeout(() => {
+                showCookieConsent();
+            }, 100);
+
+            // Set current year
+            const yearElement = document.getElementById('current-year');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+            }
+
+            // Check if background permissions were previously granted
+            backgroundPermissionGranted = localStorage.getItem('backgroundPermissionGranted') === 'true';
+            
+            // Update permissions status if GPS controls are visible
+            if (userName) {
+                setTimeout(() => {
+                    updateBackgroundPermissionsStatus();
+                }, 500);
+            }
+
+            // Event listeners - register these early
+            window.addEventListener('online', updateStatus);
+            window.addEventListener('offline', updateStatus);
+            window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            window.addEventListener('appinstalled', handleAppInstalled);
+            
+            // Handle page visibility change for background app
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            
+            console.log('App initialization complete');
+        });
+
+        // Firebase GPS functions - diperbaiki untuk dapat mengirim ke Firestore
+        async function saveGpsToFirestore(data) {
+            if (!window.firebaseDB || !window.firebaseSetDoc) {
+                console.log('Firebase not initialized, saving locally only');
+                updateGpsStatus('⚠️ Firebase belum siap, data tersimpan lokal');
+                return false;
+            }
+
+            try {
+                console.log('Attempting to save GPS to Firestore:', data);
+
+                // Save to gps_tracker (latest position per user) - persis seperti di AdminPage
+                await window.firebaseSetDoc(
+                    window.firebaseDoc(window.firebaseDB, "gps_tracker", data.nama), 
+                    {
+                        nama: data.nama,
+                        lat: data.lat,
+                        lon: data.lon,
+                        time: data.time,
+                        online: data.online,
+                        updatedAt: window.firebaseServerTimestamp(),
+                    }
+                );
+
+                // Save to gps_history (all positions) - persis seperti di AdminPage
+                await window.firebaseAddDoc(
+                    window.firebaseCollection(window.firebaseDB, "gps_history"), 
+                    {
+                        nama: data.nama,
+                        lat: data.lat,
+                        lon: data.lon,
+                        time: data.time,
+                        online: data.online,
+                        createdAt: window.firebaseServerTimestamp(),
+                    }
+                );
+
+                console.log('GPS data saved to Firestore successfully');
+                updateGpsStatus(`✅ GPS berhasil dikirim ke server: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`);
+                return true;
+            } catch (error) {
+                console.error('Error saving GPS to Firestore:', error);
+                updateGpsStatus(`❌ Gagal mengirim ke server: ${error.message}`);
+                return false;
+            }
+        }
+
+        async function syncOfflineGpsToFirestore() {
+            const saved = localStorage.getItem("gps_track");
+            if (!saved || !window.firebaseDB) {
+                console.log('No offline GPS data to sync or Firebase not ready');
+                return;
+            }
+
+            try {
+                const positions = JSON.parse(saved);
+                let synced = 0;
+
+                updateGpsStatus('🔄 Sinkronisasi data offline ke server...');
+
+                for (const data of positions) {
+                    try {
+                        const success = await saveGpsToFirestore(data);
+                        if (success) synced++;
+
+                        // Small delay to avoid rate limiting
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    } catch (error) {
+                        console.error('Error syncing GPS data:', error);
+                    }
+                }
+
+                if (synced > 0) {
+                    // Clear local storage after successful sync
+                    localStorage.removeItem("gps_track");
+                    gpsPositions = [];
+                    updateGpsTable();
+                    updateGpsStatus(`✅ ${synced} data GPS berhasil disinkronkan ke server`);
+                }
+            } catch (error) {
+                console.error('Error during GPS sync:', error);
+                updateGpsStatus(`❌ Error sinkronisasi: ${error.message}`);
+            }
+        }
+
+        // Update online/offline status
+        function updateStatus() {
+            const statusEl = document.getElementById('status');
+            if (navigator.onLine) {
+                statusEl.textContent = 'Online';
+                statusEl.className = 'status-badge online';
+
+                // Auto sync when coming online with delay
+                setTimeout(() => {
+                    syncOfflineGpsToFirestore();
+                }, 2000);
+            } else {
+                statusEl.textContent = 'Offline';
+                statusEl.className = 'status-badge offline';
+            }
+        }
+
+        // Initialize page
+        function initializePage() {
+            showTab('fitur');
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('active');
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.add('hidden'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.btn-nav');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            const selectedTab = document.getElementById(`tab-${tabName}`);
+            if (selectedTab) {
+                selectedTab.classList.remove('hidden');
+            }
+
+            // Add active class to clicked button
+            const clickedButton = Array.from(buttons).find(btn => btn.textContent.includes(getTabDisplayName(tabName)));
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            }
+
+            currentTab = tabName;
+
+            // Special initialization for certain tabs
+            if (tabName === 'checklist') {
+                renderChecklist();
+            } else if (tabName === 'gps') {
+                updateGpsTable();
+            }
+        }
+
+        function getTabDisplayName(tabName) {
+            const tabNames = {
+                'fitur': 'Fitur Survival',
+                'survival': 'Panduan Survival',
+                'ppgd': 'PPGD',
+                'navigasi': 'Navigasi Darat',
+                'checklist': 'Checklist',
+                'gps': 'Pelacak GPS'
+            };
+            return tabNames[tabName] || tabName;
+        }
+
+        // PWA Installation - Fixed functionality
+        function handleBeforeInstallPrompt(e) {
+            console.log('PWA install prompt available');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            const installContainer = document.getElementById('install-container');
+            if (installContainer) {
+                installContainer.style.display = 'flex';
+            }
+        }
+
+        function handleAppInstalled() {
+            console.log('PWA installed successfully');
+            isInstalled = true;
+            const installContainer = document.getElementById('install-container');
+            if (installContainer) {
+                installContainer.style.display = 'none';
+            }
+        }
+
+        function setupPWA() {
+            // Check if already installed
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                console.log('App already running in standalone mode');
+                isInstalled = true;
+                const installContainer = document.getElementById('install-container');
+                if (installContainer) {
+                    installContainer.style.display = 'none';
+                }
+                return;
+            }
+
+            // Check if running as PWA
+            if (window.navigator.standalone) {
+                console.log('App running as iOS PWA');
+                isInstalled = true;
+                const installContainer = document.getElementById('install-container');
+                if (installContainer) {
+                    installContainer.style.display = 'none';
+                }
+                return;
+            }
+
+            // Show install button if not installed
+            const installContainer = document.getElementById('install-container');
+            if (installContainer && !isInstalled) {
+                installContainer.style.display = 'flex';
+            }
+        }
+
+        function handleInstall() {
+            console.log('Install button clicked');
+            
+            if (deferredPrompt) {
+                console.log('Using deferred prompt');
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((result) => {
+                    console.log('User choice:', result.outcome);
+                    if (result.outcome === 'accepted') {
+                        isInstalled = true;
+                        const installContainer = document.getElementById('install-container');
+                        if (installContainer) {
+                            installContainer.style.display = 'none';
+                        }
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                console.log('No deferred prompt available');
+                // Fallback: Show manual install instructions
+                alert('Untuk menginstall aplikasi ini:\n\n1. Buka menu browser (⋮)\n2. Pilih "Tambahkan ke layar utama"\n3. Atau "Install app" jika tersedia');
+            }
+        }
+
+        // GPS Tracker Functions - diperbaiki untuk integrasi Firestore
+        function loadUserName() {
+            const saved = localStorage.getItem('gps_nama');
+            if (saved) {
+                userName = saved;
+                document.getElementById('input-nama').value = saved;
+                document.getElementById('nama-form').style.display = 'none';
+                document.getElementById('gps-controls').style.display = 'block';
+                checkGpsPermission();
+            }
+        }
+
+        async function simpanNama() {
+            const nama = document.getElementById('input-nama').value.trim();
+            if (!nama) {
+                alert('Masukkan nama terlebih dahulu!');
+                return;
+            }
+
+            userName = nama;
+            localStorage.setItem('gps_nama', nama);
+
+            document.getElementById('nama-form').style.display = 'none';
+            document.getElementById('gps-controls').style.display = 'block';
+
+            updateGpsStatus("🔄 Memeriksa izin lokasi...");
+
+            // Check GPS permission after name is saved
+            await checkGpsPermission();
+
+            // Show background permissions info
+            document.getElementById('background-permissions-info').style.display = 'block';
+            updateBackgroundPermissionsStatus();
+
+            // Enable GPS controls only if permission is granted
+            const startBtn = document.getElementById('start-gps');
+            const bgBtn = document.getElementById('background-gps');
+            const wakeLockBtn = document.getElementById('wake-lock-btn');
+
+            if (startBtn) startBtn.disabled = !gpsPermissionGranted;
+            if (bgBtn) bgBtn.disabled = !gpsPermissionGranted;
+            if (wakeLockBtn) wakeLockBtn.disabled = !gpsPermissionGranted;
+
+            if (gpsPermissionGranted) {
+                updateGpsStatus("✅ Siap untuk pelacakan GPS");
+                // Restore state after setting name
+                restoreGpsState();
+            } else {
+                updateGpsStatus("❌ Izin lokasi diperlukan - aktifkan di pengaturan browser");
+            }
+        }
+
+        async function requestAllBackgroundPermissions() {
+            updateGpsStatus("🔄 Meminta izin background app...");
+            
+            const permissions = await checkBackgroundPermissions();
+            if (permissions) {
+                updateBackgroundPermissionsStatus();
+                updateGpsStatus("✅ Izin background app telah diminta");
+                
+                // Enable background features if permissions granted
+                const bgBtn = document.getElementById('background-gps');
+                const wakeLockBtn = document.getElementById('wake-lock-btn');
+                
+                if (bgBtn && backgroundPermissionGranted) bgBtn.disabled = false;
+                if (wakeLockBtn && permissions.wakeLock) wakeLockBtn.disabled = false;
+            } else {
+                updateGpsStatus("❌ Izin background ditolak - fitur terbatas");
+            }
+        }
+
+        function updateBackgroundPermissionsStatus() {
+            // Check current permissions status
+            const notificationStatus = document.getElementById('notification-status');
+            const syncStatus = document.getElementById('sync-status');
+            const wakelockStatus = document.getElementById('wakelock-status');
+            const storageStatus = document.getElementById('storage-status');
+
+            // Update notification status
+            if (notificationStatus) {
+                notificationStatus.textContent = Notification.permission === 'granted' ? '✅ Diizinkan' : '❌ Tidak diizinkan';
+                notificationStatus.style.color = Notification.permission === 'granted' ? '#16a34a' : '#dc2626';
+            }
+
+            // Update background sync status
+            if (syncStatus) {
+                const bgSyncSupported = 'serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype;
+                syncStatus.textContent = bgSyncSupported ? '✅ Didukung' : '❌ Tidak didukung';
+                syncStatus.style.color = bgSyncSupported ? '#16a34a' : '#dc2626';
+            }
+
+            // Update wake lock status
+            if (wakelockStatus) {
+                const wakeLockSupported = 'wakeLock' in navigator;
+                wakelockStatus.textContent = wakeLockSupported ? '✅ Didukung' : '❌ Tidak didukung';
+                wakelockStatus.style.color = wakeLockSupported ? '#16a34a' : '#dc2626';
+            }
+
+            // Update storage status
+            if (storageStatus) {
+                navigator.storage?.persist?.().then(persistent => {
+                    storageStatus.textContent = persistent ? '✅ Persisten' : '❌ Tidak persisten';
+                    storageStatus.style.color = persistent ? '#16a34a' : '#dc2626';
+                }).catch(() => {
+                    storageStatus.textContent = '❌ Tidak didukung';
+                    storageStatus.style.color = '#dc2626';
+                });
+            }
+        }
+
+        async function toggleWakeLock() {
+            const btn = document.getElementById('wake-lock-btn');
+            
+            if (wakeLock) {
+                await disableWakeLock();
+                btn.textContent = 'Aktifkan Screen Lock';
+                btn.classList.remove('bg-red-600');
+                btn.classList.add('bg-orange-600');
+            } else {
+                const success = await enableWakeLock();
+                if (success) {
+                    btn.textContent = 'Matikan Screen Lock';
+                    btn.classList.remove('bg-orange-600');
+                    btn.classList.add('bg-red-600');
+                }
+            }
+        }
+
+        function loadGpsData() {
+            const saved = localStorage.getItem('gps_track');
+            if (saved) {
+                try {
+                    gpsPositions = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading GPS data:', e);
+                    gpsPositions = [];
+                }
+            }
+        }
+
+        async function requestLocationPermission() {
+            if (!navigator.geolocation) {
+                throw new Error("Geolocation tidak didukung browser ini");
+            }
+
+            return new Promise((resolve, reject) => {
+                // First try to get current position to trigger permission request
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve(position);
+                    },
+                    (error) => {
+                        let errorMessage = "Gagal mendapatkan izin lokasi";
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = "Izin akses lokasi ditolak. Silakan aktifkan di pengaturan browser.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = "Lokasi tidak tersedia. Pastikan GPS aktif.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = "Timeout saat mengakses lokasi. Coba lagi.";
+                                break;
+                        }
+                        reject(new Error(errorMessage));
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            });
+        }
+
+        async function startTracking() {
+            if (!userName) {
+                updateGpsStatus('❌ Masukkan nama terlebih dahulu');
+                return;
+            }
+
+            if (!gpsPermissionGranted) {
+                updateGpsStatus('❌ Izin lokasi diperlukan - aktifkan di pengaturan browser');
+                await checkGpsPermission();
+                return;
+            }
+
+            updateGpsStatus("🔄 Memulai pelacakan GPS...");
+
+            try {
+                // Test GPS access first
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    });
+                });
+
+                gpsTracking = true;
+                localStorage.setItem('gps_tracking_active', 'true'); // Save state
+
+                // Update UI
+                updateTrackingButtonStates();
+
+                updateGpsStatus("✅ GPS tracking aktif");
+
+                // Start tracking interval only if not already running
+                if (!gpsInterval) {
+                    gpsInterval = setInterval(trackLocation, 5000); // 5 seconds
+                }
+
+                // Track immediately
+                await trackLocation();
+
+            } catch (error) {
+                console.error("GPS Error:", error);
+                let errorMsg = "❌ GPS Error: ";
+
+                switch(error.code) {
+                    case 1:
+                        errorMsg += "Izin lokasi ditolak - aktifkan di pengaturan browser";
+                        gpsPermissionGranted = false;
+                        break;
+                    case 2:
+                        errorMsg += "Lokasi tidak tersedia - pastikan GPS aktif";
+                        break;
+                    case 3:
+                        errorMsg += "Timeout - coba lagi atau pindah ke area terbuka";
+                        break;
+                    default:
+                        errorMsg += error.message;
+                }
+
+                updateGpsStatus(errorMsg);
+                gpsTracking = false;
+                localStorage.setItem('gps_tracking_active', 'false'); // Save state
+                updateTrackingButtonStates();
+            }
+        }
+
+        // Helper function to update button states consistently
+        function updateTrackingButtonStates() {
+            const startBtn = document.getElementById('start-gps');
+            const stopBtn = document.getElementById('stop-gps');
+            const bgBtn = document.getElementById('background-gps');
+
+            if (gpsTracking) {
+                if (startBtn) {
+                    startBtn.disabled = true;
+                    startBtn.textContent = 'GPS Aktif';
+                    startBtn.classList.add('bg-green-600');
+                    startBtn.classList.remove('bg-blue-600');
+                }
+                if (stopBtn) stopBtn.disabled = false;
+                if (bgBtn) bgBtn.disabled = false;
+            } else {
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.textContent = 'Aktifkan Pelacakan';
+                    startBtn.classList.remove('bg-green-600');
+                    startBtn.classList.add('bg-blue-600');
+                }
+                if (stopBtn) stopBtn.disabled = true;
+                if (bgBtn) bgBtn.disabled = true;
+            }
+        }
+
+        async function trackLocation() {
+            if (!gpsTracking) return;
+
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 10000 // Allow slightly older data if new isn't available
+                    });
+                });
+
+                const now = new Date();
+                const data = {
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude,
+                    time: now.toISOString(),
+                    nama: userName,
+                    online: navigator.onLine,
+                    background: false
+                };
+
+                gpsPositions.push(data);
+                localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
+                updateGpsTable();
+
+                if (navigator.onLine) {
+                    await saveGpsToFirestore(data);
+                } else {
+                    updateGpsStatus(`📍 Lokasi tersimpan lokal: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)} (Offline)`);
+                }
+
+            } catch (error) {
+                console.error("GPS Tracking Error:", error);
+                let errorMsg = "❌ GPS Error: ";
+                switch(error.code) {
+                    case 1:
+                        errorMsg += "Izin lokasi ditolak";
+                        stopTracking(); // Stop if permission is denied
+                        break;
+                    case 2:
+                        errorMsg += "Lokasi tidak tersedia";
+                        break;
+                    case 3:
+                        errorMsg += "Timeout";
+                        break;
+                    default:
+                        errorMsg += error.message;
+                }
+                updateGpsStatus(errorMsg);
+            }
+        }
+
+        function stopTracking() {
+            gpsTracking = false;
+            gpsBackgroundActive = false;
+            localStorage.setItem('gps_tracking_active', 'false'); // Save state
+            localStorage.setItem('gps_background_active', 'false'); // Save state
+            
+            if (gpsInterval) {
+                clearInterval(gpsInterval);
+                gpsInterval = null;
+            }
+
+            // Stop background GPS if active
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    if (registration && registration.active) {
+                        registration.active.postMessage({
+                            type: 'STOP_GPS_BACKGROUND'
+                        });
+                    }
+                });
+            }
+
+            // Update button states using helper function
+            updateTrackingButtonStates();
+
+            // Reset background button specifically
+            const bgBtn = document.getElementById('background-gps');
+            if (bgBtn) {
+                bgBtn.disabled = true;
+                bgBtn.textContent = 'Aktifkan Background GPS';
+                bgBtn.onclick = enableBackgroundGps;
+                bgBtn.classList.remove('bg-orange-600');
+                bgBtn.classList.add('bg-purple-600');
+            }
+
+            updateGpsStatus('⏹️ Pelacakan GPS dihentikan.');
+        }
+
+        function resetTrack() {
+            // Stop tracking first if active
+            if (gpsTracking) {
+                stopTracking();
+            }
+
+            gpsPositions = [];
+            localStorage.removeItem('gps_track');
+            localStorage.removeItem('gps_offline_queue'); // Also clear any queued items
+            localStorage.removeItem('gps_tracking_active'); // Clear tracking state
+            localStorage.removeItem('gps_background_active'); // Clear background state
+            updateGpsTable();
+            updateGpsStatus('🗑️ Data lokasi telah direset.');
+        }
+
+        function updateGpsStatus(message) {
+            const statusEl = document.getElementById('gps-status');
+
+            // Show loading spinner for certain messages
+            if (message.includes('🔄') || message.includes('Mengaktifkan')) {
+                statusEl.innerHTML = `<span class="loading-spinner"></span>${message}`;
+
+                // Remove spinner after 3 seconds if message hasn't changed
+                setTimeout(() => {
+                    if (statusEl.textContent === message) { // Check if message is still the same
+                        statusEl.textContent = message;
+                    }
+                }, 3000);
+            } else {
+                statusEl.textContent = message;
+            }
+
+            console.log('GPS Status:', message);
+        }
+
+        function updateGpsTable() {
+            const tbody = document.getElementById('gps-table-body');
+            tbody.innerHTML = '';
+
+            // Sort positions by time (newest first)
+            const sortedPositions = [...gpsPositions].sort((a, b) => new Date(b.time) - new Date(a.time));
+
+            sortedPositions.forEach((pos, index) => {
+                const row = tbody.insertRow();
+                const timeStr = pos.time ? new Date(pos.time).toLocaleString('id-ID', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                }) : '-';
+
+                row.innerHTML = `
+                    <td>${timeStr}</td>
+                    <td>${pos.lat ? pos.lat.toFixed(6) : '-'}</td>
+                    <td>${pos.lon ? pos.lon.toFixed(6) : '-'}</td>
+                    <td>${pos.nama || userName}</td>
+                    <td>
+                        <span class="${pos.online ? 'online-badge' : 'offline-badge'}">
+                            ${pos.online ? 'Online' : 'Offline'}
+                        </span>
+                    </td>
+                `;
+            });
+        }
+
+        // Checklist Functions
+        const checklistItems = [
+            { icon: '🧭', label: "Kompas" },
+            { icon: '🏕️', label: "Bivak/Shelter" },
+            { icon: '📯', label: "Peluit" },
+            { icon: '🔪', label: "Pisau" },
+            { icon: '💡', label: "Senter/Headlamp" },
+            { icon: '🍱', label: "Makanan Cadangan" },
+            { icon: '🩹', label: "P3K" },
+            { icon: '🚰', label: "Botol Air" },
+            { icon: '🌧️', label: "Jas Hujan" },
+            { icon: '🪢', label: "Tali Paracord" },
+            { icon: '👕', label: "Pakaian Cadangan" },
+            { icon: '🔥', label: "Korek Api/Firestarter" }
+        ];
+
+        let checklistState = [];
+
+        function loadChecklist() {
+            const saved = localStorage.getItem("survival_checklist");
+            checklistState = saved ? JSON.parse(saved) : Array(checklistItems.length).fill(false);
+        }
+
+        function renderChecklist() {
+            const grid = document.getElementById('checklist-grid');
+            grid.innerHTML = '';
+
+            checklistItems.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = `checklist-item ${checklistState[index] ? 'checked' : ''}`;
+                div.onclick = () => toggleChecklistItem(index);
+
+                div.innerHTML = `
+                    <span class="checklist-emoji">${item.icon}</span>
+                    <span class="checklist-label">${item.label}</span>
+                    <input type="checkbox" class="checklist-checkbox" ${checklistState[index] ? 'checked' : ''} onchange="toggleChecklistItem(${index})">
+                `;
+
+                grid.appendChild(div);
+            });
+        }
+
+        function toggleChecklistItem(index) {
+            checklistState[index] = !checklistState[index];
+            localStorage.setItem("survival_checklist", JSON.stringify(checklistState));
+            renderChecklist();
+        }
+
+        function resetChecklist() {
+            checklistState = Array(checklistItems.length).fill(false);
+            localStorage.setItem("survival_checklist", JSON.stringify(checklistState));
+            renderChecklist();
+        }
+
+        // RJP Simulation
+        function startRJP() {
+            rjpStarted = true;
+            rjpCount = 0;
+            document.getElementById('rjp-content').innerHTML = `
+                <div class="mb-2">Tekan tombol di bawah ini sebanyak 30x untuk simulasi kompresi dada!</div>
+                <button class="btn-nav mb-2" onclick="tekanDada()">Tekan Dada (${rjpCount}/30)</button>
+                <div id="rjp-result"></div>
+            `;
+        }
+
+        function tekanDada() {
+            rjpCount++;
+            const button = event.target;
+            button.textContent = `Tekan Dada (${rjpCount}/30)`;
+
+            if (rjpCount >= 30) {
+                document.getElementById('rjp-result').innerHTML = 
+                    '<div style="color: #16a34a; font-weight: bold;">✅ Simulasi selesai! Segera lakukan napas bantuan.</div>';
+            }
+        }
+
+        // Compass simulation
+        function initCompass() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                window.addEventListener('deviceorientation', handleOrientation, true);
+            }
+
+            function handleOrientation(event) {
+                let alpha = event.alpha;
+                if (alpha !== null && alpha !== undefined) {
+                    // Convert to compass bearing
+                    let compass = (360 - alpha) % 360;
+                    const directions = ['Utara', 'Timur Laut', 'Timur', 'Tenggara', 'Selatan', 'Barat Daya', 'Barat', 'Barat Laut'];
+                    const directionIndex = Math.round(compass / 45) % 8;
+
+                    document.getElementById('compass-direction').textContent = 
+                        `${Math.round(compass)}° (${directions[directionIndex]})`;
+                }
+            }
+        }
+
+        // Initialize GPS status when page loads
+        setTimeout(() => {
+            // Ensure buttons are correctly enabled/disabled based on initial state
+            const startBtn = document.getElementById('start-gps');
+            const stopBtn = document.getElementById('stop-gps');
+            const bgBtn = document.getElementById('background-gps');
+
+            if (startBtn) startBtn.disabled = !userName || !gpsPermissionGranted;
+            if (stopBtn) stopBtn.disabled = true;
+            if (bgBtn) bgBtn.disabled = !userName || !gpsPermissionGranted;
+
+
+            if (navigator.onLine) {
+                updateGpsStatus(userName ? "✅ Ready untuk pelacakan GPS - Firebase terhubung" : "📝 Masukkan nama untuk memulai");
+            } else {
+                updateGpsStatus(userName ? "📱 Mode Offline: Ready untuk pelacakan" : "📝 Masukkan nama untuk memulai");
+            }
+        }, 1000);
+
+        // Test Firebase connection
+        setTimeout(() => {
+            if (window.firebaseDB && navigator.onLine) {
+                console.log('Firebase connection test successful');
+                if (userName) {
+                    updateGpsStatus("✅ Firebase terhubung, siap mengirim GPS ke server");
+                }
+            } else if (!navigator.onLine) {
+                if (userName) {
+                    updateGpsStatus("📱 Mode Offline: Data akan tersimpan lokal");
+                }
+            } else {
+                console.error('Firebase not initialized properly');
+                updateGpsStatus("❌ Firebase belum siap, data akan tersimpan lokal");
+            }
+        }, 3000);
+
+        // Helper function to store data for later sync
+        async function storeForLaterSync(data) {
+            const offlineQueue = JSON.parse(localStorage.getItem('gps_offline_queue') || '[]');
+            offlineQueue.push(data);
+            localStorage.setItem('gps_offline_queue', JSON.stringify(offlineQueue));
+
+            // Register background sync if service worker supports it
+            if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
+                try {
+                    const registration = await navigator.serviceWorker.ready;
+                    await registration.sync.register('gps-background-sync');
+                    console.log('Background sync registered for gps-background-sync');
+                } catch (error) {
+                    console.log('Background sync is not supported or failed to register:', error);
+                }
+            }
+        }
+
+        // Function to enable background GPS tracking
+        async function enableBackgroundGps() {
+            if (!gpsTracking) {
+                updateGpsStatus('❌ Aktifkan GPS tracking terlebih dahulu');
+                return;
+            }
+
+            // Check background permissions first
+            if (!backgroundPermissionGranted) {
+                const permissions = await checkBackgroundPermissions();
+                if (!permissions || !backgroundPermissionGranted) {
+                    updateGpsStatus('❌ Izin background app diperlukan untuk fitur ini');
+                    return;
+                }
+            }
+
+            try {
+                updateGpsStatus("🔄 Mengaktifkan background GPS...");
+
+                // Check if service worker is available
+                if (!('serviceWorker' in navigator)) {
+                    throw new Error("Service Worker tidak didukung oleh browser ini");
+                }
+
+                const registration = await navigator.serviceWorker.ready;
+
+                if (!registration || !registration.active) {
+                    throw new Error("Service worker tidak aktif");
+                }
+
+                // Send message to service worker
+                registration.active.postMessage({
+                    type: 'START_GPS_BACKGROUND',
+                    userName: userName
+                });
+
+                gpsBackgroundActive = true;
+                localStorage.setItem('gps_background_active', 'true'); // Save state
+
+                // Send notification about background GPS
+                if (Notification.permission === 'granted') {
+                    new Notification('GPS Tracker - Mahapala Narotama', {
+                        body: 'Background GPS tracking telah diaktifkan',
+                        icon: '/OfflineApp.png',
+                        badge: '/OfflineApp.png',
+                        tag: 'gps-background'
+                    });
+                }
+
+                // Update UI
+                updateGpsStatus("✅ Background GPS tracking diaktifkan");
+                const bgButton = document.getElementById('background-gps');
+                bgButton.textContent = 'Matikan Background GPS';
+                bgButton.onclick = disableBackgroundGps;
+                bgButton.classList.add('bg-orange-600');
+                bgButton.classList.remove('bg-purple-600');
+
+                // Listen for messages from service worker
+                navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+
+            } catch (error) {
+                console.error("Error enabling background GPS:", error);
+                updateGpsStatus("❌ Background GPS gagal diaktifkan: " + error.message);
+                gpsBackgroundActive = false;
+                localStorage.setItem('gps_background_active', 'false');
+            }
+        }
+
+        // Function to disable background GPS tracking
+        async function disableBackgroundGps() {
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.ready;
+
+                    if (registration && registration.active) {
+                        registration.active.postMessage({
+                            type: 'STOP_GPS_BACKGROUND'
+                        });
+                    }
+                }
+
+                gpsBackgroundActive = false;
+                localStorage.setItem('gps_background_active', 'false'); // Save state
+
+                // Update UI
+                updateGpsStatus("⏹️ Background GPS tracking dimatikan");
+                const bgButton = document.getElementById('background-gps');
+                bgButton.textContent = 'Aktifkan Background GPS';
+                bgButton.onclick = enableBackgroundGps;
+                bgButton.classList.remove('bg-orange-600');
+                bgButton.classList.add('bg-purple-600');
+
+                // Remove event listener
+                navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+
+            } catch (error) {
+                console.error("Error disabling background GPS:", error);
+                updateGpsStatus("❌ Error menonaktifkan background GPS: " + error.message);
+            }
+        }
+
+        // Handle messages from service worker
+        function handleServiceWorkerMessage(event) {
+            if (event.data && event.data.type === 'GPS_UPDATE') {
+                const data = event.data.data;
+                gpsPositions.push(data);
+                localStorage.setItem('gps_track', JSON.stringify(gpsPositions));
+                updateGpsTable();
+                updateGpsStatus(`📍 Background GPS: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`);
+                
+                // Send notification if app is in background and notifications allowed
+                if (document.hidden && Notification.permission === 'granted') {
+                    new Notification('GPS Update - Mahapala Narotama', {
+                        body: `Lokasi terupdate: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}`,
+                        icon: '/OfflineApp.png',
+                        badge: '/OfflineApp.png',
+                        tag: 'gps-update',
+                        silent: true
+                    });
+                }
+            }
+        }
+
+        // Handle page visibility changes for background functionality
+        function handleVisibilityChange() {
+            if (document.hidden) {
+                // App goes to background
+                console.log('App moved to background');
+                
+                if (gpsBackgroundActive && Notification.permission === 'granted') {
+                    new Notification('GPS Tracker - Background Mode', {
+                        body: 'GPS tracking berlanjut di background',
+                        icon: '/OfflineApp.png',
+                        badge: '/OfflineApp.png',
+                        tag: 'background-mode',
+                        silent: true
+                    });
+                }
+            } else {
+                // App comes to foreground
+                console.log('App moved to foreground');
+                
+                // Refresh GPS table when returning from background
+                if (gpsTracking || gpsBackgroundActive) {
+                    loadGpsData();
+                    updateGpsTable();
+                }
+            }
+        }
+
+        // Send test notification
+        function sendTestNotification() {
+            if (Notification.permission === 'granted') {
+                new Notification('GPS Tracker - Test', {
+                    body: 'Notifikasi berhasil! GPS tracker siap bekerja di background.',
+                    icon: '/OfflineApp.png',
+                    badge: '/OfflineApp.png',
+                    tag: 'test-notification'
+                });
+                updateGpsStatus("✅ Test notifikasi berhasil dikirim");
+            } else {
+                updateGpsStatus("❌ Izin notifikasi diperlukan untuk test ini");
+            }
+        }
+    </script>
+</body>
+</html>

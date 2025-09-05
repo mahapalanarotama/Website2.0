@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useTexture } from '@react-three/drei';
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
@@ -44,7 +44,7 @@ function Card3DWrapper({ frontUrl, backUrl }: { frontUrl: string; backUrl: strin
 
 export default function MemberCard3DPage() {
   const [params, setParams] = useState<{ frontUrl: string; backUrl: string; fullName: string }>({ frontUrl: '', backUrl: '', fullName: '' });
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function MemberCard3DPage() {
           </Button>
           <button
             className="text-white bg-gray-800 hover:bg-gray-700 rounded px-4 py-2 w-full sm:w-auto"
-            onClick={() => setLocation('/kartu-anggota')}
+            onClick={() => navigate('/kartu-anggota')}
           >Tutup</button>
         </div>
       </div>

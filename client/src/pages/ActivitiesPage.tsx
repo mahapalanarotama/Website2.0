@@ -1,3 +1,6 @@
+import { PosterPopup } from "@/components/PosterPopup";
+// ...existing code...
+<PosterPopup />
 import { useState } from "react";
 import { ActivityCard } from "@/components/ActivityCard";
 import { useActivities } from "@/hooks/use-activities";

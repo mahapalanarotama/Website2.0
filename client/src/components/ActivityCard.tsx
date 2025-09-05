@@ -11,7 +11,7 @@ type Activity = {
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { id } from "date-fns/locale";
 
 interface ActivityCardProps {
@@ -60,7 +60,7 @@ export function ActivityCard({ activity }: ActivityCardProps) {
         <p className="text-gray-600 mb-4 line-clamp-2">{activity.description}</p>
       </CardContent>
       <CardFooter className="pt-0 px-5 pb-5">
-        <Link href={`/kegiatan/${activity.id}`} className="text-primary font-medium hover:text-secondary transition">
+        <Link to={`/kegiatan/${activity.id}`} className="text-primary font-medium hover:text-secondary transition">
           Selengkapnya →
         </Link>
       </CardFooter>

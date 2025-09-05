@@ -1,7 +1,10 @@
+import { PosterPopup } from "@/components/PosterPopup";
+// ...existing code...
+<PosterPopup />
 import { useGallery } from "@/hooks/use-gallery";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { Instagram, Mail, Phone } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 // Ambil data contact dari Firestore
@@ -59,7 +62,7 @@ export default function GalleryPage() {
             Galeri Kegiatan
           </h1>
           <div className="flex gap-2 w-full sm:w-auto justify-center">
-            <Link href="/">
+            <Link to="/">
               <Button variant="outline" className="w-full sm:w-auto shadow-md hover:scale-105 transition-transform">Kembali ke Beranda</Button>
             </Link>
             <Button

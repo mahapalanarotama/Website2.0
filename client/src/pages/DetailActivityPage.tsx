@@ -1,9 +1,9 @@
-import { useParams } from "wouter";
+import { useParams } from "react-router-dom";
 import { useActivities } from "@/hooks/use-activities";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 
 export default function DetailActivityPage() {
   const params = useParams();
@@ -23,9 +23,7 @@ export default function DetailActivityPage() {
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center">
         <h2 className="text-2xl font-bold mb-2">Kegiatan Tidak Ditemukan</h2>
         <p className="text-gray-500 mb-6">Kegiatan yang Anda cari tidak tersedia atau telah dihapus.</p>
-        <Link href="/kegiatan">
-          <a className="px-6 py-2 bg-primary text-white rounded-lg font-semibold shadow hover:bg-primary/90 transition">Kembali ke Daftar Kegiatan</a>
-        </Link>
+  <Link to="/kegiatan" className="px-6 py-2 bg-primary text-white rounded-lg font-semibold shadow hover:bg-primary/90 transition">Kembali ke Daftar Kegiatan</Link>
       </div>
     );
   }
@@ -36,11 +34,9 @@ export default function DetailActivityPage() {
     <section className="py-12 bg-gradient-to-br from-white to-blue-50 min-h-[80vh]">
       <div className="container mx-auto px-4 max-w-3xl">
         <div className="mb-8">
-          <Link href="/kegiatan">
-            <a className="inline-flex items-center gap-2 text-primary hover:underline font-medium mb-4">
-              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-              Kembali ke Daftar Kegiatan
-            </a>
+          <Link to="/kegiatan" className="inline-flex items-center gap-2 text-primary hover:underline font-medium mb-4">
+            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            Kembali ke Daftar Kegiatan
           </Link>
         </div>
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden">

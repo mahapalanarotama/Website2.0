@@ -1,25 +1,32 @@
 {
-  "name": "Mahapala Narotama",
-  "short_name": "Mahapala",
+  "name": "MPN OfflineApp",
+  "short_name": "MPN OfflineApp",
   "description": "Website Mahapala Narotama",
-  "start_url": "/",
+  "start_url": "/offline",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#0b3d2e",
+  "theme_color": "#0b3d2e",
+  "scope": "/",
+  "orientation": "any",
+  "categories": ["navigation", "utilities", "lifestyle"],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "permissions": [
+    "geolocation",
+    "background-sync",
+    "notifications",
+    "wakeLock"
+  ],
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "apple-touch-icon.png",
-      "sizes": "180x180",
+      "src": "/OfflineApp.png",
+      "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/favicon.ico",
-      "sizes": "48x48 72x72 96x96 144x144 192x192 256x256 384x384 512x512",
+      "src": "/OfflineApp.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
